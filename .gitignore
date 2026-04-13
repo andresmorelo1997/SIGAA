@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database WAL files (not the main db - we keep sigaa.db for seed data)
+*.db-shm
+*.db-wal
+
+# temp files
+/tmp/
+.fuse_hidden*
+*.pdf
+test-*.mjs
