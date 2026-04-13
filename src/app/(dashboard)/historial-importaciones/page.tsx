@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   Button,
   Card,
@@ -375,9 +375,8 @@ export default function HistorialImportacionesPage() {
               </TableHeader>
               <TableBody>
                 {data.map((row) => (
-                  <>
+                  <Fragment key={row.id}>
                     <TableRow
-                      key={row.id}
                       className={expandedId === row.id ? 'bg-blue-50/50' : ''}
                     >
                       <TableCell>
@@ -452,7 +451,7 @@ export default function HistorialImportacionesPage() {
                     </TableRow>
                     {/* Expanded detail row */}
                     {expandedId === row.id && (
-                      <tr key={`detail-${row.id}`}>
+                      <tr>
                         <td colSpan={10} className="!p-0">
                           <div className="bg-slate-50 border-t border-b border-blue-100 px-8 py-5">
                             <h4 className="text-sm font-semibold text-[#1e3a5f] mb-3">
@@ -516,7 +515,7 @@ export default function HistorialImportacionesPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </TableBody>
             </Table>
