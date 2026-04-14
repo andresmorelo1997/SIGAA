@@ -4,36 +4,31 @@ interface PageHeaderProps {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  /** Accent color of the title icon. Defaults to UniSinú red. */
-  color?: 'primary' | 'neutral' | 'success' | 'warning' | 'danger' | 'info';
-  /** Right-aligned action buttons/controls */
+  color?: 'primary' | 'secondary' | 'neutral' | 'success' | 'warning' | 'danger' | 'info';
   actions?: React.ReactNode;
-  /** Optional sub-row (breadcrumbs, chips, etc) below the title block */
   subRow?: React.ReactNode;
   className?: string;
 }
 
-const COLOR_MAP: Record<
-  NonNullable<PageHeaderProps['color']>,
-  { iconBg: string; ring: string }
-> = {
-  primary: { iconBg: 'bg-[#A6192E]', ring: 'ring-[#A6192E]/15' },
-  neutral: { iconBg: 'bg-slate-700', ring: 'ring-slate-500/15' },
-  success: { iconBg: 'bg-emerald-600', ring: 'ring-emerald-500/15' },
-  warning: { iconBg: 'bg-amber-500', ring: 'ring-amber-500/15' },
-  danger: { iconBg: 'bg-red-600', ring: 'ring-red-500/15' },
-  info: { iconBg: 'bg-sky-700', ring: 'ring-sky-500/15' },
+const COLOR_MAP: Record<NonNullable<PageHeaderProps['color']>, { iconBg: string; iconColor: string }> = {
+  primary:   { iconBg: 'bg-[#212121]',          iconColor: 'text-white' },
+  secondary: { iconBg: 'bg-[#E54F38]',          iconColor: 'text-white' },
+  neutral:   { iconBg: 'bg-zinc-700',           iconColor: 'text-white' },
+  info:      { iconBg: 'bg-[hsl(204,70%,53%)]', iconColor: 'text-white' },
+  success:   { iconBg: 'bg-[hsl(148,71%,44%)]', iconColor: 'text-white' },
+  warning:   { iconBg: 'bg-[hsl(40,91%,60%)]',  iconColor: 'text-[#212121]' },
+  danger:    { iconBg: 'bg-[hsl(1,64%,49%)]',   iconColor: 'text-white' },
 };
 
 /**
- * Consistent page header used across the SIGAA — institutional look
- * (Universidad del Sinú red accent over neutral surfaces).
+ * Horilla-style page titlebar — bold title, subtle subtitle, right-aligned
+ * actions, thin separator underneath.
  */
 function PageHeader({
   title,
   description,
   icon,
-  color = 'primary',
+  color = 'secondary',
   actions,
   subRow,
   className,
@@ -42,29 +37,28 @@ function PageHeader({
   return (
     <header
       className={clsx(
-        'mb-6 pb-5 border-b border-zinc-200',
+        'mb-5 pb-4 border-b border-[hsl(213,22%,88%)]',
         className,
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-4 min-w-0">
+        <div className="flex items-start gap-3 min-w-0">
           {icon && (
             <div
               className={clsx(
-                'shrink-0 flex items-center justify-center size-11 rounded-lg shadow-sm ring-4 text-white',
+                'shrink-0 flex items-center justify-center size-10 rounded-md',
                 c.iconBg,
-                c.ring,
               )}
             >
-              <div className="size-6">{icon}</div>
+              <div className={clsx('size-5', c.iconColor)}>{icon}</div>
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 leading-tight">
+            <h1 className="text-[22px] font-bold tracking-tight text-[#212121] leading-tight">
               {title}
             </h1>
             {description && (
-              <p className="mt-1 text-sm text-zinc-600">{description}</p>
+              <p className="mt-0.5 text-[13px] text-zinc-500">{description}</p>
             )}
           </div>
         </div>
@@ -72,7 +66,7 @@ function PageHeader({
           <div className="flex items-center gap-2 shrink-0">{actions}</div>
         )}
       </div>
-      {subRow && <div className="mt-4">{subRow}</div>}
+      {subRow && <div className="mt-3">{subRow}</div>}
     </header>
   );
 }

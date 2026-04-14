@@ -1,15 +1,33 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #fafafa;
-  --color-foreground: #09090b;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --color-background: #ffffff;
+  --color-foreground: #212121;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* ──────────────────────────────────────────────────────────────
-     Universidad del Sinú — identidad institucional (paleta oficial)
-     Rojo corporativo + neutros. Usar `unisinu-*` en lugar de colores
-     genéricos tipo `indigo-*` o `purple-*` para mantener consistencia.
+     Horilla-inspired palette — sober institutional
+     Primary = black (used on action buttons, headers)
+     Secondary = Horilla coral (used on brand accents, highlights)
      ────────────────────────────────────────────────────────────── */
+  --color-oh-primary: hsl(0, 0%, 13%);         /* #212121 — black primary */
+  --color-oh-primary-hover: hsl(0, 0%, 8%);
+
+  --color-oh-secondary: hsl(8, 77%, 56%);      /* #E54F38 — coral accent */
+  --color-oh-secondary-hover: hsl(8, 77%, 46%);
+  --color-oh-secondary-soft: hsla(8, 77%, 56%, 0.1);
+
+  --color-oh-info: hsl(204, 70%, 53%);         /* #2897F2 — blue */
+  --color-oh-success: hsl(148, 71%, 44%);      /* #209E5B — green */
+  --color-oh-warning: hsl(40, 91%, 60%);       /* #F5B93D — amber */
+  --color-oh-danger: hsl(1, 64%, 49%);         /* #CC3D35 — red */
+
+  --color-oh-border: hsl(213, 22%, 84%);       /* #CAD3DC — card borders */
+  --color-oh-border-light: hsl(213, 22%, 93%); /* #E7EBF0 — subtle borders */
+  --color-oh-bg-soft: hsl(213, 22%, 97%);      /* #F4F6F8 — page bg */
+
+  /* Legacy UniSinú (kept as side-channel for the few UniSinú-branded
+     surfaces — logo frame, official badges — but no longer primary). */
   --color-unisinu-50:  #FDEEF0;
   --color-unisinu-100: #FBD8DC;
   --color-unisinu-200: #F4B2BA;
@@ -21,9 +39,105 @@
   --color-unisinu-800: #7F1122;
   --color-unisinu-900: #5F0E1B;
 
-  --color-primary: #A6192E;
-  --color-primary-hover: #7F1122;
+  --color-primary: hsl(0, 0%, 13%);
+  --color-primary-hover: hsl(0, 0%, 8%);
 }
+
+/* ================================================================
+   HORILLA-INSPIRED COMPONENT CLASSES
+   ================================================================ */
+/* Shared button base */
+.oh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.oh-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.oh-btn--primary { background: var(--color-oh-primary); color: #fff; }
+.oh-btn--primary:hover { background: var(--color-oh-primary-hover); color: #fff; }
+
+.oh-btn--secondary { background: var(--color-oh-secondary); color: #fff; }
+.oh-btn--secondary:hover { background: var(--color-oh-secondary-hover); color: #fff; }
+
+.oh-btn--secondary-outline { background: transparent; color: var(--color-oh-secondary); border-color: var(--color-oh-secondary); }
+.oh-btn--secondary-outline:hover { background: var(--color-oh-secondary); color: #fff; }
+
+.oh-btn--light { background: #fff; color: #212121; border-color: var(--color-oh-border); }
+.oh-btn--light:hover { background: var(--color-oh-bg-soft); }
+
+.oh-btn--ghost { background: transparent; color: #52525b; }
+.oh-btn--ghost:hover { background: var(--color-oh-bg-soft); color: #212121; }
+
+/* Cards — Horilla uses flat cards with a thin border */
+.oh-card {
+  background: #fff;
+  border: 1px solid var(--color-oh-border-light);
+  border-radius: 0.5rem;
+  padding: 1.15rem;
+}
+.oh-card--no-padding { padding: 0; }
+.oh-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--color-oh-border-light);
+}
+.oh-card__title { font-size: 0.95rem; font-weight: 600; color: #212121; margin: 0; }
+
+/* Page title bar */
+.oh-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-oh-border-light);
+  margin-bottom: 1.25rem;
+}
+.oh-titlebar__title { font-size: 1.5rem; font-weight: 700; color: #212121; margin: 0; line-height: 1.2; }
+.oh-titlebar__subtitle { font-size: 0.8125rem; color: #6c757d; margin-top: 0.25rem; }
+
+/* Tabs */
+.oh-tabs { display: flex; border-bottom: 1px solid var(--color-oh-border); margin-bottom: 1rem; }
+.oh-tabs__tab {
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+}
+.oh-tabs__tab--active { color: #212121; border-bottom-color: var(--color-oh-secondary); }
+.oh-tabs__tab:hover { color: #212121; }
+
+/* Badges */
+.oh-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.oh-badge--neutral  { background: #f4f4f5; color: #3f3f46; border-color: #e4e4e7; }
+.oh-badge--primary  { background: #f4f4f5; color: #212121; border-color: #d4d4d8; }
+.oh-badge--info     { background: hsla(204, 70%, 53%, 0.12); color: hsl(204, 70%, 38%); border-color: hsla(204, 70%, 53%, 0.25); }
+.oh-badge--success  { background: hsla(148, 71%, 44%, 0.12); color: hsl(148, 71%, 30%); border-color: hsla(148, 71%, 44%, 0.25); }
+.oh-badge--warning  { background: hsla(40, 91%, 60%, 0.15); color: hsl(34, 85%, 35%); border-color: hsla(40, 91%, 60%, 0.3); }
+.oh-badge--danger   { background: hsla(1, 64%, 49%, 0.12); color: hsl(1, 64%, 40%); border-color: hsla(1, 64%, 49%, 0.25); }
+.oh-badge--secondary{ background: var(--color-oh-secondary-soft); color: var(--color-oh-secondary-hover); border-color: hsla(8, 77%, 56%, 0.25); }
 
 /* Base styles */
 body {

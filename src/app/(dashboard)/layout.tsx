@@ -162,11 +162,9 @@ export default function DashboardLayout({
   const sidebarContent = (
     <>
       {/* Logo Header — crop to the university crest + text block only.
-           The PNG is 856x170px; the left block (escudo + "Universidad del
-           Sinú...") occupies the first ~380px. We render the image at the
-           container height and hide the accreditation/anniversary seals
-           with overflow:hidden. */}
-      <div className="flex h-24 items-center justify-center px-3 shrink-0 bg-white border-b border-zinc-200 relative overflow-hidden">
+           Matches Horilla's oh-sidebar__company block: thin bottom border,
+           white background so the logo is clean. */}
+      <div className="flex h-24 items-center justify-center px-3 shrink-0 bg-white border-b border-[hsl(213,22%,88%)] relative overflow-hidden">
         <div
           className="relative h-20 w-full overflow-hidden flex items-center"
         >
@@ -189,8 +187,7 @@ export default function DashboardLayout({
         </button>
       </div>
 
-      {/* Divider */}
-      <div className="mx-4 border-t border-zinc-950/5 dark:border-white/5" />
+      {/* (no extra divider — header already has a bottom border) */}
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
@@ -220,25 +217,26 @@ export default function DashboardLayout({
                     <Link
                       href={item.href}
                       className={clsx(
-                        "group relative flex items-center gap-x-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
+                        "group relative flex items-center gap-x-3 px-3 py-2 text-[13px] transition-all duration-100",
                         isActive
-                          ? "bg-zinc-100 text-zinc-900 font-semibold"
-                          : "text-zinc-600 font-medium hover:bg-zinc-50 hover:text-zinc-900"
+                          ? "bg-white text-[#212121] font-semibold shadow-sm border border-[hsl(213,22%,90%)]"
+                          : "text-zinc-600 font-medium hover:bg-white hover:text-[#212121]"
                       )}
+                      style={{ borderRadius: '6px' }}
                     >
-                      {/* Sober dark indicator — no red background */}
+                      {/* Active indicator: Horilla coral accent */}
                       {isActive && (
                         <span
                           aria-hidden="true"
-                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-zinc-800"
+                          className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-sm bg-[#E54F38]"
                         />
                       )}
                       <Icon
                         className={clsx(
                           "size-[18px] shrink-0 transition-colors",
                           isActive
-                            ? "text-zinc-800"
-                            : "text-zinc-400 group-hover:text-zinc-600"
+                            ? "text-[#E54F38]"
+                            : "text-zinc-400 group-hover:text-[#212121]"
                         )}
                       />
                       <span className="truncate">{item.label}</span>
@@ -252,8 +250,8 @@ export default function DashboardLayout({
         })}
       </nav>
 
-      {/* User footer */}
-      <div className="shrink-0 border-t border-zinc-950/5 dark:border-white/5 p-4">
+      {/* User footer — Horilla oh-sidebar__user block */}
+      <div className="shrink-0 border-t border-[hsl(213,22%,88%)] bg-white p-4">
         {user ? (
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-zinc-200">
@@ -298,7 +296,7 @@ export default function DashboardLayout({
   /*  Render                                                           */
   /* ---------------------------------------------------------------- */
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex h-screen overflow-hidden bg-[hsl(213,22%,97%)]">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -307,10 +305,10 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — Horilla style: soft gray background with white card items */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-40 w-[260px] bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col",
+          "fixed inset-y-0 left-0 z-40 w-[260px] bg-[hsl(213,22%,95%)] border-r border-[hsl(213,22%,85%)] flex flex-col",
           "transform transition-transform duration-200 ease-out",
           "lg:relative lg:translate-x-0",
           sidebarOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"
@@ -321,8 +319,8 @@ export default function DashboardLayout({
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar */}
-        <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 h-14 flex items-center gap-4 px-4 sm:px-6 shrink-0">
+        {/* Top bar — thin white strip with breadcrumb */}
+        <header className="bg-white border-b border-[hsl(213,22%,90%)] h-14 flex items-center gap-4 px-4 sm:px-6 shrink-0">
           {/* Mobile hamburger */}
           <button
             onClick={() => setSidebarOpen(true)}

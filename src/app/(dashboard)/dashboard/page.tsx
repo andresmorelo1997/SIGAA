@@ -40,14 +40,14 @@ function SkeletonBox({ className }: { className?: string }) {
 
 function BarChart({ data }: { data: { label: string; total: number }[] }) {
   const max = Math.max(...data.map((d) => d.total), 1);
-  // Institutional palette: primary red for the largest tier, neutrals for the rest.
+  // Horilla palette: coral highlight + dark neutrals.
   const colors: Record<string, string> = {
-    PREG: 'bg-[#A6192E]',
-    POSG: 'bg-slate-700',
-    ESP: 'bg-slate-500',
-    MSTR: 'bg-slate-400',
-    DOCT: 'bg-[#7F1122]',
-    TCN: 'bg-slate-600',
+    PREG: 'bg-[#E54F38]',
+    POSG: 'bg-[#212121]',
+    ESP: 'bg-zinc-500',
+    MSTR: 'bg-zinc-700',
+    DOCT: 'bg-zinc-600',
+    TCN: 'bg-zinc-400',
   };
 
   return (
@@ -89,14 +89,14 @@ function QuickActionCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white p-4 transition-all duration-200 hover:shadow-md hover:border-[#A6192E]/30 block"
+      className="group relative overflow-hidden rounded-lg border border-[hsl(213,22%,90%)] bg-white p-4 transition-all duration-150 hover:shadow-sm hover:border-[#E54F38]/40 block"
     >
       <div className="flex items-start gap-3">
-        <div className="shrink-0 flex items-center justify-center size-10 rounded-lg bg-[#FDEEF0] text-[#A6192E] ring-1 ring-[#A6192E]/10 group-hover:bg-[#A6192E] group-hover:text-white transition-colors">
+        <div className="shrink-0 flex items-center justify-center size-10 rounded-md bg-[hsl(8,77%,95%)] text-[#E54F38] group-hover:bg-[#E54F38] group-hover:text-white transition-colors">
           {icon}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-zinc-900 group-hover:text-[#A6192E] transition-colors">
+          <p className="text-sm font-semibold text-[#212121] group-hover:text-[#E54F38] transition-colors">
             {label}
           </p>
           <p className="mt-0.5 text-xs text-zinc-500">{description}</p>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
       <PageHeader
         title="Panel de Control"
         description={dateStr}
-        color="primary"
+        color="secondary"
         icon={
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12 12 2.25 21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />

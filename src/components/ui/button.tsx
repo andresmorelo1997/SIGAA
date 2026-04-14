@@ -23,16 +23,24 @@ const variantAliases: Record<string, string> = {
   success: 'green',
 };
 
+/**
+ * Horilla-inspired button palette. Primary is black; brand accent is coral.
+ * Legacy variant names (blue/red/green/amber) are mapped via variantAliases
+ * so existing call sites keep working.
+ */
 const variantStyles: Record<string, string> = {
-  dark: 'border-transparent bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200',
-  blue: 'border-transparent bg-blue-600 text-white hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400',
-  red: 'border-transparent bg-red-600 text-white hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-400',
-  green: 'border-transparent bg-emerald-600 text-white hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400',
-  amber: 'border-transparent bg-amber-500 text-white hover:bg-amber-400 dark:bg-amber-500 dark:hover:bg-amber-400',
+  // Horilla primary = black (#212121) — action buttons, confirm, save
+  dark: 'border-transparent bg-[#212121] text-white hover:bg-[#0a0a0a] shadow-sm',
+  // Brand coral — highlights, secure actions
+  coral: 'border-transparent bg-[#E54F38] text-white hover:bg-[hsl(8,77%,46%)] shadow-sm',
+  blue: 'border-transparent bg-[hsl(204,70%,53%)] text-white hover:bg-[hsl(204,62%,48%)]',
+  red: 'border-transparent bg-[hsl(1,64%,49%)] text-white hover:bg-[hsl(1,64%,42%)]',
+  green: 'border-transparent bg-[hsl(148,71%,44%)] text-white hover:bg-[hsl(148,71%,36%)]',
+  amber: 'border-transparent bg-[hsl(40,91%,60%)] text-[#212121] hover:bg-[hsl(40,91%,52%)]',
   outline:
-    'border-zinc-950/10 text-zinc-950 hover:bg-zinc-950/[2.5%] dark:border-white/10 dark:text-white dark:hover:bg-white/[2.5%]',
+    'border-[hsl(213,22%,84%)] bg-white text-[#212121] hover:bg-[hsl(213,22%,97%)]',
   plain:
-    'border-transparent text-zinc-950 hover:bg-zinc-950/5 dark:text-white dark:hover:bg-white/5',
+    'border-transparent text-zinc-700 hover:bg-[hsl(213,22%,95%)] hover:text-[#212121]',
 };
 
 const sizeStyles: Record<string, string> = {

@@ -49,3 +49,7 @@ next-env.d.ts
 .fuse_hidden*
 *.pdf
 test-*.mjs
+
+# Reference project used only for UI design tokens — not part of SIGAA code
+/horilla-1.0/
+/horilla-1.0.zip
