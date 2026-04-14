@@ -58,10 +58,24 @@ export async function GET() {
       }
     }
 
+    // Classify each ciclo by tier (pregrado / posgrado).
+    // Elysa convention: the third digit of the 4-digit code disambiguates:
+    //   '9' → posgrado (2591, 2592, 2691, 2692…)
+    //   '6' → pregrado (2561, 2563, 2661, 2663…)
+    //   other → 'both' (shown in any context)
+    function tierOf(code: string): 'pregrado' | 'posgrado' | 'both' {
+      if (code && code.length === 4) {
+        if (code[2] === '9') return 'posgrado';
+        if (code[2] === '6') return 'pregrado';
+      }
+      return 'both';
+    }
+
     return Response.json({
       ciclos: ciclos.map(c => ({
         value: c.ciclo_lectivo,
-        label: `${c.ciclo_lectivo} (${cicloMap[c.ciclo_lectivo] || c.ciclo_lectivo})`
+        label: `${c.ciclo_lectivo} (${cicloMap[c.ciclo_lectivo] || c.ciclo_lectivo})`,
+        tier: tierOf(c.ciclo_lectivo),
       })),
       grados: grados.map(g => ({ value: g.grado, label: g.grado })),
       campus: campus.map(c => ({ value: c.campus, label: c.campus })),

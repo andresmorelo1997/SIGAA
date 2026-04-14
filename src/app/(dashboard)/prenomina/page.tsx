@@ -13,6 +13,7 @@ import {
   useToast,
   ToastContainer,
 } from '@/components/ui';
+import { formatInstructorId } from '@/lib/format';
 
 /* ================================================================== */
 /*  Icons (inline SVG helpers)                                        */
@@ -672,9 +673,9 @@ export default function PrenominaPage() {
                             <td className="px-3 py-2.5 whitespace-nowrap text-zinc-700 max-w-[180px] truncate" title={docente.programa}>
                               {docente.programa || '-'}
                             </td>
-                            <td className="px-3 py-2.5 whitespace-nowrap font-mono text-zinc-600">{docente.instructor_id || '-'}</td>
+                            <td className="px-3 py-2.5 whitespace-nowrap font-mono text-zinc-600">{formatInstructorId(docente.instructor_id) || '-'}</td>
                             <td className="px-3 py-2.5 whitespace-nowrap text-zinc-600">{docente.tipo_doc || '-'}</td>
-                            <td className="px-3 py-2.5 whitespace-nowrap font-mono text-zinc-600">{docente.cedula || '-'}</td>
+                            <td className="px-3 py-2.5 whitespace-nowrap font-mono text-zinc-600">{formatInstructorId(docente.cedula) || '-'}</td>
                             <td className="px-3 py-2.5 whitespace-nowrap font-medium text-zinc-950 max-w-[200px] truncate" title={docente.nombre}>
                               <span className="inline-flex items-center gap-2">
                                 <ChevronDownIcon isExpanded={isExpanded} />

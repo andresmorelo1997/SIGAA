@@ -47,26 +47,30 @@ interface ToastContainerProps {
   onRemove: (id: string) => void;
 }
 
-const typeStyles: Record<ToastType, { bg: string; ring: string; icon: string }> = {
+const typeStyles: Record<ToastType, { bg: string; ring: string; icon: string; bar: string }> = {
   success: {
-    bg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
-    ring: 'ring-emerald-500/20',
+    bg: 'bg-white dark:bg-zinc-900',
+    ring: 'ring-emerald-500/40',
     icon: 'text-emerald-600 dark:text-emerald-400',
+    bar: 'bg-emerald-500',
   },
   error: {
-    bg: 'bg-red-500/10 dark:bg-red-500/15',
-    ring: 'ring-red-500/20',
+    bg: 'bg-white dark:bg-zinc-900',
+    ring: 'ring-red-500/40',
     icon: 'text-red-600 dark:text-red-400',
+    bar: 'bg-red-500',
   },
   info: {
-    bg: 'bg-blue-500/10 dark:bg-blue-500/15',
-    ring: 'ring-blue-500/20',
+    bg: 'bg-white dark:bg-zinc-900',
+    ring: 'ring-blue-500/40',
     icon: 'text-blue-600 dark:text-blue-400',
+    bar: 'bg-blue-500',
   },
   warning: {
-    bg: 'bg-amber-500/10 dark:bg-amber-500/15',
-    ring: 'ring-amber-500/20',
+    bg: 'bg-white dark:bg-zinc-900',
+    ring: 'ring-amber-500/40',
     icon: 'text-amber-600 dark:text-amber-400',
+    bar: 'bg-amber-500',
   },
 };
 
@@ -92,13 +96,18 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   return (
     <div
       className={clsx(
-        'flex items-start gap-3 rounded-lg ring-1 px-4 py-3 shadow-lg',
+        'relative flex items-start gap-3 rounded-lg ring-1 pl-5 pr-4 py-3 shadow-xl overflow-hidden',
         'animate-[slideIn_200ms_ease-out]',
         style.bg,
         style.ring,
       )}
       role="alert"
     >
+      {/* Accent bar on the left */}
+      <span
+        className={clsx('absolute inset-y-0 left-0 w-1.5 rounded-l-lg', style.bar)}
+        aria-hidden="true"
+      />
       <div className={clsx('shrink-0 mt-0.5', style.icon)}>{icons[toast.type]}</div>
       <p className="flex-1 text-sm/6 font-medium text-zinc-950 dark:text-white">
         {toast.message}

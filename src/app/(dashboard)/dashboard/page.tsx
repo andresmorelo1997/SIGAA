@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { formatDateTime } from '@/lib/format';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -515,15 +516,7 @@ export default function DashboardPage() {
                         <ImportStatusBadge status={imp.status ?? '-'} />
                       </td>
                       <td className="whitespace-nowrap px-6 py-3 text-zinc-500">
-                        {imp.created_at
-                          ? new Date(imp.created_at).toLocaleDateString('es-CO', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : '-'}
+                        {imp.created_at ? formatDateTime(imp.created_at) : '-'}
                       </td>
                     </tr>
                   ))}

@@ -21,6 +21,7 @@ import {
   ToastContainer,
   useToast,
 } from '@/components/ui';
+import { formatDate as fmtDate, formatDateTime as fmtDateTime } from '@/lib/format';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -133,6 +134,82 @@ export default function HistorialImportacionesPage() {
   const [importing, setImporting] = useState(false);
   const { toasts, addToast, removeToast } = useToast();
 
+  // Preview state: per-file summary of what the import would contain.
+  // A file is "confirmed" once its preview loaded and the user picked campus.
+  interface PreviewInfo {
+    fileType: string;
+    totalRows: number;
+    campus: string[];
+    grados: string[];
+    cicloLectivo: string;
+    loading: boolean;
+    error?: string;
+  }
+  const [previews, setPreviews] = useState<Record<string, PreviewInfo>>({});
+  const [selectedCampus, setSelectedCampus] = useState<Record<string, Set<string>>>({});
+
+  // When files change, kick off preview fetches.
+  useEffect(() => {
+    if (pendingFiles.length === 0) return;
+    let cancelled = false;
+    for (const file of pendingFiles) {
+      const key = file.name;
+      if (previews[key]) continue;
+      setPreviews((p) => ({
+        ...p,
+        [key]: { fileType: '', totalRows: 0, campus: [], grados: [], cicloLectivo: '', loading: true },
+      }));
+      (async () => {
+        try {
+          const fd = new FormData();
+          fd.append('file', file);
+          const res = await fetch('/api/carga-academica/preview', { method: 'POST', body: fd });
+          const json = await res.json();
+          if (cancelled) return;
+          if (!res.ok) {
+            setPreviews((p) => ({ ...p, [key]: { ...p[key], loading: false, error: json.error || 'Error' } }));
+            return;
+          }
+          setPreviews((p) => ({
+            ...p,
+            [key]: {
+              fileType: json.fileType,
+              totalRows: json.totalRows,
+              campus: json.campus ?? [],
+              grados: json.grados ?? [],
+              cicloLectivo: json.cicloLectivo ?? '',
+              loading: false,
+            },
+          }));
+          // Pre-select all campus by default.
+          setSelectedCampus((s) => ({
+            ...s,
+            [key]: new Set(json.campus ?? []),
+          }));
+        } catch (e) {
+          if (cancelled) return;
+          setPreviews((p) => ({
+            ...p,
+            [key]: { ...p[key], loading: false, error: e instanceof Error ? e.message : 'Error' },
+          }));
+        }
+      })();
+    }
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFiles]);
+
+  function toggleCampusForFile(fileName: string, campus: string) {
+    setSelectedCampus((s) => {
+      const current = new Set(s[fileName] ?? []);
+      if (current.has(campus)) current.delete(campus);
+      else current.add(campus);
+      return { ...s, [fileName]: current };
+    });
+  }
+
   /* ---- Import handler ---- */
   async function handleImport() {
     if (pendingFiles.length === 0) {
@@ -143,7 +220,7 @@ export default function HistorialImportacionesPage() {
     let okCount = 0;
     let failCount = 0;
     for (const file of pendingFiles) {
-      if (!/\.(xlsx|xls)$/i.test(file.name)) {
+      if (!/\.(xlsx|xls|xlsm)$/i.test(file.name)) {
         addToast('error', `${file.name}: solo Excel (.xlsx, .xls)`);
         failCount++;
         continue;
@@ -151,16 +228,19 @@ export default function HistorialImportacionesPage() {
       try {
         const fd = new FormData();
         fd.append('file', file);
+        // Include campus filter when the user has deselected at least one.
+        const preview = previews[file.name];
+        const chosen = selectedCampus[file.name];
+        if (preview && chosen && preview.campus.length > 0 && chosen.size < preview.campus.length) {
+          fd.append('campus_filter', Array.from(chosen).join(','));
+        }
         const res = await fetch('/api/carga-academica/import', {
           method: 'POST',
           body: fd,
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Error');
-        addToast(
-          'success',
-          `${file.name}: ${json.message || 'Importado'}`,
-        );
+        addToast('success', `${file.name}: ${json.message || 'Importado'}`);
         okCount++;
       } catch (e) {
         const msg = e instanceof Error ? e.message : 'Error';
@@ -170,6 +250,8 @@ export default function HistorialImportacionesPage() {
     }
     setImporting(false);
     setPendingFiles([]);
+    setPreviews({});
+    setSelectedCampus({});
     setShowImportModal(false);
     if (okCount > 0) {
       addToast('info', `${okCount} archivo(s) importado(s), ${failCount} con error(es)`);
@@ -236,33 +318,8 @@ export default function HistorialImportacionesPage() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
-  function formatDate(dateStr: string | null) {
-    if (!dateStr) return '-';
-    try {
-      return new Intl.DateTimeFormat('es-CO', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(new Date(dateStr));
-    } catch {
-      return dateStr;
-    }
-  }
-
-  function formatShortDate(dateStr: string | null) {
-    if (!dateStr) return 'N/A';
-    try {
-      return new Intl.DateTimeFormat('es-CO', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      }).format(new Date(dateStr));
-    } catch {
-      return dateStr;
-    }
-  }
+  const formatDate = (dateStr: string | null) => fmtDateTime(dateStr) || '-';
+  const formatShortDate = (dateStr: string | null) => fmtDate(dateStr) || 'N/A';
 
   const deleteRecordCount = deleteTarget
     ? (deleteTarget.inserted ?? deleteTarget.records_inserted ?? 0) + (deleteTarget.updated ?? deleteTarget.records_updated ?? 0)
@@ -503,6 +560,17 @@ export default function HistorialImportacionesPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                             </svg>
                           </button>
+                          {/* Download original Excel */}
+                          <a
+                            href={`/api/import-history/${row.id}/download`}
+                            className="p-1.5 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            title="Descargar archivo original"
+                            download
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                          </a>
                           {/* Delete */}
                           <button
                             onClick={() => setDeleteTarget(row)}
@@ -699,20 +767,112 @@ export default function HistorialImportacionesPage() {
           </>
         }
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
           <p className="text-sm text-zinc-600">
             El sistema detecta automáticamente el tipo de archivo:
             US_PROG_CLASES, LC_PROGRAMACION_CLASES, US_DATOS_DOCENTES o DOCENTES_IES.
           </p>
           <FileDropzone
             onFiles={setPendingFiles}
-            accept=".xlsx,.xls"
+            accept=".xlsx,.xls,.xlsm"
             multiple
             maxSize={25 * 1024 * 1024}
             label="Arrastrá los archivos Excel o hacé clic para seleccionar"
             description="Se pueden importar varios archivos a la vez"
             disabled={importing}
           />
+
+          {/* Preview cards — show detected metadata per file + campus picker */}
+          {pendingFiles.length > 0 && (
+            <div className="space-y-3 border-t border-zinc-200 pt-4">
+              <h4 className="text-sm font-semibold text-zinc-900">
+                Vista previa de importación
+              </h4>
+              {pendingFiles.map((file) => {
+                const p = previews[file.name];
+                const sel = selectedCampus[file.name] ?? new Set<string>();
+                return (
+                  <div
+                    key={file.name}
+                    className="border border-zinc-200 rounded-lg p-3 bg-zinc-50/50"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-zinc-950 truncate">
+                          {file.name}
+                        </p>
+                        {p?.loading && (
+                          <p className="text-xs text-zinc-500 mt-1">Analizando…</p>
+                        )}
+                        {p?.error && (
+                          <p className="text-xs text-red-600 mt-1">{p.error}</p>
+                        )}
+                        {p && !p.loading && !p.error && (
+                          <div className="flex flex-wrap gap-2 mt-1 text-xs text-zinc-600">
+                            <span>
+                              <strong>Tipo:</strong> {p.fileType}
+                            </span>
+                            <span>•</span>
+                            <span>
+                              <strong>{p.totalRows.toLocaleString('es-CO')}</strong> filas
+                            </span>
+                            {p.cicloLectivo && (
+                              <>
+                                <span>•</span>
+                                <span>
+                                  <strong>Ciclo:</strong> {p.cicloLectivo}
+                                </span>
+                              </>
+                            )}
+                            {p.grados.length > 0 && (
+                              <>
+                                <span>•</span>
+                                <span>
+                                  <strong>Grados:</strong> {p.grados.join(', ')}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Campus selector (if any detected) */}
+                    {p && !p.loading && p.campus.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-zinc-700 mb-1.5">
+                          Campus a importar ({sel.size} / {p.campus.length}):
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {p.campus.map((c) => {
+                            const checked = sel.has(c);
+                            return (
+                              <label
+                                key={c}
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border cursor-pointer text-xs ${
+                                  checked
+                                    ? 'bg-blue-50 border-blue-300 text-blue-900'
+                                    : 'bg-white border-zinc-200 text-zinc-700'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggleCampusForFile(file.name, c)}
+                                  className="size-3.5 rounded border-zinc-300 text-blue-600"
+                                />
+                                {c}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </Modal>
 

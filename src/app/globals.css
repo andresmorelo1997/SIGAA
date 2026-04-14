@@ -21,27 +21,45 @@ body {
 /*  Scrollbar — thin, subtle, always visible for tables               */
 /* ------------------------------------------------------------------ */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f4f4f5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: #a1a1aa;
   border-radius: 9999px;
+  border: 2px solid #f4f4f5;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  background: #71717a;
 }
 
-/* Firefox scrollbar */
+/* Firefox scrollbar — always visible */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d4d4d8 transparent;
+  scrollbar-color: #a1a1aa #f4f4f5;
+}
+
+/* Any container that needs horizontal scrolling for wide tables must
+   explicitly show its scrollbar in WebKit (Chrome/Safari on macOS
+   default-hide overlay scrollbars). */
+.scroll-x-stable,
+.scroll-x-stable * {
+  -webkit-overflow-scrolling: auto;
+}
+.scroll-x-stable::-webkit-scrollbar {
+  height: 12px;
+  -webkit-appearance: none;
+}
+.scroll-x-stable::-webkit-scrollbar-thumb {
+  background: #a1a1aa;
+  border-radius: 9999px;
+  border: 3px solid #f4f4f5;
 }
 
 /* ------------------------------------------------------------------ */

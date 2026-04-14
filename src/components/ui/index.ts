@@ -13,6 +13,9 @@ export type { InputProps } from './input';
 export { Select } from './select';
 export type { SelectProps } from './select';
 
+export { MultiSelect } from './multi-select';
+export type { MultiSelectProps, MultiSelectOption } from './multi-select';
+
 export { FileDropzone } from './file-dropzone';
 export type { FileDropzoneProps } from './file-dropzone';
 

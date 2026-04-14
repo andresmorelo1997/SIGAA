@@ -553,6 +553,9 @@ function runMigrations(db: Database.Database): void {
   addColumn('profesores_asignatura', 'import_id', 'INTEGER REFERENCES import_history(id)');
   addColumn('plan_estudios', 'import_id', 'INTEGER REFERENCES import_history(id)');
 
+  // Store the original Excel blob for auditing/downloads.
+  addColumn('import_history', 'file_blob', 'BLOB');
+
   // Columnas derivadas del macro VBA "MacroProgramacionAcademicafinal"
   // Se agregan aquí para DBs existentes; las nuevas incluyen estos campos
   // desde el CREATE TABLE actualizado.

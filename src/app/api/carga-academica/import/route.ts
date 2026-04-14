@@ -301,19 +301,21 @@ interface FileImportResult {
   importId: number;
   /** ID del corte/snapshot creado automáticamente antes del import (si se creó) */
   snapshotCorteId?: number;
+  /** Campus filter applied after parse (if any). */
+  campusFilterApplied?: { kept: string[]; removed: number };
 }
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────
 
-function createImportRecord(filename: string, fileSize: number): number {
+function createImportRecord(filename: string, fileSize: number, fileBlob?: Buffer): number {
   const result = db
     .prepare(
-      `INSERT INTO import_history (filename, file_type, file_size, status, created_at)
-       VALUES (?, 'UNKNOWN', ?, 'processing', ?)`,
+      `INSERT INTO import_history (filename, file_type, file_size, status, created_at, file_blob)
+       VALUES (?, 'UNKNOWN', ?, 'processing', ?, ?)`,
     )
-    .run(filename, fileSize, new Date().toISOString());
+    .run(filename, fileSize, new Date().toISOString(), fileBlob ?? null);
   return Number(result.lastInsertRowid);
 }
 
@@ -706,7 +708,7 @@ function computeHoursForImport(importId: number): void {
 // ─────────────────────────────────────────────────────────────
 
 function processFile(file: { name: string; buffer: Buffer; size: number }): FileImportResult {
-  const importId = createImportRecord(file.name, file.size);
+  const importId = createImportRecord(file.name, file.size, file.buffer);
 
   const result: FileImportResult = {
     filename: file.name,
@@ -1322,10 +1324,43 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Optional campus filter (CSV). If supplied, rows whose campus is not
+    // in the list are removed post-import (simpler than threading the filter
+    // through every parser branch).
+    const campusFilterRaw = (formData.get('campus_filter') as string | null) ?? '';
+    const campusFilter = campusFilterRaw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
     // Process each file
     const results: FileImportResult[] = [];
     for (const f of files) {
-      results.push(processFile(f));
+      const result = processFile(f);
+
+      // Apply campus filter post-import
+      if (campusFilter.length > 0 && typeof result.importId === 'number') {
+        const placeholders = campusFilter.map(() => '?').join(',');
+        const tablesToFilter = ['carga_academica', 'docentes', 'plan_estudios', 'profesores_asignatura'];
+        let removed = 0;
+        for (const tbl of tablesToFilter) {
+          try {
+            const del = db
+              .prepare(
+                `DELETE FROM ${tbl}
+                 WHERE import_id = ?
+                   AND (campus IS NULL OR campus NOT IN (${placeholders}))`,
+              )
+              .run(result.importId, ...campusFilter);
+            removed += del.changes;
+          } catch {
+            /* table may not have campus/import_id — skip */
+          }
+        }
+        result.campusFilterApplied = { kept: campusFilter, removed };
+      }
+
+      results.push(result);
     }
 
     // Build summary

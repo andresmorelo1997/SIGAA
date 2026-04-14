@@ -39,12 +39,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             className={clsx(
               'relative block w-full appearance-none rounded-lg border bg-transparent',
-              'px-3.5 py-2.5 sm:px-3 sm:py-1.5',
+              'py-2.5 sm:py-1.5',
+              // Split left/right padding so the icon always reserves space
+              // (fixes overlap caused by sm:px-3 winning over pl-10).
+              icon
+                ? 'pl-10 pr-3.5 sm:pl-9 sm:pr-3'
+                : 'px-3.5 sm:px-3',
               'text-base/6 sm:text-sm/6 text-zinc-950 dark:text-white',
               'placeholder:text-zinc-500 dark:placeholder:text-zinc-400',
               'focus:outline-none focus:ring-2 focus:ring-blue-500',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              icon && 'pl-10',
               error
                 ? 'border-red-500 focus:ring-red-500'
                 : 'border-zinc-950/10 dark:border-white/10 dark:bg-white/5',

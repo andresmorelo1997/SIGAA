@@ -322,9 +322,10 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Page content — scrollable area */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="p-4 sm:p-6 lg:px-8 lg:py-6 min-w-0">
+        {/* Page content — scrollable area. Uses flex column so children
+             with h-full can size themselves and keep pagination sticky. */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
+          <div className="p-4 sm:p-6 lg:px-8 lg:py-6 min-w-0 flex-1 flex flex-col">
             {children}
           </div>
         </main>

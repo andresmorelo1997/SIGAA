@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const estado = searchParams.get('estado') || '';
     const grado = searchParams.get('grado') || '';
+    const cicloLectivo = searchParams.get('ciclo_lectivo') || '';
+    const campusCsv = searchParams.get('campus') || '';
     const orgAcademica = searchParams.get('org_academica') || '';
     const asOf = searchParams.get('as_of') || '';
     const corteIdParam = searchParams.get('corte_id') || '';
@@ -108,6 +110,26 @@ export async function GET(request: NextRequest) {
     if (grado) {
       conditions.push('grado = ?');
       params.push(grado);
+    }
+
+    if (cicloLectivo) {
+      conditions.push('ciclo_lectivo = ?');
+      params.push(cicloLectivo);
+    }
+
+    if (campusCsv) {
+      const campuses = campusCsv
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (campuses.length === 1) {
+        conditions.push('campus = ?');
+        params.push(campuses[0]);
+      } else if (campuses.length > 1) {
+        const placeholders = campuses.map(() => '?').join(',');
+        conditions.push(`campus IN (${placeholders})`);
+        for (const c of campuses) params.push(c);
+      }
     }
 
     if (orgAcademica) {

@@ -170,6 +170,8 @@ export default function PlanEstudiosPage() {
   const [error, setError] = useState('');
 
   const [programas, setProgramas] = useState<string[]>([]);
+  /** Map programa code → full human-readable name (from /api/programas). */
+  const [programaNombres, setProgramaNombres] = useState<Record<string, string>>({});
   const [filterPrograma, setFilterPrograma] = useState('');
   const [filterGrado, setFilterGrado] = useState('');
 
@@ -207,6 +209,23 @@ export default function PlanEstudiosPage() {
   }, []);
 
   useEffect(() => { fetchProgramas(); }, [fetchProgramas]);
+
+  /* ---- fetch programa full names (code → nombre) ---- */
+  useEffect(() => {
+    async function loadProgramaNames() {
+      try {
+        const res = await fetch('/api/programas?limit=9999');
+        if (!res.ok) return;
+        const json = await res.json();
+        const map: Record<string, string> = {};
+        for (const p of json.data ?? []) {
+          if (p.codigo && p.nombre) map[p.codigo] = p.nombre;
+        }
+        setProgramaNombres(map);
+      } catch { /* ignore */ }
+    }
+    loadProgramaNames();
+  }, []);
 
   /* ---- fetch plan data ---- */
   const fetchData = useCallback(async (page = 1) => {
@@ -311,7 +330,12 @@ export default function PlanEstudiosPage() {
 
   // Get cohorte / plan info
   const cohorteInfo = data.length > 0 ? data[0].cohorte : '';
-  const programaFullName = data.length > 0 ? (data[0].modalidad || data[0].programa_academico) : '';
+  // Prefer the full human-readable name from /api/programas, falling back to
+  // modalidad (legacy) and then the program code.
+  const programaCodigo = data.length > 0 ? data[0].programa_academico : filterPrograma;
+  const programaFullName =
+    programaNombres[programaCodigo] ||
+    (data.length > 0 ? data[0].modalidad || data[0].programa_academico : programaCodigo);
   const gradoInfo = data.length > 0 ? data[0].grado : '';
 
   /* ---- export ---- */
@@ -440,7 +464,9 @@ export default function PlanEstudiosPage() {
             >
               <option value="">Todos los programas</option>
               {programas.map(p => (
-                <option key={p} value={p}>{p}</option>
+                <option key={p} value={p}>
+                  {programaNombres[p] ? `${p} — ${programaNombres[p]}` : p}
+                </option>
               ))}
             </select>
           </div>

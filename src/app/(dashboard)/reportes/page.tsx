@@ -7,6 +7,7 @@ import {
   Badge,
   Input,
   Select,
+  MultiSelect,
   Table,
   TableHeader,
   TableBody,
@@ -30,7 +31,7 @@ interface PaginationData {
 
 interface GlobalFilters {
   periodo: string;
-  campus: string;
+  campus: string[];
   facultad: string;
 }
 
@@ -334,7 +335,7 @@ export default function ReportesPage() {
   const [activeTab, setActiveTab] = useState(TAB_CONFIGS[0].id);
   const [globalFilters, setGlobalFilters] = useState<GlobalFilters>({
     periodo: '',
-    campus: '',
+    campus: [],
     facultad: '',
   });
   const [tabFilters, setTabFilters] = useState<Record<string, Record<string, string>>>({});
@@ -371,12 +372,6 @@ export default function ReportesPage() {
   const currentConfig = TAB_CONFIGS.find((t) => t.id === activeTab)!;
   const currentTabFilters = tabFilters[activeTab] ?? {};
 
-  /* ---- Campus options (real, from DB) ---- */
-  const CAMPUS_OPTIONS = [
-    { value: '', label: 'Todos los campus' },
-    ...campusList,
-  ];
-
   /* ---- build query params ---- */
   const buildParams = useCallback(
     (page = 1, limit = pagination.limit, forExport = false) => {
@@ -386,7 +381,7 @@ export default function ReportesPage() {
       params.set('limit', String(limit));
 
       if (globalFilters.periodo) params.set('periodo', globalFilters.periodo);
-      if (globalFilters.campus) params.set('campus', globalFilters.campus);
+      if (globalFilters.campus.length > 0) params.set('campus', globalFilters.campus.join(','));
       if (globalFilters.facultad) params.set('facultad', globalFilters.facultad);
 
       const tabF = tabFilters[activeTab] ?? {};
@@ -461,7 +456,10 @@ export default function ReportesPage() {
   }
 
   /* ---- filter helpers ---- */
-  function updateGlobalFilter<K extends keyof GlobalFilters>(key: K, value: string) {
+  function updateGlobalFilter<K extends keyof GlobalFilters>(
+    key: K,
+    value: GlobalFilters[K],
+  ) {
     setGlobalFilters((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -507,11 +505,13 @@ export default function ReportesPage() {
               value={globalFilters.periodo}
               onChange={(e) => updateGlobalFilter('periodo', e.target.value)}
             />
-            <Select
+            <MultiSelect
               label="Campus"
               value={globalFilters.campus}
-              onChange={(e) => updateGlobalFilter('campus', e.target.value)}
-              options={CAMPUS_OPTIONS}
+              onChange={(vals) => updateGlobalFilter('campus', vals)}
+              options={campusList}
+              placeholder="Todos los campus"
+              searchPlaceholder="Buscar campus..."
             />
             <Input
               label="Facultad"

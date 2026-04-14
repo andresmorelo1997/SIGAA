@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, FormEvent } from 'react';
+import { formatInstructorId } from '@/lib/format';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -240,13 +241,20 @@ export default function DocentesPage() {
     }
 
     const isEditable = EDITABLE_FIELDS.includes(col.key);
+
+    // Format employee/instructor IDs with Colombian 10-digit convention.
+    let displayValue: unknown = value;
+    if ((col.key === 'instructor_id' || col.key === 'doc_id') && value != null && value !== '') {
+      displayValue = formatInstructorId(value);
+    }
+
     return (
       <span
         onClick={() => isEditable && startEdit(row.id, col.key, value)}
-        className={`block w-full rounded text-sm truncate ${isEditable ? 'cursor-pointer hover:bg-indigo-50 transition-colors px-2 py-1' : ''} text-zinc-900`}
-        title={String(value ?? '')}
+        className={`block w-full rounded text-sm truncate ${isEditable ? 'cursor-pointer hover:bg-indigo-50 transition-colors px-2 py-1' : ''} ${col.key === 'instructor_id' || col.key === 'doc_id' ? 'font-mono tabular-nums' : ''} text-zinc-900`}
+        title={String(displayValue ?? value ?? '')}
       >
-        {value ?? '-'}
+        {displayValue ?? '-'}
       </span>
     );
   }
@@ -392,8 +400,8 @@ export default function DocentesPage() {
                                 { label: 'Primer Apellido', value: row.primer_apellido },
                                 { label: 'Segundo Apellido', value: row.segundo_apellido },
                                 { label: 'Tipo Documento', value: row.tipo_doc },
-                                { label: 'Numero Documento', value: row.doc_id },
-                                { label: 'Instructor ID', value: row.instructor_id },
+                                { label: 'Numero Documento', value: formatInstructorId(row.doc_id) || row.doc_id },
+                                { label: 'Instructor ID', value: formatInstructorId(row.instructor_id) },
                                 { label: 'Campus', value: row.campus },
                                 { label: 'Ciudad', value: row.ciudad },
                                 { label: 'Direccion', value: row.direccion },

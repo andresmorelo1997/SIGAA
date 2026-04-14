@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useMemo,
   useCallback,
   useRef,
   type ChangeEvent,
@@ -12,6 +13,7 @@ import { useToast, ToastContainer } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Pagination } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
@@ -100,6 +102,7 @@ type SortDir = 'asc' | 'desc';
 interface DropdownOption {
   value: string;
   label: string;
+  tier?: 'pregrado' | 'posgrado' | 'both';
 }
 
 /* ================================================================== */
@@ -496,7 +499,7 @@ export default function CargaAcademicaPage() {
   const [estado, setEstado] = useState('');
   const [grado, setGrado] = useState('');
   const [ciclo, setCiclo] = useState('');
-  const [campus, setCampus] = useState('');
+  const [campusList, setCampusList] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<keyof CargaAcademica | ''>('');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -514,6 +517,26 @@ export default function CargaAcademicaPage() {
   const [cicloOptions, setCicloOptions] = useState<DropdownOption[]>([]);
   const [gradoOptions, setGradoOptions] = useState<DropdownOption[]>([]);
   const [campusOptions, setCampusOptions] = useState<DropdownOption[]>([]);
+
+  // Filtered ciclos: when a grado is picked, hide ciclos from the other tier.
+  // PREG / TCN → pregrado + both
+  // POSG / MSTR / DOCT → posgrado + both
+  const visibleCicloOptions = useMemo(() => {
+    if (!grado) return cicloOptions;
+    const pregrado = new Set(['PREG', 'TCN']);
+    const posgrado = new Set(['POSG', 'MSTR', 'DOCT', 'ESP']);
+    const tier = pregrado.has(grado) ? 'pregrado' : posgrado.has(grado) ? 'posgrado' : null;
+    if (!tier) return cicloOptions;
+    return cicloOptions.filter((o) => !o.tier || o.tier === 'both' || o.tier === tier);
+  }, [cicloOptions, grado]);
+
+  // Reset the ciclo filter if it becomes invalid for the selected grado.
+  useEffect(() => {
+    if (!ciclo) return;
+    const stillValid = visibleCicloOptions.some((o) => o.value === ciclo);
+    if (!stillValid) setCiclo('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleCicloOptions]);
 
   const { toasts, addToast, removeToast } = useToast();
 
@@ -546,7 +569,7 @@ export default function CargaAcademicaPage() {
         if (estado) params.set('estado', estado);
         if (grado) params.set('grado', grado);
         if (ciclo) params.set('ciclo_lectivo', ciclo);
-        if (campus) params.set('campus', campus);
+        if (campusList.length > 0) params.set('campus', campusList.join(','));
 
         const res = await fetch(`/api/carga-academica?${params.toString()}`);
         if (!res.ok) throw new Error('Error al cargar datos');
@@ -559,13 +582,13 @@ export default function CargaAcademicaPage() {
         setLoading(false);
       }
     },
-    [pagination.page, pagination.limit, search, estado, grado, ciclo, campus, addToast]
+    [pagination.page, pagination.limit, search, estado, grado, ciclo, campusList, addToast]
   );
 
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.limit, estado, grado, ciclo, campus]);
+  }, [pagination.page, pagination.limit, estado, grado, ciclo, campusList]);
 
   /* Debounced search */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -746,7 +769,7 @@ export default function CargaAcademicaPage() {
       if (estado) params.set('estado', estado);
       if (grado) params.set('grado', grado);
       if (ciclo) params.set('ciclo_lectivo', ciclo);
-      if (campus) params.set('campus', campus);
+      if (campusList.length > 0) params.set('campus', campusList.join(','));
       params.set('format', 'pdf');
       const res = await fetch(`/api/carga-academica/export?${params.toString()}`);
       if (!res.ok) throw new Error('Error al exportar PDF');
@@ -779,7 +802,7 @@ export default function CargaAcademicaPage() {
     setEstado('');
     setGrado('');
     setCiclo('');
-    setCampus('');
+    setCampusList([]);
     setPagination((prev) => ({ ...prev, page: 1 }));
   }
 
@@ -796,7 +819,7 @@ export default function CargaAcademicaPage() {
     setSelectAll(false);
   }
 
-  const hasActiveFilters = search || estado || grado || ciclo || campus;
+  const hasActiveFilters = search || estado || grado || ciclo || campusList.length > 0;
 
   /* ================================================================ */
   /*  Render                                                          */
@@ -911,7 +934,7 @@ export default function CargaAcademicaPage() {
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
             placeholder="Ciclo"
-            options={cicloOptions}
+            options={visibleCicloOptions}
           />
         </div>
 
@@ -928,16 +951,17 @@ export default function CargaAcademicaPage() {
           />
         </div>
 
-        {/* Campus */}
-        <div className="w-36">
-          <Select
-            value={campus}
-            onChange={(e) => {
-              setCampus(e.target.value);
+        {/* Campus (multi-select) */}
+        <div className="w-44">
+          <MultiSelect
+            value={campusList}
+            onChange={(vals) => {
+              setCampusList(vals);
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            placeholder="Campus"
             options={campusOptions}
+            placeholder="Campus"
+            searchPlaceholder="Buscar campus..."
           />
         </div>
 
@@ -1009,7 +1033,7 @@ export default function CargaAcademicaPage() {
       {/*  Data table (fills remaining space)                         */}
       {/* ---------------------------------------------------------- */}
       <div className="flex-1 min-h-0 min-w-0 rounded-lg bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 shadow-sm flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto" style={{ scrollbarWidth: 'auto' }}>
+        <div className="flex-1 overflow-auto scroll-x-stable" style={{ scrollbarWidth: 'auto' }}>
           <table className="w-full" style={{ minWidth: '1600px' }}>
             <thead className="sticky top-0 z-10">
               <tr>
