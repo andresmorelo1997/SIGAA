@@ -94,6 +94,7 @@ const navSections: NavSection[] = [
   {
     title: "Configuración",
     items: [
+      { label: "Usuarios", href: "/usuarios", icon: UsersIcon },
       { label: "Calendario", href: "/calendario", icon: CalendarDaysIcon },
       { label: "Parámetros", href: "/parametros", icon: Cog6ToothIcon },
     ],
@@ -160,26 +161,29 @@ export default function DashboardLayout({
   /* ---------------------------------------------------------------- */
   const sidebarContent = (
     <>
-      {/* Logo Header — UniSinú brand block. Sober white background,
-           prominent institutional logo on the top-left. */}
-      <div className="flex h-24 items-center gap-3 px-5 shrink-0 bg-white border-b border-zinc-200">
-        <img
-          src="/logos/unisinu-logo.png"
-          alt="Universidad del Sinú"
-          className="h-16 w-auto shrink-0 object-contain"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="text-lg font-extrabold leading-none tracking-tight text-zinc-900">
-            SIGAA
-          </p>
-          <p className="text-[10px] uppercase tracking-wider text-zinc-500 leading-tight mt-1 truncate">
-            Universidad del Sinú
-          </p>
+      {/* Logo Header — crop to the university crest + text block only.
+           The PNG is 856x170px; the left block (escudo + "Universidad del
+           Sinú...") occupies the first ~380px. We render the image at the
+           container height and hide the accreditation/anniversary seals
+           with overflow:hidden. */}
+      <div className="flex h-24 items-center justify-center px-3 shrink-0 bg-white border-b border-zinc-200 relative overflow-hidden">
+        <div
+          className="relative h-20 w-full overflow-hidden flex items-center"
+        >
+          <img
+            src="/logos/unisinu-logo.png"
+            alt="Universidad del Sinú"
+            // Height fills the container; width auto preserves aspect ratio.
+            // With height=80px, the left block is ~180px wide — the sidebar
+            // crop naturally hides the right medallions.
+            className="h-20 w-auto max-w-none select-none pointer-events-none"
+            draggable={false}
+          />
         </div>
         {/* Close button (mobile) */}
         <button
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden -mr-1 p-1 rounded-md text-zinc-500 hover:text-zinc-900"
+          className="lg:hidden absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-zinc-500 hover:text-zinc-900 bg-white/80"
         >
           <XMarkIcon className="size-5" />
         </button>
