@@ -24,8 +24,26 @@ export async function GET(request: NextRequest) {
     }
 
     if (campus) {
-      conditions.push('campus = ?');
-      params.push(campus);
+      const values = campus.split(',').map((s) => s.trim()).filter(Boolean);
+      if (values.length === 1) {
+        conditions.push('campus = ?');
+        params.push(values[0]);
+      } else if (values.length > 1) {
+        conditions.push(`campus IN (${values.map(() => '?').join(',')})`);
+        for (const v of values) params.push(v);
+      }
+    }
+
+    const dedicacion = searchParams.get('dedicacion') || '';
+    if (dedicacion) {
+      const values = dedicacion.split(',').map((s) => s.trim()).filter(Boolean);
+      if (values.length === 1) {
+        conditions.push('dedicacion = ?');
+        params.push(values[0]);
+      } else if (values.length > 1) {
+        conditions.push(`dedicacion IN (${values.map(() => '?').join(',')})`);
+        for (const v of values) params.push(v);
+      }
     }
 
     const whereClause =

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, FormEvent } from 'react';
 import { formatInstructorId } from '@/lib/format';
-import { PageHeader, Avatar } from '@/components/ui';
+import { PageHeader, Avatar, MultiSelect } from '@/components/ui';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -24,6 +24,7 @@ interface Docente {
   correo: string;
   fecha_inicio: string;
   fecha_final: string;
+  dedicacion: string | null;
 }
 
 interface Pagination {
@@ -51,12 +52,14 @@ const EMPTY_FORM: Omit<Docente, 'id'> = {
   correo: '',
   fecha_inicio: '',
   fecha_final: '',
+  dedicacion: '',
 };
 
 const TABLE_COLUMNS: { key: keyof Docente; label: string; width?: string; type?: string; visible: boolean }[] = [
   { key: 'id', label: 'ID', width: 'min-w-[70px]', visible: true },
   { key: 'primer_nombre', label: 'Nombre Completo', width: 'min-w-[220px]', visible: true },
   { key: 'doc_id', label: 'Doc ID', width: 'min-w-[130px]', visible: true },
+  { key: 'dedicacion', label: 'Dedicación', width: 'min-w-[160px]', visible: true },
   { key: 'campus', label: 'Campus', width: 'min-w-[120px]', visible: true },
   { key: 'ciudad', label: 'Ciudad', width: 'min-w-[130px]', visible: true },
   { key: 'telefono', label: 'Telefono', width: 'min-w-[140px]', visible: true },
@@ -65,7 +68,16 @@ const TABLE_COLUMNS: { key: keyof Docente; label: string; width?: string; type?:
   { key: 'fecha_final', label: 'Fecha Final', width: 'min-w-[130px]', type: 'date', visible: true },
 ];
 
-const EDITABLE_FIELDS: (keyof Docente)[] = ['campus', 'ciudad', 'telefono', 'correo', 'fecha_inicio', 'fecha_final', 'doc_id'];
+const EDITABLE_FIELDS: (keyof Docente)[] = ['dedicacion', 'campus', 'ciudad', 'telefono', 'correo', 'fecha_inicio', 'fecha_final', 'doc_id'];
+
+const DEDICACION_OPTIONS = [
+  'Tiempo Completo',
+  'Medio Tiempo',
+  'Catedrático',
+  'Hora Cátedra',
+  'Profesor Investigador',
+  'Coordinador',
+];
 
 const FORM_FIELDS: { key: keyof Omit<Docente, 'id'>; label: string; type?: string; required?: boolean }[] = [
   { key: 'primer_nombre', label: 'Primer Nombre', required: true },
@@ -103,7 +115,8 @@ export default function DocentesPage() {
   const [error, setError] = useState('');
 
   const [search, setSearch] = useState('');
-  const [filterCampus, setFilterCampus] = useState('');
+  const [filterCampus, setFilterCampus] = useState<string[]>([]);
+  const [filterDedicacion, setFilterDedicacion] = useState<string[]>([]);
   const [campusList, setCampusList] = useState<string[]>([]);
 
   const [editingCell, setEditingCell] = useState<EditingCell>(null);
@@ -124,7 +137,8 @@ export default function DocentesPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.set('search', search);
-      if (filterCampus) params.set('campus', filterCampus);
+      if (filterCampus.length) params.set('campus', filterCampus.join(','));
+      if (filterDedicacion.length) params.set('dedicacion', filterDedicacion.join(','));
       params.set('page', String(page));
       params.set('limit', '50');
 
@@ -145,7 +159,7 @@ export default function DocentesPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, filterCampus]);
+  }, [search, filterCampus, filterDedicacion]);
 
   useEffect(() => { fetchData(1); }, [fetchData]);
 
@@ -232,6 +246,23 @@ export default function DocentesPage() {
     const value = row[col.key];
 
     if (isEditing) {
+      if (col.key === 'dedicacion') {
+        return (
+          <select
+            autoFocus
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={saveEdit}
+            onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditingCell(null); }}
+            className="w-full px-2 py-1 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unisinu-600 bg-white text-zinc-900"
+          >
+            <option value="">(Sin asignar)</option>
+            {DEDICACION_OPTIONS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+        );
+      }
       return (
         <input
           ref={editRef}
@@ -240,7 +271,7 @@ export default function DocentesPage() {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={saveEdit}
           onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditingCell(null); }}
-          className="w-full px-2 py-1 text-sm border border-indigo-400 rounded-md focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent bg-white text-zinc-900 transition-colors"
+          className="w-full px-2 py-1 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent bg-white text-zinc-900 transition-colors"
         />
       );
     }
@@ -293,7 +324,7 @@ export default function DocentesPage() {
 
       {/* Search & Filters */}
       <div className="rounded-xl ring-1 ring-zinc-950/5 bg-white p-4 mb-6 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="sm:col-span-2">
             <div className="relative">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -309,16 +340,22 @@ export default function DocentesPage() {
             </div>
           </div>
           <div>
-            <select
+            <MultiSelect
               value={filterCampus}
-              onChange={(e) => setFilterCampus(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent transition-colors"
-            >
-              <option value="">Todos los campus</option>
-              {campusList.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+              onChange={setFilterCampus}
+              options={campusList.map((c) => ({ value: c, label: c }))}
+              placeholder="Todos los campus"
+              searchPlaceholder="Buscar campus..."
+            />
+          </div>
+          <div>
+            <MultiSelect
+              value={filterDedicacion}
+              onChange={setFilterDedicacion}
+              options={DEDICACION_OPTIONS.map((d) => ({ value: d, label: d }))}
+              placeholder="Todas las dedicaciones"
+              searchPlaceholder="Buscar dedicación..."
+            />
           </div>
         </div>
       </div>

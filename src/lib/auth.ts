@@ -31,3 +31,14 @@ export function hashPassword(password: string): string {
 export function comparePassword(password: string, hash: string): boolean {
   return compareSync(password, hash);
 }
+
+/** Role helpers — single source of truth for what each role can do. */
+export type Rol = 'admin' | 'editor' | 'viewer';
+
+export function canEdit(rol: string | undefined): boolean {
+  return rol === 'admin' || rol === 'editor';
+}
+
+export function canManageUsers(rol: string | undefined): boolean {
+  return rol === 'admin';
+}

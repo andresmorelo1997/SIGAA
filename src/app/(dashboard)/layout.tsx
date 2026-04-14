@@ -194,7 +194,14 @@ export default function DashboardLayout({
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
-        {navSections.map((section) => (
+        {navSections.map((section) => {
+          // Filter "Usuarios" entry — visible only to admins.
+          const items = section.items.filter((it) => {
+            if (it.href === '/usuarios') return user?.rol === 'admin';
+            return true;
+          });
+          if (items.length === 0) return null;
+          return (
           <div key={section.title || "_root"}>
             {section.title && (
               <div className="mb-2 px-3 flex items-center gap-2">
@@ -205,7 +212,7 @@ export default function DashboardLayout({
               </div>
             )}
             <ul role="list" className="space-y-0.5">
-              {section.items.map((item) => {
+              {items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
                 return (
@@ -241,7 +248,8 @@ export default function DashboardLayout({
               })}
             </ul>
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* User footer */}

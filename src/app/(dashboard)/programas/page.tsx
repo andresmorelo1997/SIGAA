@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, FormEvent } from 'react';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, MultiSelect } from '@/components/ui';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -70,9 +70,9 @@ export default function ProgramasPage() {
   const [error, setError] = useState('');
 
   const [search, setSearch] = useState('');
-  const [filterGrado, setFilterGrado] = useState('');
-  const [filterModalidad, setFilterModalidad] = useState('');
-  const [filterEstado, setFilterEstado] = useState('');
+  const [filterGrado, setFilterGrado] = useState<string[]>([]);
+  const [filterModalidad, setFilterModalidad] = useState<string[]>([]);
+  const [filterEstado, setFilterEstado] = useState<string[]>([]);
 
   const [editingCell, setEditingCell] = useState<EditingCell>(null);
   const [editValue, setEditValue] = useState('');
@@ -92,9 +92,9 @@ export default function ProgramasPage() {
     try {
       const params = new URLSearchParams({ page: String(page), limit: '20' });
       if (search) params.set('search', search);
-      if (filterGrado) params.set('grado', filterGrado);
-      if (filterModalidad) params.set('modalidad', filterModalidad);
-      if (filterEstado) params.set('estado', filterEstado);
+      if (filterGrado.length) params.set('grado', filterGrado.join(','));
+      if (filterModalidad.length) params.set('modalidad', filterModalidad.join(','));
+      if (filterEstado.length) params.set('estado', filterEstado.join(','));
 
       const res = await fetch(`/api/programas?${params}`);
       if (!res.ok) throw new Error('Error al cargar programas');
@@ -314,28 +314,19 @@ export default function ProgramasPage() {
               <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={"Nombre, c\u00f3digo, SNIES..."} className="w-full pl-10 pr-4 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
             </div>
           </div>
-          <div className="min-w-[150px]">
+          <div className="min-w-[170px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Grado</label>
-            <select value={filterGrado} onChange={(e) => setFilterGrado(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
-              <option value="">Todos</option>
-              {GRADO_OPTIONS.map((g) => (<option key={g} value={g}>{g}</option>))}
-            </select>
+            <MultiSelect value={filterGrado} onChange={setFilterGrado} options={GRADO_OPTIONS.map((g) => ({ value: g, label: g }))} placeholder="Todos" searchPlaceholder="Buscar grado..." />
           </div>
-          <div className="min-w-[140px]">
+          <div className="min-w-[180px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Modalidad</label>
-            <select value={filterModalidad} onChange={(e) => setFilterModalidad(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
-              <option value="">Todas</option>
-              {MODALIDAD_OPTIONS.map((m) => (<option key={m} value={m}>{m}</option>))}
-            </select>
+            <MultiSelect value={filterModalidad} onChange={setFilterModalidad} options={MODALIDAD_OPTIONS.map((m) => ({ value: m, label: m }))} placeholder="Todas" searchPlaceholder="Buscar modalidad..." />
           </div>
-          <div className="min-w-[130px]">
+          <div className="min-w-[160px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Estado</label>
-            <select value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
-              <option value="">Todos</option>
-              {ESTADO_OPTIONS.map((e) => (<option key={e} value={e}>{e === 'en_revision' ? 'En revisi\u00f3n' : e.charAt(0).toUpperCase() + e.slice(1)}</option>))}
-            </select>
+            <MultiSelect value={filterEstado} onChange={setFilterEstado} options={ESTADO_OPTIONS.map((e) => ({ value: e, label: e === 'en_revision' ? 'En revisión' : e.charAt(0).toUpperCase() + e.slice(1) }))} placeholder="Todos" searchPlaceholder="Buscar estado..." />
           </div>
-          <button onClick={() => { setSearch(''); setFilterGrado(''); setFilterModalidad(''); setFilterEstado(''); }} className="px-3 py-2 text-sm text-zinc-600 hover:text-unisinu-700 hover:bg-zinc-100 rounded-lg transition-colors">
+          <button onClick={() => { setSearch(''); setFilterGrado([]); setFilterModalidad([]); setFilterEstado([]); }} className="px-3 py-2 text-sm text-zinc-600 hover:text-unisinu-700 hover:bg-zinc-100 rounded-lg transition-colors self-end">
             Limpiar
           </button>
         </div>

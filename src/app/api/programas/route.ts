@@ -23,19 +23,16 @@ export async function GET(request: NextRequest) {
       params.push(term, term, term, term);
     }
 
-    if (grado) {
-      conditions.push('grado = ?');
-      params.push(grado);
-    }
-
-    if (modalidad) {
-      conditions.push('modalidad = ?');
-      params.push(modalidad);
-    }
-
-    if (estado) {
-      conditions.push('estado = ?');
-      params.push(estado);
+    for (const [name, raw] of [['grado', grado], ['modalidad', modalidad], ['estado', estado]] as const) {
+      if (!raw) continue;
+      const values = String(raw).split(',').map((s) => s.trim()).filter(Boolean);
+      if (values.length === 1) {
+        conditions.push(`${name} = ?`);
+        params.push(values[0]);
+      } else if (values.length > 1) {
+        conditions.push(`${name} IN (${values.map(() => '?').join(',')})`);
+        for (const v of values) params.push(v);
+      }
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

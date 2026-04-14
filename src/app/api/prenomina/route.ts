@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (tipo) {
-      conditions.push('tipo = ?');
+      // Frontend sends lowercase; DB stores uppercase (PREGRADO/POSGRADO).
+      conditions.push('UPPER(tipo) = UPPER(?)');
       params.push(tipo);
     }
 

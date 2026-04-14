@@ -228,11 +228,15 @@ export default function PrenominaPage() {
         if (json.periodos && json.periodos.length > 0 && !periodo) {
           setPeriodo(json.periodos[0].value);
         }
-        // Auto-select first ciclo if none selected or current value not in list
+        // Auto-select a ciclo whose tier matches the active tab (PREGRADO/POSGRADO).
         if (json.ciclos && json.ciclos.length > 0) {
           const cicloValues = json.ciclos.map((c: { value: string }) => c.value);
           if (!ciclo || !cicloValues.includes(ciclo)) {
-            setCiclo(json.ciclos[0].value);
+            const wanted = tipo === 'PREGRADO' ? 'pregrado' : 'posgrado';
+            const match = json.ciclos.find(
+              (c: { value: string; tier?: string }) => c.tier === wanted,
+            );
+            setCiclo((match ?? json.ciclos[0]).value);
           }
         }
       } catch {
@@ -285,6 +289,23 @@ export default function PrenominaPage() {
     setPage(1);
     setExpandedDocente(null);
   }, [tipo, periodo, ciclo, campus, dedicacion, search]);
+
+  // When switching PREGRADO/POSGRADO tab, re-align the active ciclo to the
+  // matching tier so the view always has the right dataset.
+  useEffect(() => {
+    if (cicloOptions.length === 0) return;
+    const wanted = tipo === 'PREGRADO' ? 'pregrado' : 'posgrado';
+    const current = cicloOptions.find(
+      (c) => c.value === ciclo,
+    ) as { value: string; tier?: string } | undefined;
+    if (current && current.tier && current.tier !== wanted && current.tier !== 'both') {
+      const match = cicloOptions.find(
+        (c) => (c as { tier?: string }).tier === wanted,
+      );
+      if (match) setCiclo(match.value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tipo, cicloOptions]);
 
   /* ---- Paginated consolidado ---- */
   const totalDocentes = consolidado.length;
