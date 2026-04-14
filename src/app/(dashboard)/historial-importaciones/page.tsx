@@ -17,6 +17,9 @@ import {
   StatCard,
   EmptyState,
   Modal,
+  FileDropzone,
+  ToastContainer,
+  useToast,
 } from '@/components/ui';
 
 /* ------------------------------------------------------------------ */
@@ -124,6 +127,56 @@ export default function HistorialImportacionesPage() {
   const [deleteTarget, setDeleteTarget] = useState<ImportRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  /* ---- Import state ---- */
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [importing, setImporting] = useState(false);
+  const { toasts, addToast, removeToast } = useToast();
+
+  /* ---- Import handler ---- */
+  async function handleImport() {
+    if (pendingFiles.length === 0) {
+      addToast('error', 'Selecciona al menos un archivo');
+      return;
+    }
+    setImporting(true);
+    let okCount = 0;
+    let failCount = 0;
+    for (const file of pendingFiles) {
+      if (!/\.(xlsx|xls)$/i.test(file.name)) {
+        addToast('error', `${file.name}: solo Excel (.xlsx, .xls)`);
+        failCount++;
+        continue;
+      }
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/carga-academica/import', {
+          method: 'POST',
+          body: fd,
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Error');
+        addToast(
+          'success',
+          `${file.name}: ${json.message || 'Importado'}`,
+        );
+        okCount++;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Error';
+        addToast('error', `${file.name}: ${msg}`);
+        failCount++;
+      }
+    }
+    setImporting(false);
+    setPendingFiles([]);
+    setShowImportModal(false);
+    if (okCount > 0) {
+      addToast('info', `${okCount} archivo(s) importado(s), ${failCount} con error(es)`);
+      fetchData(1);
+    }
+  }
+
   /* ---- fetch ---- */
   const fetchData = useCallback(
     async (page = 1, limit = pagination.limit) => {
@@ -221,13 +274,27 @@ export default function HistorialImportacionesPage() {
   return (
     <div className="p-6 max-w-full">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
-          Historial de Importaciones
-        </h1>
-        <p className="text-sm text-zinc-600 mt-1">
-          Registro de todos los archivos importados al sistema
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
+            Historial de Importaciones
+          </h1>
+          <p className="text-sm text-zinc-600 mt-1">
+            Registro de todos los archivos importados al sistema
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            setPendingFiles([]);
+            setShowImportModal(true);
+          }}
+          variant="primary"
+        >
+          <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+          </svg>
+          Importar Archivo
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -595,6 +662,61 @@ export default function HistorialImportacionesPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Import Modal */}
+      <Modal
+        open={showImportModal}
+        onClose={() => {
+          if (!importing) {
+            setShowImportModal(false);
+            setPendingFiles([]);
+          }
+        }}
+        title="Importar Archivo Excel"
+        size="md"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setShowImportModal(false);
+                setPendingFiles([]);
+              }}
+              disabled={importing}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleImport}
+              loading={importing}
+              disabled={pendingFiles.length === 0}
+            >
+              Importar {pendingFiles.length > 0 ? `(${pendingFiles.length})` : ''}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-zinc-600">
+            El sistema detecta automáticamente el tipo de archivo:
+            US_PROG_CLASES, LC_PROGRAMACION_CLASES, US_DATOS_DOCENTES o DOCENTES_IES.
+          </p>
+          <FileDropzone
+            onFiles={setPendingFiles}
+            accept=".xlsx,.xls"
+            multiple
+            maxSize={25 * 1024 * 1024}
+            label="Arrastrá los archivos Excel o hacé clic para seleccionar"
+            description="Se pueden importar varios archivos a la vez"
+            disabled={importing}
+          />
+        </div>
+      </Modal>
+
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

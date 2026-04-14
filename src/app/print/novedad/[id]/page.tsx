@@ -134,59 +134,26 @@ export default function PrintNovedadPage({ params }: { params: Promise<{ id: str
    * a browser download. The PDF preserves the on-screen layout exactly.
    */
   async function handleDownloadPDF() {
-    if (!pageRef.current || !novedad) return;
+    if (!novedad) return;
     setDownloading(true);
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import('html2canvas'),
-        import('jspdf'),
-      ]);
-
-      const canvas = await html2canvas(pageRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
-
-      // A4 landscape: 297mm × 210mm
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 6;
-      const imgW = pageW - margin * 2;
-      const imgH = (canvas.height * imgW) / canvas.width;
-
-      const imgData = canvas.toDataURL('image/png');
-
-      if (imgH <= pageH - margin * 2) {
-        // Single page
-        pdf.addImage(imgData, 'PNG', margin, margin, imgW, imgH, undefined, 'FAST');
-      } else {
-        // Multi-page slicing
-        const pageContentH = pageH - margin * 2;
-        const sliceH = (pageContentH * canvas.width) / imgW;
-        let y = 0;
-        let pageIdx = 0;
-        while (y < canvas.height) {
-          const sliceCanvas = document.createElement('canvas');
-          sliceCanvas.width = canvas.width;
-          sliceCanvas.height = Math.min(sliceH, canvas.height - y);
-          const ctx = sliceCanvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(canvas, 0, y, canvas.width, sliceCanvas.height, 0, 0, canvas.width, sliceCanvas.height);
-            const sliceData = sliceCanvas.toDataURL('image/png');
-            const sliceImgH = (sliceCanvas.height * imgW) / canvas.width;
-            if (pageIdx > 0) pdf.addPage('a4', 'landscape');
-            pdf.addImage(sliceData, 'PNG', margin, margin, imgW, sliceImgH, undefined, 'FAST');
-          }
-          y += sliceH;
-          pageIdx++;
-        }
+      // Use server-side PDF generation via Playwright-rendered Chromium.
+      // This avoids html2canvas failures with Tailwind v4 OKLCH colors and
+      // produces a pixel-accurate PDF every time.
+      const res = await fetch(`/api/print/novedad/${novedad.id}`);
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({ error: 'Error generando PDF' }));
+        throw new Error(errJson.error || `HTTP ${res.status}`);
       }
-
-      const filename = `Novedad_F-GC-002_${novedad.id}_${(novedad.docente_sale || 'docente').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30)}.pdf`;
-      pdf.save(filename);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Novedad_F-GC-002_${novedad.id}_${(novedad.docente_sale || 'docente').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error generating PDF:', err);
       alert('Error al generar el PDF: ' + (err as Error).message);

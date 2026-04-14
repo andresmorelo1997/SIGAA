@@ -56,6 +56,23 @@ export async function GET(request: NextRequest) {
       )
       .all(...params, limit, offset);
 
+    // Aggregate stats (not filtered — always global for the dashboard header)
+    const statsRow = db
+      .prepare(
+        `SELECT
+           COUNT(*) as total_imports,
+           COALESCE(SUM(records_inserted), 0) + COALESCE(SUM(records_updated), 0) as total_records,
+           MAX(created_at) as last_import,
+           SUM(CASE WHEN status = 'failed' OR status = 'error' THEN 1 ELSE 0 END) as total_errors
+         FROM import_history`
+      )
+      .get() as {
+        total_imports: number;
+        total_records: number;
+        last_import: string | null;
+        total_errors: number;
+      };
+
     return Response.json({
       data: rows,
       pagination: {
@@ -63,6 +80,12 @@ export async function GET(request: NextRequest) {
         limit,
         total: countRow.total,
         totalPages: Math.ceil(countRow.total / limit),
+      },
+      stats: {
+        total_imports: statsRow.total_imports ?? 0,
+        total_records: statsRow.total_records ?? 0,
+        last_import: statsRow.last_import,
+        total_errors: statsRow.total_errors ?? 0,
       },
     });
   } catch (error) {

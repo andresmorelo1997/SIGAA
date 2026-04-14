@@ -874,9 +874,26 @@ function processFile(file: { name: string; buffer: Buffer; size: number }): File
         throw new Error(`No se encontraron hojas reconocibles en "${file.name}". Hojas: ${workbook.SheetNames.join(', ')}`);
       }
 
+      // Derive campus for MIXED imports
+      const mixedCampusSet = new Set<string>();
+      for (const tbl of ['carga_academica', 'docentes', 'plan_estudios']) {
+        try {
+          const rows = db
+            .prepare(
+              `SELECT DISTINCT campus FROM ${tbl}
+               WHERE import_id = ? AND campus IS NOT NULL AND campus != ''`,
+            )
+            .all(importId) as { campus: string }[];
+          for (const r of rows) if (r.campus) mixedCampusSet.add(r.campus);
+        } catch {
+          /* skip */
+        }
+      }
+      const mixedCampus = Array.from(mixedCampusSet).sort().join(',');
+
       // Skip the rest of the if/else chain
       updateImportRecord(importId, {
-        fileType: 'MIXED', cicloLectivo, grado: '', campus: '',
+        fileType: 'MIXED', cicloLectivo, grado: '', campus: mixedCampus,
         inserted: totalInserted, updated: totalUpdated, skipped: 0,
         tablesAffected: tablesAffected.join(', '), status: 'completed',
       });
@@ -1174,12 +1191,37 @@ function processFile(file: { name: string; buffer: Buffer; size: number }): File
       };
     }
 
+    // Derive campus from imported rows if metadata doesn't have it.
+    // Query DISTINCT campus values across tables actually touched by this import.
+    function deriveCampusFromImport(): string {
+      if (metadata?.campus) return metadata.campus;
+      const tryTables = ['carga_academica', 'docentes', 'plan_estudios'];
+      const found = new Set<string>();
+      for (const tbl of tryTables) {
+        try {
+          const rows = db
+            .prepare(
+              `SELECT DISTINCT campus FROM ${tbl}
+               WHERE import_id = ? AND campus IS NOT NULL AND campus != ''`,
+            )
+            .all(importId) as { campus: string }[];
+          for (const r of rows) if (r.campus) found.add(r.campus);
+        } catch {
+          /* table may not have campus or import_id — skip */
+        }
+      }
+      const arr = Array.from(found);
+      if (arr.length === 0) return '';
+      if (arr.length === 1) return arr[0];
+      return arr.sort().join(',');
+    }
+
     // Update import history with success
     updateImportRecord(importId, {
       fileType,
       cicloLectivo: metadata?.cicloLectivo ?? resolveCicloLectivo(),
       grado: metadata?.grado,
-      campus: metadata?.campus,
+      campus: deriveCampusFromImport(),
       inserted: totalInserted,
       updated: totalUpdated,
       skipped: 0,

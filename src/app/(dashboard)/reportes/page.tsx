@@ -351,15 +351,30 @@ export default function ReportesPage() {
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
 
+  /* ---- Dynamic campus options from API ---- */
+  const [campusList, setCampusList] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    async function fetchCampus() {
+      try {
+        const res = await fetch('/api/ciclos');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (Array.isArray(json.campus)) setCampusList(json.campus);
+      } catch {
+        /* silent */
+      }
+    }
+    fetchCampus();
+  }, []);
+
   const currentConfig = TAB_CONFIGS.find((t) => t.id === activeTab)!;
   const currentTabFilters = tabFilters[activeTab] ?? {};
 
-  /* ---- Campus options ---- */
+  /* ---- Campus options (real, from DB) ---- */
   const CAMPUS_OPTIONS = [
     { value: '', label: 'Todos los campus' },
-    { value: 'PRINCIPAL', label: 'Principal' },
-    { value: 'NORTE', label: 'Norte' },
-    { value: 'SUR', label: 'Sur' },
+    ...campusList,
   ];
 
   /* ---- build query params ---- */
