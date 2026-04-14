@@ -137,6 +137,57 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Asignaturas programadas con catalogos que NO aparecen en el plan del
+    // programa. Útil para detectar programaciones "huérfanas".
+    // Heurística: buscar en carga_academica catalogos que empiecen con el
+    // mismo prefijo que los del plan (por ejemplo si el plan tiene 100EDEM…
+    // consideramos catalogos con 100E… como posiblemente del mismo programa).
+    const planCatalogos = new Set(planEntries.map((e) => e.catalogo));
+    const planPrefixes = new Set(
+      planEntries
+        .map((e) => (e.catalogo || '').slice(0, 4))
+        .filter((p) => p.length >= 4),
+    );
+
+    let programadasNoEnPlan: Array<{
+      catalogo: string;
+      descripcion: string | null;
+      nombre_instructor: string | null;
+      hrs_semestre: number | null;
+      ciclo_lectivo: string | null;
+    }> = [];
+
+    if (planPrefixes.size > 0) {
+      const prefixConds = Array.from(planPrefixes)
+        .map(() => 'catalogo LIKE ?')
+        .join(' OR ');
+      const prefixParams = Array.from(planPrefixes).map((p) => `${p}%`);
+
+      let orphanQuery = `
+        SELECT DISTINCT catalogo, descripcion, nombre_instructor, hrs_semestre, ciclo_lectivo
+        FROM carga_academica
+        WHERE (${prefixConds})
+      `;
+      const orphanParams: (string | number)[] = [...prefixParams];
+      if (cicloLectivo) {
+        orphanQuery += ` AND ciclo_lectivo = ?`;
+        orphanParams.push(cicloLectivo);
+      }
+      orphanQuery += ` ORDER BY catalogo LIMIT 500`;
+
+      const candidates = db
+        .prepare(orphanQuery)
+        .all(...orphanParams) as Array<{
+          catalogo: string;
+          descripcion: string | null;
+          nombre_instructor: string | null;
+          hrs_semestre: number | null;
+          ciclo_lectivo: string | null;
+        }>;
+
+      programadasNoEnPlan = candidates.filter((c) => !planCatalogos.has(c.catalogo));
+    }
+
     return Response.json({
       programa,
       plan_entries: planEntries,
@@ -146,8 +197,10 @@ export async function GET(request: NextRequest) {
         sin_carga: sinCarga,
         con_diferencia_horas: conDiferenciaHoras,
         docentes_asignados: docenteSet.size,
+        programadas_fuera_del_plan: programadasNoEnPlan.length,
       },
       detalle,
+      programadas_no_en_plan: programadasNoEnPlan,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Error desconocido';

@@ -73,7 +73,6 @@ const navSections: NavSection[] = [
       { label: "Docentes", href: "/docentes", icon: UserGroupIcon },
       { label: "Programas", href: "/programas", icon: Squares2X2Icon },
       { label: "Plan de Estudios", href: "/plan-estudios", icon: BookOpenIcon },
-      { label: "Profesores x Asig.", href: "/profesores-asignatura", icon: UsersIcon },
       { label: "Escalafón", href: "/escalafon", icon: ChartBarIcon },
     ],
   },

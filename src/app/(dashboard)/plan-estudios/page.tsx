@@ -49,6 +49,15 @@ interface ValidacionResumen {
   sin_carga: number;
   con_diferencia_horas: number;
   docentes_asignados: number;
+  programadas_fuera_del_plan?: number;
+}
+
+interface ProgramadaNoEnPlan {
+  catalogo: string;
+  descripcion: string | null;
+  nombre_instructor: string | null;
+  hrs_semestre: number | null;
+  ciclo_lectivo: string | null;
 }
 
 interface ValidacionData {
@@ -56,6 +65,7 @@ interface ValidacionData {
   plan_entries: PlanEstudio[];
   resumen: ValidacionResumen;
   detalle: ValidacionDetalle[];
+  programadas_no_en_plan?: ProgramadaNoEnPlan[];
 }
 
 type EditingCell = { id: number; field: keyof PlanEstudio } | null;
@@ -854,6 +864,50 @@ export default function PlanEstudiosPage() {
                   </div>
                 )}
               </div>
+
+              {/* Sección: Programadas fuera del plan */}
+              {validacionData.programadas_no_en_plan &&
+               validacionData.programadas_no_en_plan.length > 0 && (
+                <div className="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden mt-6">
+                  <div className="px-6 py-4 bg-amber-50 border-b border-amber-200">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                      </svg>
+                      <h3 className="text-base font-semibold text-amber-900">
+                        Programadas fuera del plan ({validacionData.programadas_no_en_plan.length})
+                      </h3>
+                    </div>
+                    <p className="text-xs text-amber-800 mt-1">
+                      Estas asignaturas están programadas en carga académica con catálogo similar al del programa, pero no aparecen en el plan de estudios.
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-zinc-50 border-b border-zinc-200">
+                        <tr>
+                          <th className="px-4 py-2.5 text-left text-xs font-semibold text-zinc-700 uppercase tracking-wider">Catálogo</th>
+                          <th className="px-4 py-2.5 text-left text-xs font-semibold text-zinc-700 uppercase tracking-wider">Descripción</th>
+                          <th className="px-4 py-2.5 text-left text-xs font-semibold text-zinc-700 uppercase tracking-wider">Docente</th>
+                          <th className="px-4 py-2.5 text-right text-xs font-semibold text-zinc-700 uppercase tracking-wider">Hrs Sem</th>
+                          <th className="px-4 py-2.5 text-left text-xs font-semibold text-zinc-700 uppercase tracking-wider">Ciclo</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100">
+                        {validacionData.programadas_no_en_plan.map((row, i) => (
+                          <tr key={i} className="hover:bg-amber-50/30">
+                            <td className="px-4 py-2 font-mono text-xs text-zinc-900">{row.catalogo}</td>
+                            <td className="px-4 py-2 text-zinc-700">{row.descripcion || '-'}</td>
+                            <td className="px-4 py-2 text-zinc-600">{row.nombre_instructor || '-'}</td>
+                            <td className="px-4 py-2 text-right text-zinc-900 tabular-nums">{row.hrs_semestre ?? '-'}</td>
+                            <td className="px-4 py-2 text-zinc-600">{row.ciclo_lectivo || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-zinc-200 shadow-sm flex flex-col items-center justify-center py-20 text-zinc-400">

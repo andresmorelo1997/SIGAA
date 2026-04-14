@@ -455,6 +455,33 @@ export default function ReportesPage() {
     }
   }
 
+  async function handleExportPdf() {
+    setExporting(true);
+    try {
+      // Reuse buildParams but strip the Excel "export" flag; the PDF endpoint
+      // ignores pagination anyway.
+      const params = buildParams(1, pagination.limit, false);
+      const res = await fetch(`/api/reportes/pdf?${params}`);
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Error al exportar PDF');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte-${activeTab}-${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al exportar PDF');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   /* ---- filter helpers ---- */
   function updateGlobalFilter<K extends keyof GlobalFilters>(
     key: K,
@@ -579,8 +606,8 @@ export default function ReportesPage() {
               </div>
             </div>
 
-            {/* Export Button in Tab Bar */}
-            <div className="ml-4 shrink-0 border-l border-zinc-200 pl-4">
+            {/* Export Buttons in Tab Bar */}
+            <div className="ml-4 shrink-0 border-l border-zinc-200 pl-4 flex items-center gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -592,7 +619,20 @@ export default function ReportesPage() {
                   </svg>
                 }
               >
-                Exportar
+                Excel
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={exporting}
+                onClick={handleExportPdf}
+                icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                }
+              >
+                PDF
               </Button>
             </div>
           </div>
@@ -674,7 +714,7 @@ export default function ReportesPage() {
           ) : (
             <>
               {/* Table Wrapper */}
-              <div className="rounded-xl ring-1 ring-zinc-950/5 overflow-x-auto bg-white">
+              <div className="rounded-xl ring-1 ring-zinc-950/5 overflow-x-auto scroll-x-stable bg-white">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-zinc-50">
@@ -747,6 +787,42 @@ export default function ReportesPage() {
                         })}
                       </TableRow>
                     ))}
+                    {/* Row of totals: sum numeric columns across visible rows */}
+                    {data.length > 0 && (() => {
+                      const totals: Record<string, number | null> = {};
+                      for (const col of currentConfig.columns) {
+                        let sum = 0;
+                        let hasNum = false;
+                        for (const r of data) {
+                          const v = (r as Record<string, unknown>)[col.key];
+                          if (typeof v === 'number' && isFinite(v)) {
+                            sum += v;
+                            hasNum = true;
+                          }
+                        }
+                        totals[col.key] = hasNum ? sum : null;
+                      }
+                      const anyTotal = Object.values(totals).some((v) => v !== null);
+                      if (!anyTotal) return null;
+                      return (
+                        <TableRow className="bg-amber-50 border-t-2 border-amber-400 font-semibold">
+                          {currentConfig.columns.map((col, idx) => (
+                            <TableCell
+                              key={col.key}
+                              className={`text-sm text-zinc-900 ${
+                                col.align === 'right' ? 'text-right tabular-nums' : ''
+                              }`}
+                            >
+                              {idx === 0
+                                ? `Total (${data.length.toLocaleString('es-CO')})`
+                                : totals[col.key] !== null
+                                  ? (totals[col.key] as number).toLocaleString('es-CO')
+                                  : ''}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      );
+                    })()}
                   </TableBody>
                 </Table>
               </div>
