@@ -4,8 +4,25 @@
   --color-background: #fafafa;
   --color-foreground: #09090b;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
+
+  /* ──────────────────────────────────────────────────────────────
+     Universidad del Sinú — identidad institucional (paleta oficial)
+     Rojo corporativo + neutros. Usar `unisinu-*` en lugar de colores
+     genéricos tipo `indigo-*` o `purple-*` para mantener consistencia.
+     ────────────────────────────────────────────────────────────── */
+  --color-unisinu-50:  #FDEEF0;
+  --color-unisinu-100: #FBD8DC;
+  --color-unisinu-200: #F4B2BA;
+  --color-unisinu-300: #EC8894;
+  --color-unisinu-400: #D3546A;
+  --color-unisinu-500: #B82B48;
+  --color-unisinu-600: #A6192E;
+  --color-unisinu-700: #8B1328;
+  --color-unisinu-800: #7F1122;
+  --color-unisinu-900: #5F0E1B;
+
+  --color-primary: #A6192E;
+  --color-primary-hover: #7F1122;
 }
 
 /* Base styles */

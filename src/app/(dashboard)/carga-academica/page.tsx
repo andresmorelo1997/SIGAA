@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { PageHeader } from '@/components/ui/page-header';
 import { Pagination } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
@@ -835,37 +836,40 @@ export default function CargaAcademicaPage() {
         />
       )}
 
-      {/* ---------------------------------------------------------- */}
-      {/*  Header bar: title + import/export buttons                  */}
-      {/* ---------------------------------------------------------- */}
-      <div className="flex items-center justify-between gap-4 flex-shrink-0">
-        <h1 className="text-xl font-bold text-zinc-950 dark:text-white">
-          {"Carga Acad\u00e9mica"}
-        </h1>
-        <div className="flex items-center gap-2">
-          {/* Import button */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={importing}
-            onClick={() => fileInputRef.current?.click()}
-            icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-            }
-          >
-            Importar
-          </Button>
+      {/* Page Header */}
+      <PageHeader
+        title="Carga Académica"
+        description={`${pagination.total.toLocaleString('es-CO')} clases programadas · gestión de programación académica`}
+        color="primary"
+        icon={
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+          </svg>
+        }
+        actions={
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={importing}
+              onClick={() => fileInputRef.current?.click()}
+              icon={
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              }
+            >
+              Importar
+            </Button>
 
           {/* Export dropdown */}
           <div className="relative">
@@ -903,13 +907,14 @@ export default function CargaAcademicaPage() {
               </>
             )}
           </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ---------------------------------------------------------- */}
       {/*  Filter bar                                                 */}
       {/* ---------------------------------------------------------- */}
-      <div className="flex flex-wrap items-end gap-2 flex-shrink-0">
+      <div className="flex flex-wrap items-end gap-2 flex-shrink-0 mb-4">
         {/* Search */}
         <div className="flex-1 min-w-[200px] max-w-sm">
           <Input

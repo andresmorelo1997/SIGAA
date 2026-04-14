@@ -454,7 +454,7 @@ export default function PrenominaPage() {
                 onClick={() => setTipo(tab.id as 'PREGRADO' | 'POSGRADO')}
                 className={`px-4 py-3 text-sm font-semibold transition-all ${
                   tipo === tab.id
-                    ? 'text-indigo-600 border-b-2 border-indigo-600 -mb-px'
+                    ? 'text-unisinu-700 border-b-2 border-indigo-600 -mb-px'
                     : 'text-zinc-600 hover:text-zinc-950'
                 }`}
               >
@@ -470,7 +470,7 @@ export default function PrenominaPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           {/* Emitir Corte Dropdown */}
           <div className="relative group">
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors">
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-unisinu-600 hover:bg-unisinu-700 text-white text-sm font-semibold rounded-lg transition-colors">
               <LockIcon />
               Emitir Corte
               <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -496,7 +496,7 @@ export default function PrenominaPage() {
                     className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors ${
                       cd.disabled
                         ? 'text-zinc-400 cursor-not-allowed bg-zinc-50'
-                        : 'text-zinc-700 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer'
+                        : 'text-zinc-700 hover:bg-unisinu-50 hover:text-unisinu-800 cursor-pointer'
                     }`}
                   >
                     <span className="font-medium">{formatCorteHeader(cd)}</span>
@@ -652,7 +652,7 @@ export default function PrenominaPage() {
                           {/* ---- Consolidado row (clickable) ---- */}
                           <tr
                             className={`cursor-pointer transition-colors ${
-                              isExpanded ? 'bg-indigo-50' : 'hover:bg-zinc-50'
+                              isExpanded ? 'bg-unisinu-50' : 'hover:bg-zinc-50'
                             }`}
                             onClick={() => toggleDocente(docente.instructor_id)}
                           >
@@ -695,7 +695,7 @@ export default function PrenominaPage() {
                                 {docente.cortes_congelados[i] && <LockIcon />}
                               </td>
                             ))}
-                            <td className="px-3 py-2.5 text-right font-semibold text-indigo-600">{docente.hrs_prenomina}</td>
+                            <td className="px-3 py-2.5 text-right font-semibold text-unisinu-700">{docente.hrs_prenomina}</td>
                             <td
                               className={`px-3 py-2.5 text-right font-semibold ${
                                 docente.saldo < 0 ? 'text-red-600' : docente.saldo > 0 ? 'text-amber-600' : 'text-green-600'
@@ -711,33 +711,33 @@ export default function PrenominaPage() {
                           {isExpanded && (
                             <>
                               {/* Detallado sub-header */}
-                              <tr className="bg-indigo-50 border-y border-indigo-200">
+                              <tr className="bg-unisinu-50 border-y border-unisinu-200">
                                 <td className="px-3 py-2" />
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">{LBL_PROGRAMA}</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">{LBL_CAMPUS}</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">{'\u2116'} Clase</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Catálogo</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide" colSpan={2}>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">{LBL_PROGRAMA}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">{LBL_CAMPUS}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">{'\u2116'} Clase</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">Catálogo</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide" colSpan={2}>
                                   Asignatura
                                 </td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Componente</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide text-right">{LBL_HRS_SEMANA}</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide text-right">{LBL_HRS_SEMESTRE}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">Componente</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide text-right">{LBL_HRS_SEMANA}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide text-right">{LBL_HRS_SEMESTRE}</td>
                                 {cortesInfo.map((ci) => (
-                                  <td key={ci.num} className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide text-right">
+                                  <td key={ci.num} className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide text-right">
                                     {formatCorteHeader(ci)}
                                   </td>
                                 ))}
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide text-right">{LBL_HRS_PRENOMINA}</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">{LBL_FECHA_INICIO}</td>
-                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">{LBL_FECHA_FINAL}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide text-right">{LBL_HRS_PRENOMINA}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">{LBL_FECHA_INICIO}</td>
+                                <td className="px-3 py-2 text-[10px] font-bold text-unisinu-800 uppercase tracking-wide">{LBL_FECHA_FINAL}</td>
                               </tr>
 
                               {/* Each class row */}
                               {docente.clases.map((clase) => {
                                 const claseTotal = clase.cortes.reduce((s, v) => s + v, 0);
                                 return (
-                                  <tr key={clase.num_clase} className="bg-indigo-50/50 hover:bg-indigo-50/80 transition-colors">
+                                  <tr key={clase.num_clase} className="bg-unisinu-50/50 hover:bg-unisinu-50/80 transition-colors">
                                     <td className="px-3 py-1.5" />
                                     <td className="px-3 py-1.5 text-zinc-600 max-w-[160px] truncate" title={clase.programa}>
                                       {clase.programa || '-'}
@@ -761,7 +761,7 @@ export default function PrenominaPage() {
                                       {c}
                                     </td>
                                   ))}
-                                    <td className="px-3 py-1.5 text-right font-medium text-indigo-600">
+                                    <td className="px-3 py-1.5 text-right font-medium text-unisinu-700">
                                       {Math.round(claseTotal * 100) / 100}
                                     </td>
                                     <td className="px-3 py-1.5 text-zinc-600 whitespace-nowrap">{formatDate(clase.fecha_inicial)}</td>
@@ -771,19 +771,19 @@ export default function PrenominaPage() {
                               })}
 
                               {/* Total row for this docente */}
-                              <tr className="bg-indigo-100 border-y-2 border-indigo-300">
+                              <tr className="bg-unisinu-100 border-y-2 border-indigo-300">
                                 <td className="px-3 py-2.5" />
-                                <td colSpan={7} className="px-3 py-2.5 font-bold text-indigo-900 text-right">
+                                <td colSpan={7} className="px-3 py-2.5 font-bold text-unisinu-900 text-right">
                                   Total {docente.nombre} ({docente.clases.length} clases)
                                 </td>
-                                <td className="px-3 py-2.5 text-right font-bold text-indigo-900">{docente.hrs_semana}</td>
-                                <td className="px-3 py-2.5 text-right font-bold text-indigo-900">{docente.hrs_semestre}</td>
+                                <td className="px-3 py-2.5 text-right font-bold text-unisinu-900">{docente.hrs_semana}</td>
+                                <td className="px-3 py-2.5 text-right font-bold text-unisinu-900">{docente.hrs_semestre}</td>
                                 {docente.cortes.map((c, i) => (
-                                  <td key={i} className="px-3 py-2.5 text-right font-bold text-indigo-900">
+                                  <td key={i} className="px-3 py-2.5 text-right font-bold text-unisinu-900">
                                     {c}
                                   </td>
                                 ))}
-                                <td className="px-3 py-2.5 text-right font-bold text-indigo-900">{docente.hrs_prenomina}</td>
+                                <td className="px-3 py-2.5 text-right font-bold text-unisinu-900">{docente.hrs_prenomina}</td>
                                 <td colSpan={2} className="px-3 py-2.5" />
                               </tr>
                           </>

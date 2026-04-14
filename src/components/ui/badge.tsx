@@ -48,7 +48,7 @@ const colorStyles: Record<BadgeColor, string> = {
   green: 'bg-green-500/15 text-green-700 dark:text-green-400',
   emerald: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
   cyan: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400',
-  purple: 'bg-purple-500/15 text-purple-700 dark:text-purple-400',
+  purple: 'bg-unisinu-600/15 text-unisinu-800 dark:text-purple-400',
   pink: 'bg-pink-500/15 text-pink-700 dark:text-pink-400',
 };
 
@@ -61,7 +61,7 @@ const dotColorStyles: Record<BadgeColor, string> = {
   green: 'bg-green-500',
   emerald: 'bg-emerald-500',
   cyan: 'bg-cyan-500',
-  purple: 'bg-purple-500',
+  purple: 'bg-unisinu-600',
   pink: 'bg-pink-500',
 };
 

@@ -209,7 +209,7 @@ export default function CalendarioPage() {
         </div>
         <button
           onClick={openAdd}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-unisinu-600 hover:bg-unisinu-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -234,19 +234,19 @@ export default function CalendarioPage() {
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[150px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">{"Per\u00edodo"}</label>
-            <select value={filterPeriodo} onChange={(e) => setFilterPeriodo(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select value={filterPeriodo} onChange={(e) => setFilterPeriodo(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
               <option value="">Todos</option>
               {periodosList.map((p) => (<option key={p} value={p}>{p}</option>))}
             </select>
           </div>
           <div className="min-w-[150px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Tipo</label>
-            <select value={filterTipo} onChange={(e) => setFilterTipo(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select value={filterTipo} onChange={(e) => setFilterTipo(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
               <option value="">Todos</option>
               {TIPO_OPTIONS.map((t) => (<option key={t} value={t}>{t}</option>))}
             </select>
           </div>
-          <button onClick={() => { setFilterPeriodo(''); setFilterTipo(''); }} className="px-3 py-2 text-sm text-zinc-600 hover:text-indigo-600 hover:bg-zinc-100 rounded-lg transition-colors">
+          <button onClick={() => { setFilterPeriodo(''); setFilterTipo(''); }} className="px-3 py-2 text-sm text-zinc-600 hover:text-unisinu-700 hover:bg-zinc-100 rounded-lg transition-colors">
             Limpiar
           </button>
         </div>
@@ -408,16 +408,16 @@ export default function CalendarioPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Evento <span className="text-red-500">*</span></label>
-                <input type="text" value={formData.evento} onChange={(e) => setFormData({ ...formData, evento: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="text" value={formData.evento} onChange={(e) => setFormData({ ...formData, evento: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">{"Per\u00edodo"} <span className="text-red-500">*</span></label>
-                  <input type="text" value={formData.periodo} onChange={(e) => setFormData({ ...formData, periodo: e.target.value })} required placeholder="2025-1" className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="text" value={formData.periodo} onChange={(e) => setFormData({ ...formData, periodo: e.target.value })} required placeholder="2025-1" className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">Tipo <span className="text-red-500">*</span></label>
-                  <select value={formData.tipo} onChange={(e) => setFormData({ ...formData, tipo: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <select value={formData.tipo} onChange={(e) => setFormData({ ...formData, tipo: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
                     <option value="">Seleccionar...</option>
                     {TIPO_OPTIONS.map((t) => (<option key={t} value={t}>{t}</option>))}
                   </select>
@@ -426,16 +426,16 @@ export default function CalendarioPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">Fecha Inicio <span className="text-red-500">*</span></label>
-                  <input type="date" value={formData.fecha_inicio} onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="date" value={formData.fecha_inicio} onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">Fecha Fin</label>
-                  <input type="date" value={formData.fecha_fin} onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="date" value={formData.fecha_fin} onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">{"Descripci\u00f3n"}</label>
-                <textarea value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} rows={3} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+                <textarea value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} rows={3} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600 resize-none" />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 bg-zinc-100 rounded-lg hover:bg-zinc-200 transition-colors">

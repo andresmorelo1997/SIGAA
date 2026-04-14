@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, FormEvent } from 'react';
 import { formatInstructorId } from '@/lib/format';
+import { PageHeader, Avatar } from '@/components/ui';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -209,12 +210,16 @@ export default function DocentesPage() {
 
   /* ---- render cell ---- */
   function renderCell(row: Docente, col: typeof TABLE_COLUMNS[number]) {
-    // Name column shows concatenated name
+    // Name column shows avatar + concatenated name
     if (col.key === 'primer_nombre') {
+      const name = fullName(row);
       return (
-        <span className="block text-sm font-medium text-zinc-900 truncate" title={fullName(row)}>
-          {fullName(row)}
-        </span>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Avatar name={name} size="sm" />
+          <span className="block text-sm font-semibold text-zinc-900 truncate" title={name}>
+            {name}
+          </span>
+        </div>
       );
     }
 
@@ -235,7 +240,7 @@ export default function DocentesPage() {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={saveEdit}
           onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditingCell(null); }}
-          className="w-full px-2 py-1 text-sm border border-indigo-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white text-zinc-900 transition-colors"
+          className="w-full px-2 py-1 text-sm border border-indigo-400 rounded-md focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent bg-white text-zinc-900 transition-colors"
         />
       );
     }
@@ -251,7 +256,7 @@ export default function DocentesPage() {
     return (
       <span
         onClick={() => isEditable && startEdit(row.id, col.key, value)}
-        className={`block w-full rounded text-sm truncate ${isEditable ? 'cursor-pointer hover:bg-indigo-50 transition-colors px-2 py-1' : ''} ${col.key === 'instructor_id' || col.key === 'doc_id' ? 'font-mono tabular-nums' : ''} text-zinc-900`}
+        className={`block w-full rounded text-sm truncate ${isEditable ? 'cursor-pointer hover:bg-unisinu-50 transition-colors px-2 py-1' : ''} ${col.key === 'instructor_id' || col.key === 'doc_id' ? 'font-mono tabular-nums' : ''} text-zinc-900`}
         title={String(displayValue ?? value ?? '')}
       >
         {displayValue ?? '-'}
@@ -263,23 +268,28 @@ export default function DocentesPage() {
   /*  JSX                                                              */
   /* ================================================================ */
   return (
-    <div className="px-6 py-8 max-w-full bg-zinc-50 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Docentes</h1>
-          <p className="text-sm text-zinc-600 mt-2">Gestión de docentes del sistema</p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 mt-4 sm:mt-0 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-lg transition-colors shadow-sm"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    <div className="max-w-full">
+      <PageHeader
+        title="Docentes"
+        description={`${data.length > 0 ? data.length : ''} docentes registrados en el sistema`}
+        color="primary"
+        icon={
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
           </svg>
-          Nuevo Docente
-        </button>
-      </div>
+        }
+        actions={
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#A6192E] hover:bg-[#7F1122] rounded-lg shadow-sm transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nuevo Docente
+          </button>
+        }
+      />
 
       {/* Search & Filters */}
       <div className="rounded-xl ring-1 ring-zinc-950/5 bg-white p-4 mb-6 shadow-sm">
@@ -294,7 +304,7 @@ export default function DocentesPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre, documento, correo..."
-                className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 placeholder-zinc-500 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 placeholder-zinc-500 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent transition-colors"
               />
             </div>
           </div>
@@ -302,7 +312,7 @@ export default function DocentesPage() {
             <select
               value={filterCampus}
               onChange={(e) => setFilterCampus(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+              className="w-full px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent transition-colors"
             >
               <option value="">Todos los campus</option>
               {campusList.map((c) => (
@@ -332,7 +342,7 @@ export default function DocentesPage() {
       <div className="rounded-xl ring-1 ring-zinc-950/5 bg-white shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24">
-            <svg className="animate-spin h-8 w-8 text-indigo-600 mb-3" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-8 w-8 text-unisinu-700 mb-3" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
@@ -452,7 +462,7 @@ export default function DocentesPage() {
                     onClick={() => fetchData(p)}
                     className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                       p === pagination.page
-                        ? 'bg-indigo-600 text-white shadow-sm'
+                        ? 'bg-unisinu-600 text-white shadow-sm'
                         : 'text-zinc-700 bg-white border border-zinc-300 hover:bg-zinc-50'
                     }`}
                   >
@@ -500,7 +510,7 @@ export default function DocentesPage() {
                       value={(formData as Record<string, string>)[field.key] ?? ''}
                       onChange={(e) => setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))}
                       required={field.required}
-                      className="w-full px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                      className="w-full px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg ring-1 ring-zinc-200 text-zinc-900 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-transparent transition-colors"
                     />
                   </div>
                 ))}
@@ -516,7 +526,7 @@ export default function DocentesPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-unisinu-600 hover:bg-unisinu-700 active:bg-unisinu-800 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
                 >
                   {saving ? 'Guardando...' : 'Crear Docente'}
                 </button>

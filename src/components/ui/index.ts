@@ -48,6 +48,12 @@ export type { BadgeProps, BadgeColor } from './badge';
 export { StatCard } from './stat-card';
 export type { StatCardProps } from './stat-card';
 
+export { PageHeader } from './page-header';
+export type { PageHeaderProps } from './page-header';
+
+export { Avatar } from './avatar';
+export type { AvatarProps } from './avatar';
+
 export { EmptyState } from './empty-state';
 export type { EmptyStateProps } from './empty-state';
 

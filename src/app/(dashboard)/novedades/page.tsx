@@ -140,14 +140,14 @@ const MOTIVO_OPTIONS: Array<{ value: MotivoType; label: string }> = [
 
 const MOTIVO_COLORS: Record<MotivoType, string> = {
   RENUNCIA: 'bg-red-100 text-red-800',
-  COMISION_ESTUDIO: 'bg-purple-100 text-purple-800',
+  COMISION_ESTUDIO: 'bg-unisinu-100 text-purple-800',
   LICENCIA: 'bg-amber-100 text-amber-800',
   REASIGNACION: 'bg-blue-100 text-blue-800',
   TERMINACION_CONTRATO: 'bg-red-100 text-red-800',
   CAMBIO_HORARIO: 'bg-cyan-100 text-cyan-800',
   CIERRE_CURSO: 'bg-zinc-200 text-zinc-800',
   APERTURA_CURSO: 'bg-emerald-100 text-emerald-800',
-  CAMBIO_GRUPO: 'bg-indigo-100 text-indigo-800',
+  CAMBIO_GRUPO: 'bg-unisinu-100 text-indigo-800',
 };
 
 const ESTADO_COLORS: Record<EstadoType, string> = {
@@ -403,7 +403,7 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
   const canPrev = currentIdx > 0;
   const canNext = currentIdx < visibleSteps.length - 1;
 
-  const inputClass = 'w-full px-3 py-2 text-sm rounded-md border border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-zinc-50 disabled:text-zinc-600';
+  const inputClass = 'w-full px-3 py-2 text-sm rounded-md border border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-unisinu-600 focus:border-unisinu-500 disabled:bg-zinc-50 disabled:text-zinc-600';
   const labelClass = 'block text-xs font-semibold text-zinc-700 mb-1 uppercase tracking-wide';
 
   return (
@@ -418,13 +418,13 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
             className={clsx(
               'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors',
               activeStep === step.id
-                ? 'border-indigo-600 text-indigo-600'
+                ? 'border-indigo-600 text-unisinu-700'
                 : 'border-transparent text-zinc-500 hover:text-zinc-900 hover:border-zinc-300',
             )}
           >
             <span className={clsx(
               'inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold',
-              activeStep === step.id ? 'bg-indigo-600 text-white' : 'bg-zinc-200 text-zinc-600',
+              activeStep === step.id ? 'bg-unisinu-600 text-white' : 'bg-zinc-200 text-zinc-600',
             )}>
               {idx + 1}
             </span>
@@ -567,7 +567,7 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
                           key={docente.id}
                           type="button"
                           onClick={() => handleSelectDocenteSaliente(docente)}
-                          className="w-full text-left px-3 py-2 hover:bg-indigo-50 border-b border-zinc-100 last:border-b-0"
+                          className="w-full text-left px-3 py-2 hover:bg-unisinu-50 border-b border-zinc-100 last:border-b-0"
                         >
                           <p className="font-medium text-sm text-zinc-900">{docente.nombre}</p>
                           <p className="text-xs text-zinc-500">Cédula: {docente.cedula}</p>
@@ -724,7 +724,7 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
                   type="number"
                   value={horasRestantes}
                   disabled
-                  className={clsx(inputClass, 'font-semibold text-indigo-700')}
+                  className={clsx(inputClass, 'font-semibold text-unisinu-800')}
                 />
               </div>
             </div>
@@ -760,7 +760,7 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
                           key={docente.id}
                           type="button"
                           onClick={() => handleSelectDocenteEntrante(docente)}
-                          className="w-full text-left px-3 py-2 hover:bg-indigo-50 border-b border-zinc-100 last:border-b-0"
+                          className="w-full text-left px-3 py-2 hover:bg-unisinu-50 border-b border-zinc-100 last:border-b-0"
                         >
                           <p className="font-medium text-sm text-zinc-900">{docente.nombre}</p>
                           <p className="text-xs text-zinc-500">Cédula: {docente.cedula}</p>
@@ -857,7 +857,7 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
             <button
               type="button"
               onClick={() => setActiveStep(visibleSteps[currentIdx + 1].id)}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-500"
+              className="px-4 py-2 text-sm font-medium text-white bg-unisinu-600 rounded-md hover:bg-unisinu-600"
             >
               Siguiente →
             </button>
@@ -865,7 +865,7 @@ function NovaForm({ form, onChange, programas, onSave, saving }: NovaFormProps) 
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-500 disabled:opacity-50"
+              className="px-5 py-2 text-sm font-semibold text-white bg-unisinu-600 rounded-md hover:bg-unisinu-600 disabled:opacity-50"
             >
               {saving ? 'Guardando...' : 'Guardar Novedad'}
             </button>
@@ -1089,7 +1089,7 @@ export default function NovedadesPage() {
         </div>
         <Button
           onClick={openAdd}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center gap-2"
+          className="bg-unisinu-600 hover:bg-unisinu-700 text-white rounded-lg flex items-center gap-2"
         >
           <PlusIcon className="size-5" />
           Nueva Novedad
@@ -1187,7 +1187,7 @@ export default function NovedadesPage() {
               title="Sin novedades"
               description="No hay novedades de carga académica registradas"
               action={
-                <Button onClick={openAdd} className="bg-indigo-600 hover:bg-indigo-500 text-white">
+                <Button onClick={openAdd} className="bg-unisinu-600 hover:bg-unisinu-700 text-white">
                   Crear novedad
                 </Button>
               }
@@ -1235,7 +1235,7 @@ export default function NovedadesPage() {
                         <div className="flex gap-3">
                           <button
                             onClick={() => openEdit(item)}
-                            className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                            className="text-unisinu-700 hover:text-unisinu-800 text-sm font-medium"
                             disabled={item.estado !== 'pendiente'}
                           >
                             Editar

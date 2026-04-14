@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, FormEvent } from 'react';
+import { PageHeader } from '@/components/ui';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -33,7 +34,7 @@ const ESTADO_OPTIONS = ['activo', 'inactivo', 'en_revision'];
 
 const GRADO_COLORS: Record<string, string> = {
   'Pregrado': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Posgrado': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  'Posgrado': 'bg-unisinu-100 text-indigo-800 border-unisinu-200',
   'Especializaci\u00f3n': 'bg-violet-100 text-violet-800 border-violet-200',
   'Maestr\u00eda': 'bg-emerald-100 text-emerald-800 border-emerald-200',
   'Doctorado': 'bg-amber-100 text-amber-800 border-amber-200',
@@ -218,7 +219,7 @@ export default function ProgramasPage() {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={saveEdit}
           onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditingCell(null); }}
-          className="w-full px-2 py-1 text-sm ring-1 ring-indigo-400 rounded focus:outline-none focus:ring-indigo-500 bg-white"
+          className="w-full px-2 py-1 text-sm ring-1 ring-unisinu-400 rounded focus:outline-none focus:ring-unisinu-600 bg-white"
         />
       );
     }
@@ -227,7 +228,7 @@ export default function ProgramasPage() {
     return (
       <span
         onClick={() => isEditable && startEdit(row.id, field, value)}
-        className={`block w-full px-2 py-1 rounded text-sm truncate ${isEditable ? 'cursor-pointer hover:bg-indigo-50 transition-colors' : ''}`}
+        className={`block w-full px-2 py-1 rounded text-sm truncate ${isEditable ? 'cursor-pointer hover:bg-unisinu-50 transition-colors' : ''}`}
         title={String(value ?? '')}
       >
         {value ?? '-'}
@@ -239,23 +240,28 @@ export default function ProgramasPage() {
   /*  JSX                                                              */
   /* ================================================================ */
   return (
-    <div className="p-6 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">{"Programas Acad\u00e9micos"}</h1>
-          <p className="text-sm text-zinc-600 mt-1">{"Gesti\u00f3n de programas acad\u00e9micos institucionales"}</p>
-        </div>
-        <button
-          onClick={openAdd}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    <div className="max-w-[1400px] mx-auto w-full">
+      <PageHeader
+        title="Programas Académicos"
+        description="Gestión de programas académicos institucionales"
+        color="primary"
+        icon={
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
           </svg>
-          Nuevo Programa
-        </button>
-      </div>
+        }
+        actions={
+          <button
+            onClick={openAdd}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#A6192E] hover:bg-[#7F1122] text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nuevo Programa
+          </button>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
@@ -305,31 +311,31 @@ export default function ProgramasPage() {
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
               </svg>
-              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={"Nombre, c\u00f3digo, SNIES..."} className="w-full pl-10 pr-4 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={"Nombre, c\u00f3digo, SNIES..."} className="w-full pl-10 pr-4 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
             </div>
           </div>
           <div className="min-w-[150px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Grado</label>
-            <select value={filterGrado} onChange={(e) => setFilterGrado(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select value={filterGrado} onChange={(e) => setFilterGrado(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
               <option value="">Todos</option>
               {GRADO_OPTIONS.map((g) => (<option key={g} value={g}>{g}</option>))}
             </select>
           </div>
           <div className="min-w-[140px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Modalidad</label>
-            <select value={filterModalidad} onChange={(e) => setFilterModalidad(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select value={filterModalidad} onChange={(e) => setFilterModalidad(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
               <option value="">Todas</option>
               {MODALIDAD_OPTIONS.map((m) => (<option key={m} value={m}>{m}</option>))}
             </select>
           </div>
           <div className="min-w-[130px]">
             <label className="block text-xs font-medium text-zinc-600 mb-1">Estado</label>
-            <select value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
               <option value="">Todos</option>
               {ESTADO_OPTIONS.map((e) => (<option key={e} value={e}>{e === 'en_revision' ? 'En revisi\u00f3n' : e.charAt(0).toUpperCase() + e.slice(1)}</option>))}
             </select>
           </div>
-          <button onClick={() => { setSearch(''); setFilterGrado(''); setFilterModalidad(''); setFilterEstado(''); }} className="px-3 py-2 text-sm text-zinc-600 hover:text-indigo-600 hover:bg-zinc-100 rounded-lg transition-colors">
+          <button onClick={() => { setSearch(''); setFilterGrado(''); setFilterModalidad(''); setFilterEstado(''); }} className="px-3 py-2 text-sm text-zinc-600 hover:text-unisinu-700 hover:bg-zinc-100 rounded-lg transition-colors">
             Limpiar
           </button>
         </div>
@@ -411,7 +417,7 @@ export default function ProgramasPage() {
                     </td>
                     <td className="px-6 py-3 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => openEdit(row)} className="p-1.5 text-zinc-400 hover:text-[#2563eb] hover:bg-indigo-50 rounded-lg transition-colors" title="Editar">
+                        <button onClick={() => openEdit(row)} className="p-1.5 text-zinc-400 hover:text-[#2563eb] hover:bg-unisinu-50 rounded-lg transition-colors" title="Editar">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
                           </svg>
@@ -472,28 +478,28 @@ export default function ProgramasPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">{"C\u00f3digo"} <span className="text-red-500">*</span></label>
-                  <input type="text" value={formData.codigo} onChange={(e) => setFormData({ ...formData, codigo: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="text" value={formData.codigo} onChange={(e) => setFormData({ ...formData, codigo: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">SNIES</label>
-                  <input type="text" value={formData.snies} onChange={(e) => setFormData({ ...formData, snies: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="text" value={formData.snies} onChange={(e) => setFormData({ ...formData, snies: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Nombre <span className="text-red-500">*</span></label>
-                <input type="text" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="text" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">Grado <span className="text-red-500">*</span></label>
-                  <select value={formData.grado} onChange={(e) => setFormData({ ...formData, grado: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <select value={formData.grado} onChange={(e) => setFormData({ ...formData, grado: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
                     <option value="">Seleccionar...</option>
                     {GRADO_OPTIONS.map((g) => (<option key={g} value={g}>{g}</option>))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">Modalidad <span className="text-red-500">*</span></label>
-                  <select value={formData.modalidad} onChange={(e) => setFormData({ ...formData, modalidad: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <select value={formData.modalidad} onChange={(e) => setFormData({ ...formData, modalidad: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
                     <option value="">Seleccionar...</option>
                     {MODALIDAD_OPTIONS.map((m) => (<option key={m} value={m}>{m}</option>))}
                   </select>
@@ -501,20 +507,20 @@ export default function ProgramasPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Facultad</label>
-                <input type="text" value={formData.facultad} onChange={(e) => setFormData({ ...formData, facultad: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="text" value={formData.facultad} onChange={(e) => setFormData({ ...formData, facultad: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">{"Cr\u00e9ditos"}</label>
-                  <input type="number" value={formData.creditos} onChange={(e) => setFormData({ ...formData, creditos: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="number" value={formData.creditos} onChange={(e) => setFormData({ ...formData, creditos: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">{"Duraci\u00f3n"}</label>
-                  <input type="text" value={formData.duracion} onChange={(e) => setFormData({ ...formData, duracion: e.target.value })} placeholder="10 semestres" className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input type="text" value={formData.duracion} onChange={(e) => setFormData({ ...formData, duracion: e.target.value })} placeholder="10 semestres" className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">Estado</label>
-                  <select value={formData.estado} onChange={(e) => setFormData({ ...formData, estado: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <select value={formData.estado} onChange={(e) => setFormData({ ...formData, estado: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
                     {ESTADO_OPTIONS.map((e) => (<option key={e} value={e}>{e === 'en_revision' ? 'En revisi\u00f3n' : e.charAt(0).toUpperCase() + e.slice(1)}</option>))}
                   </select>
                 </div>

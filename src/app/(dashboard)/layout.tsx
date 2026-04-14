@@ -160,21 +160,26 @@ export default function DashboardLayout({
   /* ---------------------------------------------------------------- */
   const sidebarContent = (
     <>
-      {/* Logo Header */}
-      <div className="flex h-16 items-center gap-3 px-6 shrink-0">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-indigo-600 shrink-0">
-          <svg className="size-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5zm0 2.18l7 3.89v5.93c0 4.12-2.95 7.97-7 8.93-4.05-.96-7-4.81-7-8.93V8.07l7-3.89z" />
-          </svg>
-        </div>
+      {/* Logo Header — UniSinú brand block. Sober white background,
+           prominent institutional logo on the top-left. */}
+      <div className="flex h-24 items-center gap-3 px-5 shrink-0 bg-white border-b border-zinc-200">
+        <img
+          src="/logos/unisinu-logo.png"
+          alt="Universidad del Sinú"
+          className="h-16 w-auto shrink-0 object-contain"
+        />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-zinc-950 dark:text-white">SIGAA</p>
-          <p className="text-xs text-zinc-500 truncate">Universidad del Sinú</p>
+          <p className="text-lg font-extrabold leading-none tracking-tight text-zinc-900">
+            SIGAA
+          </p>
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 leading-tight mt-1 truncate">
+            Universidad del Sinú
+          </p>
         </div>
         {/* Close button (mobile) */}
         <button
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden -mr-1 p-1 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="lg:hidden -mr-1 p-1 rounded-md text-zinc-500 hover:text-zinc-900"
         >
           <XMarkIcon className="size-5" />
         </button>
@@ -184,13 +189,16 @@ export default function DashboardLayout({
       <div className="mx-4 border-t border-zinc-950/5 dark:border-white/5" />
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-3 space-y-6">
-        {navSections.map((section, sIdx) => (
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+        {navSections.map((section) => (
           <div key={section.title || "_root"}>
             {section.title && (
-              <h3 className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-                {section.title}
-              </h3>
+              <div className="mb-2 px-3 flex items-center gap-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-500">
+                  {section.title}
+                </h3>
+                <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+              </div>
             )}
             <ul role="list" className="space-y-0.5">
               {section.items.map((item) => {
@@ -201,21 +209,28 @@ export default function DashboardLayout({
                     <Link
                       href={item.href}
                       className={clsx(
-                        "group flex items-center gap-x-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150",
+                        "group relative flex items-center gap-x-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
                         isActive
-                          ? "bg-zinc-950/5 text-zinc-950 dark:bg-white/10 dark:text-white"
-                          : "text-zinc-600 hover:bg-zinc-950/[0.03] hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-200"
+                          ? "bg-zinc-100 text-zinc-900 font-semibold"
+                          : "text-zinc-600 font-medium hover:bg-zinc-50 hover:text-zinc-900"
                       )}
                     >
+                      {/* Sober dark indicator — no red background */}
+                      {isActive && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-zinc-800"
+                        />
+                      )}
                       <Icon
                         className={clsx(
                           "size-[18px] shrink-0 transition-colors",
                           isActive
-                            ? "text-indigo-600 dark:text-indigo-400"
-                            : "text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300"
+                            ? "text-zinc-800"
+                            : "text-zinc-400 group-hover:text-zinc-600"
                         )}
                       />
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
                     </Link>
                   </li>
                 );
@@ -229,8 +244,8 @@ export default function DashboardLayout({
       <div className="shrink-0 border-t border-zinc-950/5 dark:border-white/5 p-4">
         {user ? (
           <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-200 dark:ring-indigo-800">
-              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+            <div className="flex size-9 items-center justify-center rounded-full bg-zinc-800 ring-2 ring-zinc-200">
+              <span className="text-xs font-bold text-white">
                 {user.nombre
                   .split(" ")
                   .map((n) => n[0])

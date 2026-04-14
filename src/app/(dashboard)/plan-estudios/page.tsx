@@ -413,7 +413,7 @@ export default function PlanEstudiosPage() {
     return (
       <span
         onClick={() => startEdit(row.id, field, value)}
-        className="block w-full cursor-pointer hover:bg-indigo-50/50 rounded px-1 py-0.5 transition-colors text-sm"
+        className="block w-full cursor-pointer hover:bg-unisinu-50/50 rounded px-1 py-0.5 transition-colors text-sm"
         title="Clic para editar"
       >
         {value ?? '-'}
@@ -470,7 +470,7 @@ export default function PlanEstudiosPage() {
             <select
               value={filterPrograma}
               onChange={(e) => setFilterPrograma(e.target.value)}
-              className="w-full px-3 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="w-full px-3 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-unisinu-600 bg-white"
             >
               <option value="">Todos los programas</option>
               {programas.map(p => (
@@ -485,7 +485,7 @@ export default function PlanEstudiosPage() {
             <select
               value={filterGrado}
               onChange={(e) => setFilterGrado(e.target.value)}
-              className="w-full px-3 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="w-full px-3 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-unisinu-600 bg-white"
             >
               <option value="">Todos los grados</option>
               {GRADO_OPTIONS.map(g => (
@@ -545,10 +545,10 @@ export default function PlanEstudiosPage() {
 
           {/* ── Summary Cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
-            <StatCard label="Total Asignaturas" value={totalAsignaturas} icon={<IconBook />} color="blue" />
-            <StatCard label="Total Creditos" value={totalCreditos} icon={<IconAcademic />} color="green" />
-            <StatCard label="Hrs Semestre" value={totalHrsSemestre} icon={<IconClock />} color="amber" />
-            <StatCard label="Semestres" value={uniqueSemesters} icon={<IconUsers />} color="purple" />
+            <StatCard label="Total Asignaturas" value={totalAsignaturas} icon={<IconBook />} color="primary" />
+            <StatCard label="Total Creditos" value={totalCreditos} icon={<IconAcademic />} color="success" />
+            <StatCard label="Hrs Semestre" value={totalHrsSemestre} icon={<IconClock />} color="warning" />
+            <StatCard label="Semestres" value={uniqueSemesters} icon={<IconUsers />} color="neutral" />
           </div>
 
           {/* ── Program Info Bar ── */}
@@ -643,7 +643,7 @@ export default function PlanEstudiosPage() {
                           </thead>
                           <tbody>
                             {rows.map((row) => (
-                              <tr key={row.id} className="border-b border-zinc-200 hover:bg-indigo-50/30 transition-colors">
+                              <tr key={row.id} className="border-b border-zinc-200 hover:bg-unisinu-50/30 transition-colors">
                                 <td className="px-4 py-2">
                                   <span className="text-sm font-mono text-zinc-700">{row.catalogo}</span>
                                 </td>
@@ -771,31 +771,31 @@ export default function PlanEstudiosPage() {
                   label="Total Asignaturas"
                   value={validacionData.resumen.total_asignaturas}
                   icon={<IconBook />}
-                  color="blue"
+                  color="primary"
                 />
                 <StatCard
                   label="Con Carga"
                   value={validacionData.resumen.con_carga}
                   icon={<IconCheck />}
-                  color="green"
+                  color="success"
                 />
                 <StatCard
                   label="Sin Carga"
                   value={validacionData.resumen.sin_carga}
                   icon={<IconX />}
-                  color="red"
+                  color="danger"
                 />
                 <StatCard
                   label="Diferencia Horas"
                   value={validacionData.resumen.con_diferencia_horas}
                   icon={<IconWarning />}
-                  color="amber"
+                  color="warning"
                 />
                 <StatCard
                   label="Docentes Asignados"
                   value={validacionData.resumen.docentes_asignados}
                   icon={<IconUsers />}
-                  color="purple"
+                  color="neutral"
                 />
               </div>
 

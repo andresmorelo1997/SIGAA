@@ -29,7 +29,7 @@ const NIVEL_OPTIONS = ['Pregrado', 'Especializacion', 'Maestria', 'Doctorado', '
 const CATEGORIA_COLORS: Record<string, string> = {
   Auxiliar: 'bg-gray-100 text-gray-700 border-gray-200',
   Asistente: 'bg-blue-100 text-blue-700 border-blue-200',
-  Asociado: 'bg-purple-100 text-purple-700 border-purple-200',
+  Asociado: 'bg-unisinu-100 text-unisinu-800 border-unisinu-200',
   Titular: 'bg-emerald-100 text-emerald-700 border-emerald-200',
 };
 
@@ -160,11 +160,11 @@ export default function EscalafonPage() {
       );
     }
     return sortOrder === 'ASC' ? (
-      <svg className="w-3 h-3 text-indigo-600 ml-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="w-3 h-3 text-unisinu-700 ml-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
       </svg>
     ) : (
-      <svg className="w-3 h-3 text-indigo-600 ml-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="w-3 h-3 text-unisinu-700 ml-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
       </svg>
     );
@@ -199,7 +199,7 @@ export default function EscalafonPage() {
         </div>
         <button
           onClick={openAdd}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-unisinu-600 hover:bg-unisinu-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -222,7 +222,7 @@ export default function EscalafonPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nombre, cedula o titulo..."
-                className="w-full pl-10 pr-4 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                className="w-full pl-10 pr-4 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
               />
             </div>
           </div>
@@ -231,7 +231,7 @@ export default function EscalafonPage() {
             <select
               value={filterCategoria}
               onChange={(e) => setFilterCategoria(e.target.value)}
-              className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+              className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
             >
               <option value="">Todas</option>
               {CATEGORIA_OPTIONS.map((c) => (
@@ -244,7 +244,7 @@ export default function EscalafonPage() {
             <select
               value={filterNivel}
               onChange={(e) => setFilterNivel(e.target.value)}
-              className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+              className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
             >
               <option value="">Todos</option>
               {NIVEL_OPTIONS.map((n) => (
@@ -283,13 +283,13 @@ export default function EscalafonPage() {
             <thead className="bg-zinc-50 border-b border-zinc-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">
-                  <button onClick={() => handleSort('nombre')} className="inline-flex items-center hover:text-indigo-600 transition-colors">
+                  <button onClick={() => handleSort('nombre')} className="inline-flex items-center hover:text-unisinu-700 transition-colors">
                     Nombre <SortIcon field="nombre" />
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">Cedula</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">
-                  <button onClick={() => handleSort('categoria')} className="inline-flex items-center hover:text-indigo-600 transition-colors">
+                  <button onClick={() => handleSort('categoria')} className="inline-flex items-center hover:text-unisinu-700 transition-colors">
                     Categoria <SortIcon field="categoria" />
                   </button>
                 </th>
@@ -297,12 +297,12 @@ export default function EscalafonPage() {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">Nivel Formacion</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">Fecha Ingreso</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">
-                  <button onClick={() => handleSort('antiguedad')} className="inline-flex items-center hover:text-indigo-600 transition-colors">
+                  <button onClick={() => handleSort('antiguedad')} className="inline-flex items-center hover:text-unisinu-700 transition-colors">
                     Antiguedad <SortIcon field="antiguedad" />
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-900 uppercase tracking-wide">
-                  <button onClick={() => handleSort('puntos')} className="inline-flex items-center hover:text-indigo-600 transition-colors">
+                  <button onClick={() => handleSort('puntos')} className="inline-flex items-center hover:text-unisinu-700 transition-colors">
                     Puntos <SortIcon field="puntos" />
                   </button>
                 </th>
@@ -344,7 +344,7 @@ export default function EscalafonPage() {
                     <td className="px-6 py-3 whitespace-nowrap text-zinc-700">{item.fecha_ingreso || '-'}</td>
                     <td className="px-6 py-3 text-zinc-700">{item.antiguedad || '-'}</td>
                     <td className="px-6 py-3">
-                      <span className="inline-flex items-center justify-center min-w-[40px] px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">
+                      <span className="inline-flex items-center justify-center min-w-[40px] px-2.5 py-1 bg-unisinu-100 text-unisinu-800 text-xs font-bold rounded-full">
                         {item.puntos ?? 0}
                       </span>
                     </td>
@@ -352,7 +352,7 @@ export default function EscalafonPage() {
                     <td className="px-6 py-3 text-right">
                       <button
                         onClick={() => openEdit(item)}
-                        className="p-1.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="p-1.5 text-zinc-400 hover:text-unisinu-700 hover:bg-unisinu-50 rounded-lg transition-colors"
                         title="Editar"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -391,7 +391,7 @@ export default function EscalafonPage() {
                     onClick={() => fetchData(p)}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                       p === pagination.page
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-unisinu-600 text-white'
                         : 'bg-white ring-1 ring-zinc-200 hover:bg-zinc-50'
                     }`}
                   >
@@ -430,7 +430,7 @@ export default function EscalafonPage() {
                     value={form.nombre}
                     onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                     required
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   />
                 </div>
                 <div>
@@ -440,7 +440,7 @@ export default function EscalafonPage() {
                     value={form.cedula}
                     onChange={(e) => setForm({ ...form, cedula: e.target.value })}
                     required
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   />
                 </div>
               </div>
@@ -450,7 +450,7 @@ export default function EscalafonPage() {
                   type="text"
                   value={form.docente_id}
                   onChange={(e) => setForm({ ...form, docente_id: e.target.value })}
-                  className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -460,7 +460,7 @@ export default function EscalafonPage() {
                     value={form.categoria}
                     onChange={(e) => setForm({ ...form, categoria: e.target.value })}
                     required
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   >
                     <option value="">Seleccionar...</option>
                     {CATEGORIA_OPTIONS.map((c) => (
@@ -474,7 +474,7 @@ export default function EscalafonPage() {
                     value={form.nivel_formacion}
                     onChange={(e) => setForm({ ...form, nivel_formacion: e.target.value })}
                     required
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   >
                     <option value="">Seleccionar...</option>
                     {NIVEL_OPTIONS.map((n) => (
@@ -489,7 +489,7 @@ export default function EscalafonPage() {
                   type="text"
                   value={form.titulo}
                   onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                  className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                 />
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -499,7 +499,7 @@ export default function EscalafonPage() {
                     type="date"
                     value={form.fecha_ingreso}
                     onChange={(e) => setForm({ ...form, fecha_ingreso: e.target.value })}
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   />
                 </div>
                 <div>
@@ -509,7 +509,7 @@ export default function EscalafonPage() {
                     value={form.antiguedad}
                     onChange={(e) => setForm({ ...form, antiguedad: e.target.value })}
                     placeholder="Ej: 5 anos"
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   />
                 </div>
                 <div>
@@ -518,7 +518,7 @@ export default function EscalafonPage() {
                     type="number"
                     value={form.puntos}
                     onChange={(e) => setForm({ ...form, puntos: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white"
                   />
                 </div>
               </div>
@@ -528,7 +528,7 @@ export default function EscalafonPage() {
                   value={form.observaciones}
                   onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-indigo-500 bg-white resize-none"
+                  className="w-full px-3 py-2 ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-unisinu-600 bg-white resize-none"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
@@ -542,7 +542,7 @@ export default function EscalafonPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm disabled:opacity-60 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-unisinu-600 hover:bg-unisinu-700 rounded-lg shadow-sm disabled:opacity-60 transition-colors"
                 >
                   {saving ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
                 </button>

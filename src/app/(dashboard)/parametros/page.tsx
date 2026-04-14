@@ -200,7 +200,7 @@ export default function ParametrosPage() {
         </div>
         <button
           onClick={openAdd}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-unisinu-600 hover:bg-unisinu-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -248,7 +248,7 @@ export default function ParametrosPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={"Buscar por clave, valor o descripci\u00f3n..."}
-            className="w-full pl-10 pr-4 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2 text-sm ring-1 ring-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-unisinu-600"
           />
         </div>
       </div>
@@ -342,7 +342,7 @@ export default function ParametrosPage() {
                           ) : (
                             <span
                               onClick={() => startEditValor(param.id, param.valor)}
-                              className="inline-flex px-3 py-1.5 bg-white border border-zinc-200 rounded-lg text-sm font-mono text-gray-800 cursor-pointer hover:border-[#2563eb] hover:bg-indigo-50/50 transition-colors min-w-[120px]"
+                              className="inline-flex px-3 py-1.5 bg-white border border-zinc-200 rounded-lg text-sm font-mono text-gray-800 cursor-pointer hover:border-[#2563eb] hover:bg-unisinu-50/50 transition-colors min-w-[120px]"
                               title="Clic para editar"
                             >
                               {param.valor || '-'}
@@ -350,7 +350,7 @@ export default function ParametrosPage() {
                           )}
                           {/* Actions */}
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => openEdit(param)} className="p-1.5 text-zinc-400 hover:text-[#2563eb] hover:bg-indigo-50 rounded-lg transition-colors" title="Editar completo">
+                            <button onClick={() => openEdit(param)} className="p-1.5 text-zinc-400 hover:text-[#2563eb] hover:bg-unisinu-50 rounded-lg transition-colors" title="Editar completo">
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
                               </svg>
@@ -412,21 +412,21 @@ export default function ParametrosPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Clave <span className="text-red-500">*</span></label>
-                <input type="text" value={formData.clave} onChange={(e) => setFormData({ ...formData, clave: e.target.value })} required placeholder="nombre_parametro" className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="text" value={formData.clave} onChange={(e) => setFormData({ ...formData, clave: e.target.value })} required placeholder="nombre_parametro" className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">Valor <span className="text-red-500">*</span></label>
-                <input type="text" value={formData.valor} onChange={(e) => setFormData({ ...formData, valor: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="text" value={formData.valor} onChange={(e) => setFormData({ ...formData, valor: e.target.value })} required className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">{"Categor\u00eda"}</label>
-                <select value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600">
                   {CATEGORIA_OPTIONS.map((c) => (<option key={c} value={c}>{c}</option>))}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-1">{"Descripci\u00f3n"}</label>
-                <textarea value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} rows={2} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+                <textarea value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} rows={2} className="w-full px-3 py-2 bg-white ring-1 ring-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-unisinu-600 resize-none" />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 bg-zinc-100 rounded-lg hover:bg-zinc-200 transition-colors">
