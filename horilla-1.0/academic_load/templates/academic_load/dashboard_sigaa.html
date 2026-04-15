@@ -155,6 +155,55 @@
     </div>
   </div>
 
+  <!-- Últimas importaciones -->
+  {% if ultimas_importaciones %}
+  <div class="oh-card mb-3">
+    <div class="oh-card__header d-flex justify-content-between align-items-center">
+      <h4 class="oh-card__title mb-0">
+        <ion-icon name="time-outline"></ion-icon>
+        {% trans "Últimas importaciones" %}
+      </h4>
+      <a href="{% url 'academic-load-history' %}" class="oh-btn oh-btn--light oh-btn--sm">
+        {% trans "Ver historial completo" %} →
+      </a>
+    </div>
+    <div class="oh-sticky-table-container">
+      <table class="oh-sticky-table">
+        <thead class="oh-sticky-table__thead">
+          <tr>
+            <th class="oh-sticky-table__th">{% trans "Archivo" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Tipo" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Insertadas" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Estado" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Fecha" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for imp in ultimas_importaciones %}
+          <tr class="oh-sticky-table__tr">
+            <td class="oh-sticky-table__td"><small>{{ imp.filename|truncatechars:50 }}</small></td>
+            <td class="oh-sticky-table__td">
+              <span class="oh-badge oh-badge--info">{{ imp.file_type }}</span>
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ imp.records_inserted }}</td>
+            <td class="oh-sticky-table__td">
+              {% if imp.status == 'completed' %}
+                <span class="oh-badge oh-badge--success">{% trans "Completado" %}</span>
+              {% elif imp.status == 'error' %}
+                <span class="oh-badge oh-badge--danger">{% trans "Error" %}</span>
+              {% else %}
+                <span class="oh-badge oh-badge--warning">{{ imp.status }}</span>
+              {% endif %}
+            </td>
+            <td class="oh-sticky-table__td"><small>{{ imp.created_at|date:"d/m/Y H:i" }}</small></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Evolución por ciclo -->
   {% if por_ciclo %}
   <div class="oh-card mb-3">

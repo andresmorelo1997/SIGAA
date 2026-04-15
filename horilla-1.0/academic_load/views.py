@@ -547,7 +547,7 @@ def dashboard_sigaa(request):
     ciclo = request.GET.get("ciclo", ciclos[0] if ciclos else "")
 
     # Cache de métricas pesadas por ciclo (5 min)
-    cache_key = f"sigaa_dashboard_v1:{ciclo or 'all'}"
+    cache_key = f"sigaa_dashboard_v2:{ciclo or 'all'}"
     cached = cache.get(cache_key)
     if cached:
         # Aún así sobreescribimos saludo/nombre por usuario, para personalizar
@@ -675,6 +675,12 @@ def dashboard_sigaa(request):
     except Exception:
         nombre = request.user.get_short_name() or request.user.username
 
+    # Últimas 5 importaciones
+    ultimas_importaciones = list(
+        ImportHistory.objects.order_by("-created_at")[:5]
+        .values("id", "filename", "file_type", "status", "records_inserted", "created_at")
+    )
+
     payload = {
         "kpis": kpis,
         "top_docentes": top_docentes,
@@ -682,6 +688,7 @@ def dashboard_sigaa(request):
         "por_grado": por_grado,
         "programas_criticos": programas_criticos[:5],
         "por_ciclo": por_ciclo,
+        "ultimas_importaciones": ultimas_importaciones,
     }
     # Cache 5 min los datos pesados (sin saludo/ciclos/user)
     cache.set(cache_key, payload, 300)
