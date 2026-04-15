@@ -20,6 +20,7 @@ from django.db.models import Q
 
 from academic_load.models import CargaAcademica, GRADO_CHOICES, CAMPUS_CHOICES
 from employee.models import Employee
+from .forms import CorteForm
 from .models import Corte, PrenominaDocente
 
 
@@ -137,6 +138,27 @@ def consolidado(request):
 def cortes_view(request):
     cortes = Corte.objects.all().order_by("periodo", "grado", "num_corte")
     return render(request, "academic_payroll/cortes.html", {"cortes": cortes})
+
+
+@login_required
+def corte_new(request):
+    form = CorteForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Corte creado correctamente.")
+        return HttpResponseRedirect(reverse("payroll-cortes"))
+    return render(request, "academic_payroll/corte_form.html", {"form": form, "is_new": True})
+
+
+@login_required
+def corte_edit(request, pk: int):
+    corte = get_object_or_404(Corte, pk=pk)
+    form = CorteForm(request.POST or None, instance=corte)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Corte actualizado correctamente.")
+        return HttpResponseRedirect(reverse("payroll-cortes"))
+    return render(request, "academic_payroll/corte_form.html", {"form": form, "corte": corte})
 
 
 @login_required

@@ -63,6 +63,12 @@ def carga_list(request):
             qs = qs.filter(estado_clase__in=d["estado"])
         if d.get("ciclo_lectivo"):
             qs = qs.filter(ciclo_lectivo=d["ciclo_lectivo"])
+        if d.get("rango_horas"):
+            try:
+                lo, hi = [int(x) for x in d["rango_horas"].split("-")]
+                qs = qs.filter(hrs_semanal__gte=lo, hrs_semanal__lte=hi)
+            except (ValueError, AttributeError):
+                pass
 
     paginator = Paginator(qs, 50)
     page = paginator.get_page(request.GET.get("page") or 1)
@@ -97,6 +103,12 @@ def carga_export(request):
         if d.get("grado"): qs = qs.filter(grado__in=d["grado"])
         if d.get("estado"): qs = qs.filter(estado_clase__in=d["estado"])
         if d.get("ciclo_lectivo"): qs = qs.filter(ciclo_lectivo=d["ciclo_lectivo"])
+        if d.get("rango_horas"):
+            try:
+                lo, hi = [int(x) for x in d["rango_horas"].split("-")]
+                qs = qs.filter(hrs_semanal__gte=lo, hrs_semanal__lte=hi)
+            except (ValueError, AttributeError):
+                pass
 
     wb = Workbook()
     ws = wb.active

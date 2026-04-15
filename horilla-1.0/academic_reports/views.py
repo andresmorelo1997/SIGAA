@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils.translation import gettext as _
 
 from openpyxl import Workbook
 
@@ -17,18 +18,29 @@ from employee.models import Employee
 from base.models import JobPosition
 
 
-REPORTES = {
-    "actividad-academica": "Actividad Académica",
-    "dedicacion": "Dedicación",
-    "nivel-formacion": "Nivel de Formación",
-    "profesores-asignaturas": "Profesores por Asignatura",
-    "planta-profesoral": "Planta Profesoral",
-    "horas-docentes": "Horas Docente",
-    "cobertura-plan": "Cobertura del Plan (horas)",
-    "nuevas-plazas": "Nuevas Plazas",
-    "reemplazos": "Reemplazos",
-    "no-continuan": "No Continúan",
-}
+def get_reportes():
+    """Etiquetas traducibles de los reportes SNIES."""
+    return {
+        "actividad-academica": _("Actividad Académica"),
+        "dedicacion": _("Dedicación"),
+        "nivel-formacion": _("Nivel de Formación"),
+        "profesores-asignaturas": _("Profesores por Asignatura"),
+        "planta-profesoral": _("Planta Profesoral"),
+        "horas-docentes": _("Horas Docente"),
+        "cobertura-plan": _("Cobertura del Plan (horas)"),
+        "nuevas-plazas": _("Nuevas Plazas"),
+        "reemplazos": _("Reemplazos"),
+        "no-continuan": _("No Continúan"),
+    }
+
+
+# Clave canónica (para switch interno sin traducir)
+REPORTES_KEYS = [
+    "actividad-academica", "dedicacion", "nivel-formacion",
+    "profesores-asignaturas", "planta-profesoral", "horas-docentes",
+    "cobertura-plan", "nuevas-plazas", "reemplazos", "no-continuan",
+]
+REPORTES = {k: k for k in REPORTES_KEYS}  # fallback para .get()
 
 
 def _build_rows(tipo: str) -> tuple[list[str], list[list]]:
@@ -238,18 +250,19 @@ def _build_rows(tipo: str) -> tuple[list[str], list[list]]:
         return headers, rows
 
     # Fallback (no debería llegar aquí)
-    return ["Mensaje"], [[f"Reporte '{REPORTES.get(tipo, tipo)}' no implementado aún."]]
+    return ["Mensaje"], [[f"Reporte '{get_reportes().get(tipo, tipo)}' no implementado aún."]]
 
 
 @login_required
 def index(request):
     tipo = request.GET.get("tipo", "actividad-academica")
-    if tipo not in REPORTES:
+    if tipo not in REPORTES_KEYS:
         tipo = "actividad-academica"
     headers, rows = _build_rows(tipo)
+    reportes = get_reportes()
     return render(request, "academic_reports/index.html", {
-        "tipo": tipo, "tipo_label": REPORTES[tipo],
-        "reportes": REPORTES, "headers": headers, "rows": rows,
+        "tipo": tipo, "tipo_label": reportes[tipo],
+        "reportes": reportes, "headers": headers, "rows": rows,
         "total": len(rows),
     })
 
@@ -260,7 +273,7 @@ def export_excel(request):
     headers, rows = _build_rows(tipo)
     wb = Workbook()
     ws = wb.active
-    ws.title = REPORTES.get(tipo, tipo)[:31]
+    ws.title = str(get_reportes().get(tipo, tipo))[:31]
     ws.append(headers)
     for r in rows:
         ws.append(r)

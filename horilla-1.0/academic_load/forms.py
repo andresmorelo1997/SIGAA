@@ -21,6 +21,16 @@ class FilterForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
     )
     ciclo_lectivo = forms.CharField(required=False)
+    rango_horas = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "— Todos —"),
+            ("0-5", "0 a 5 hrs/sem (subutilizado)"),
+            ("6-10", "6 a 10 hrs/sem"),
+            ("11-20", "11 a 20 hrs/sem"),
+            ("21-99", "21+ hrs/sem (sobrecargado)"),
+        ],
+    )
 
 
 class ImportUploadForm(forms.Form):

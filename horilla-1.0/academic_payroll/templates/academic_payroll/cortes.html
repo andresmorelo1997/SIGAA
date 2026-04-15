@@ -3,44 +3,58 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Cortes de Prenómina" %}</h1>
-    <p class="oh-titlebar__subtitle">{% trans "Configuración de cortes por periodo y grado" %}</p>
-  </section>
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Cortes de Prenómina" %}</h1>
+      <p class="oh-titlebar__subtitle">{% trans "Configuración de cortes por periodo y grado (en HORAS)" %}</p>
+    </div>
+    <div class="oh-titlebar__actions">
+      <a href="{% url 'payroll-corte-new' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="add-outline" class="me-1"></ion-icon>
+        {% trans "Nuevo corte" %}
+      </a>
+    </div>
+  </div>
 
-  <div class="oh-card oh-card--no-padding">
-    <table style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background:#18181b; color:white;">
-          <th style="padding:6px 10px;">{% trans "Periodo" %}</th>
-          <th>{% trans "Grado" %}</th>
-          <th>N°</th>
-          <th>{% trans "Inicio" %}</th>
-          <th>{% trans "Fin" %}</th>
-          <th>{% trans "Descripción" %}</th>
-          <th>{% trans "Estado" %}</th>
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Periodo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Grado" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "N° corte" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Inicio" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Fin" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Descripción" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Estado" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Acciones" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for c in cortes %}
-        <tr>
-          <td style="padding:4px 10px;">{{ c.periodo }}</td>
-          <td>{{ c.get_grado_display }}</td>
-          <td>{{ c.num_corte }}</td>
-          <td>{{ c.fecha_inicio|date:"d/m/Y" }}</td>
-          <td>{{ c.fecha_fin|date:"d/m/Y" }}</td>
-          <td>{{ c.descripcion|default:"-" }}</td>
-          <td>
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ c.periodo }}</strong></td>
+          <td class="oh-sticky-table__td">{{ c.get_grado_display }}</td>
+          <td class="oh-sticky-table__td text-end">{{ c.num_corte }}</td>
+          <td class="oh-sticky-table__td">{{ c.fecha_inicio|date:"d/m/Y" }}</td>
+          <td class="oh-sticky-table__td">{{ c.fecha_fin|date:"d/m/Y" }}</td>
+          <td class="oh-sticky-table__td">{{ c.descripcion|default:"—" }}</td>
+          <td class="oh-sticky-table__td">
             {% if c.emitido %}
               <span class="oh-badge oh-badge--success">{% trans "Emitido" %}</span>
             {% else %}
-              <span class="oh-badge oh-badge--neutral">{% trans "Pendiente" %}</span>
+              <span class="oh-badge oh-badge--warning">{% trans "Pendiente" %}</span>
             {% endif %}
+          </td>
+          <td class="oh-sticky-table__td">
+            <a href="{% url 'payroll-corte-edit' c.id %}" class="oh-btn oh-btn--light oh-btn--sm">
+              <ion-icon name="create-outline"></ion-icon>
+            </a>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-center p-4 text-muted">
-          {% trans "No hay cortes definidos. Configúrelos en el panel de administración." %}
+        <tr><td colspan="8" class="text-center p-4 text-muted">
+          {% trans "No hay cortes definidos. Cree el primero con el botón Nuevo corte." %}
         </td></tr>
         {% endfor %}
       </tbody>

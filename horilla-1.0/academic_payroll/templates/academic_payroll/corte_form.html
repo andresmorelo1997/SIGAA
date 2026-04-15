@@ -1,0 +1,72 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper" style="max-width: 760px; margin: 0 auto;">
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">
+        {% if is_new %}{% trans "Nuevo corte de prenómina" %}
+        {% else %}{% trans "Editar corte" %} {{ corte.num_corte }} · {{ corte.periodo }}
+        {% endif %}
+      </h1>
+      <p class="oh-titlebar__subtitle">{% trans "Define el periodo y rango de fechas del corte" %}</p>
+    </div>
+  </div>
+
+  <form method="post" class="oh-card">
+    {% csrf_token %}
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="calendar-outline"></ion-icon>
+        {% trans "Datos del corte" %}
+      </h4>
+    </div>
+
+    <div class="row g-3 p-3">
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "Periodo" %} *</label>
+        {{ form.periodo }}
+        {% if form.periodo.errors %}<small class="text-danger">{{ form.periodo.errors }}</small>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "Grado" %} *</label>
+        {{ form.grado }}
+      </div>
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "N° corte" %} *</label>
+        {{ form.num_corte }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="oh-label">{% trans "Fecha inicio" %} *</label>
+        {{ form.fecha_inicio }}
+      </div>
+      <div class="col-md-6">
+        <label class="oh-label">{% trans "Fecha fin" %} *</label>
+        {{ form.fecha_fin }}
+      </div>
+
+      <div class="col-12">
+        <label class="oh-label">{% trans "Descripción" %}</label>
+        {{ form.descripcion }}
+      </div>
+
+      <div class="col-12">
+        <div class="form-check">
+          {{ form.emitido }}
+          <label class="form-check-label ms-2">{% trans "Corte emitido (congelado)" %}</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="oh-card__footer--border-top p-3">
+      <button type="submit" class="oh-btn oh-btn--secondary">
+        <ion-icon name="save-outline" class="me-1"></ion-icon>
+        {% trans "Guardar" %}
+      </button>
+      <a href="{% url 'payroll-cortes' %}" class="oh-btn oh-btn--light">{% trans "Cancelar" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
