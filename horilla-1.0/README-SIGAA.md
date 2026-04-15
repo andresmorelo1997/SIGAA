@@ -26,6 +26,10 @@ Abrir: http://localhost:8000/ → redirige al Dashboard SIGAA.
 | `/academic/import/` | Importar Excel US_PROG_CLASES (con preview + selección de campus) |
 | `/academic/export/` | Exportar carga filtrada a Excel |
 | `/academic/history/` | Historial de importaciones |
+| `/academic/buscar/?q=<texto>` | Búsqueda global de docentes (redirige al detail si hay 1 coincidencia) |
+| `/academic/docentes-sin-carga/` | Empleados sin CargaAcademica vinculada |
+| `/academic/anomalias/` | Docentes sobrecargados (>25h/sem) o subutilizados (<4h/sem) |
+| `/academic/status/` | JSON con métricas operativas del sistema (healthcheck) |
 | `/plan/` | Lista de Plan de Estudios (540 asignaturas, 34 programas) |
 | `/plan/import/` | Importar Excel de Plan (multi-file, formatos A y B) |
 | `/plan/validar/` | Cruzar plan vs carga por programa |
@@ -35,6 +39,9 @@ Abrir: http://localhost:8000/ → redirige al Dashboard SIGAA.
 | `/prenomina/cortes/` | CRUD de cortes de prenómina |
 | `/prenomina/cortes/<id>/emitir/` | Emitir corte (congela horas) |
 | `/prenomina/historicos/` | Snapshots de cortes emitidos (auditoría) |
+| `/prenomina/constancia/<emp_id>/` | Constancia imprimible de horas del docente (con firmas) |
+| `/prenomina/mi-prenomina/` | Shortcut al tab prenómina del docente logueado |
+| `/prenomina/mi-constancia/` | Shortcut a la constancia del docente logueado |
 | `/reports/` | 10 reportes SNIES (actividad, dedicación, nivel formación, etc.) |
 | `/employee/employee-view/<id>/` | Detalle docente con tabs **Carga Académica** y **Prenómina Docente** |
 
@@ -94,6 +101,30 @@ Abrir: http://localhost:8000/ → redirige al Dashboard SIGAA.
 - Contraseña: `admin`
 
 (Cambiar en producción desde `/employee/employee-profile/`.)
+
+## Tests
+
+```bash
+docker compose exec server python manage.py test \
+  academic_load.tests academic_plan.tests --keepdb
+```
+
+Actualmente 26 tests pasando:
+- 12 de `academic_load` (parsers, detección de tipo, filtros, preview)
+- 6 de `academic_plan` (parse_plan formatos A y B, regex semestre)
+- 8 smoke tests de views SIGAA
+
+## Performance
+
+- Dashboard cacheado 5 min por ciclo (40% más rápido en hit).
+- Cache key: `sigaa_dashboard_v1:{ciclo}`.
+- Invalida automáticamente tras 5 min o al reiniciar el contenedor.
+
+## Landing según rol
+
+- **Admin/staff** → `/academic/dashboard/` (KPIs globales).
+- **Docente normal** → `/employee/employee-view/<id>/` (su detail con tabs Carga Académica y Prenómina Docente).
+- **Anónimo** → `/login/`.
 
 ## Commits relevantes
 
