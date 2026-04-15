@@ -117,40 +117,131 @@
   {% endif %}
 
   <!-- Accesos rápidos -->
+  <style>
+    .qa-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+    @media (max-width: 1100px) { .qa-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 768px)  { .qa-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 480px)  { .qa-grid { grid-template-columns: 1fr; } }
+
+    .qa-section-title {
+      grid-column: 1 / -1; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: #6b7280; margin: 10px 0 -4px; padding-left: 2px;
+    }
+    .qa-section-title:first-child { margin-top: 0; }
+
+    .qa-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 10px;
+      background: #fff; text-decoration: none; color: #111;
+      transition: all .18s ease; min-height: 68px;
+    }
+    .qa-card:hover {
+      border-color: #a6192e; background: #fef4f5;
+      transform: translateY(-2px); box-shadow: 0 6px 16px rgba(166, 25, 46, 0.12);
+      color: #a6192e;
+    }
+    .qa-card__icon {
+      width: 40px; height: 40px; flex-shrink: 0; border-radius: 8px;
+      background: #fef2f2; color: #a6192e;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .qa-card__body { display: flex; flex-direction: column; min-width: 0; }
+    .qa-card__title { font-size: 13px; font-weight: 600; line-height: 1.25; }
+    .qa-card__hint { font-size: 11px; color: #6b7280; margin-top: 2px; }
+    .qa-card:hover .qa-card__hint { color: #b94a5b; }
+  </style>
+
   <div class="oh-card mb-3">
     <div class="oh-card__header">
       <h4 class="oh-card__title"><ion-icon name="flash-outline"></ion-icon> {% trans "Accesos rápidos" %}</h4>
     </div>
-    <div class="p-3 d-flex flex-wrap gap-2">
-      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="list-outline" class="me-1"></ion-icon> {% trans "Carga Académica" %}
+    <div class="qa-grid">
+      <div class="qa-section-title">{% trans "Carga Académica" %}</div>
+
+      <a href="{% url 'academic-load-list' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="list-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Carga Académica" %}</span>
+          <span class="qa-card__hint">{% trans "Clases programadas" %}</span>
+        </span>
       </a>
-      <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="cloud-upload-outline" class="me-1"></ion-icon> {% trans "Importar Carga" %}
+      <a href="{% url 'academic-load-import' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="cloud-upload-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Importar Carga" %}</span>
+          <span class="qa-card__hint">{% trans "Subir Excel SIGAA" %}</span>
+        </span>
       </a>
-      <a href="{% url 'plan-list' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="book-outline" class="me-1"></ion-icon> {% trans "Plan de Estudios" %}
+      <a href="{% url 'academic-docentes-sin-carga' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="person-remove-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Docentes sin carga" %}</span>
+          <span class="qa-card__hint">{% trans "Detectar ausentes" %}</span>
+        </span>
       </a>
-      <a href="{% url 'plan-validar' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="checkmark-circle-outline" class="me-1"></ion-icon> {% trans "Validar Plan vs Carga" %}
+      <a href="{% url 'academic-anomalias' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="alert-circle-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Anomalías de carga" %}</span>
+          <span class="qa-card__hint">{% trans "Revisar inconsistencias" %}</span>
+        </span>
       </a>
-      <a href="{% url 'plan-faltantes' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="alert-circle-outline" class="me-1"></ion-icon> {% trans "Faltantes por Programar" %}
+
+      <div class="qa-section-title">{% trans "Plan de Estudios" %}</div>
+
+      <a href="{% url 'plan-list' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="book-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Plan de Estudios" %}</span>
+          <span class="qa-card__hint">{% trans "Asignaturas por programa" %}</span>
+        </span>
       </a>
-      <a href="{% url 'payroll-consolidado' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="time-outline" class="me-1"></ion-icon> {% trans "Prenómina Docente" %}
+      <a href="{% url 'plan-validar' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Validar Plan vs Carga" %}</span>
+          <span class="qa-card__hint">{% trans "Comparar programadas" %}</span>
+        </span>
       </a>
-      <a href="{% url 'reports-index' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="document-text-outline" class="me-1"></ion-icon> {% trans "Reportes Académicos" %}
+      <a href="{% url 'plan-faltantes' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="warning-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Faltantes por Programar" %}</span>
+          <span class="qa-card__hint">{% trans "Asignaturas sin clase" %}</span>
+        </span>
       </a>
-      <a href="{% url 'employee-view' %}" class="oh-btn oh-btn--light">
-        <ion-icon name="people-outline" class="me-1"></ion-icon> {% trans "Lista de Docentes" %}
+
+      <div class="qa-section-title">{% trans "Docentes y Prenómina" %}</div>
+
+      <a href="{% url 'payroll-detalle' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="time-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Prenómina Docente" %}</span>
+          <span class="qa-card__hint">{% trans "Detalle oficial UniSinú" %}</span>
+        </span>
       </a>
-      <a href="{% url 'academic-docentes-sin-carga' %}" class="oh-btn oh-btn--light">
-        <ion-icon name="person-remove-outline" class="me-1"></ion-icon> {% trans "Docentes sin carga" %}
+      <a href="{% url 'employee-view' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="people-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Lista de Docentes" %}</span>
+          <span class="qa-card__hint">{% trans "Perfil y carga" %}</span>
+        </span>
       </a>
-      <a href="{% url 'academic-anomalias' %}" class="oh-btn oh-btn--light">
-        <ion-icon name="alert-circle-outline" class="me-1"></ion-icon> {% trans "Anomalías de carga" %}
+      <a href="{% url 'reports-index' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="document-text-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Reportes Académicos" %}</span>
+          <span class="qa-card__hint">{% trans "SNIES y consolidados" %}</span>
+        </span>
+      </a>
+      <a href="{% url 'payroll-cortes' %}" class="qa-card">
+        <span class="qa-card__icon"><ion-icon name="calendar-outline"></ion-icon></span>
+        <span class="qa-card__body">
+          <span class="qa-card__title">{% trans "Cortes de Prenómina" %}</span>
+          <span class="qa-card__hint">{% trans "Configurar y emitir" %}</span>
+        </span>
       </a>
     </div>
   </div>
