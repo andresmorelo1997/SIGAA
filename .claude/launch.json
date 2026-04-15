@@ -5,7 +5,8 @@
       "name": "horilla-django",
       "runtimeExecutable": "docker",
       "runtimeArgs": ["compose", "-f", "horilla-1.0/docker-compose.yaml", "up"],
-      "port": 8000
+      "port": 8000,
+      "autoPort": false
     }
   ]
 }

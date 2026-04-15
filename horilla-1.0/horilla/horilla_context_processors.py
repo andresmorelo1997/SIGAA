@@ -43,6 +43,3 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(
 TEMPLATES[0]["OPTIONS"]["context_processors"].append(
     "base.context_processors.enable_profile_edit",
 )
-TEMPLATES[0]["OPTIONS"]["context_processors"].append(
-    "base.context_processors.sigaa_flags",
-)

@@ -31,6 +31,107 @@ def _grados_for_tipo(tipo: str) -> list[str]:
     return ["POSG", "MSTR", "DOCT", "ESP"]
 
 
+def _parse_fecha(s):
+    """Parse dd/mm/yyyy, yyyy-mm-dd, dd-mm-yyyy → date | None."""
+    if not s:
+        return None
+    s = str(s).strip()
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except Exception:
+            continue
+    return None
+
+
+def _calc_horas_por_corte(hrs_semestre, fecha_ini, fecha_fin, cortes_list):
+    """
+    Distribuye hrs_semestre entre los cortes, proporcional al overlap de días
+    entre la duración de la clase (fecha_ini→fecha_fin) y cada corte.
+
+    Si falta info, cae al reparto uniforme.
+    Retorna lista de enteros (redondeados) alineada con cortes_list.
+    """
+    n = len(cortes_list)
+    if n == 0:
+        return []
+    hrs = float(hrs_semestre or 0)
+    if hrs <= 0:
+        return [0] * n
+
+    fi = _parse_fecha(fecha_ini)
+    ff = _parse_fecha(fecha_fin)
+
+    # Fallback uniforme
+    if not fi or not ff or ff < fi:
+        base = round(hrs / n)
+        res = [base] * n
+        res[-1] += int(round(hrs - base * n))
+        return res
+
+    total_days = (ff - fi).days + 1
+    if total_days <= 0:
+        return [round(hrs / n)] * n
+
+    raw = []
+    for c in cortes_list:
+        ci, cf = c.get("fecha_inicio"), c.get("fecha_fin")
+        if not ci or not cf:
+            raw.append(0.0)
+            continue
+        start = max(fi, ci)
+        end = min(ff, cf)
+        if end < start:
+            raw.append(0.0)
+        else:
+            overlap = (end - start).days + 1
+            raw.append(hrs * overlap / total_days)
+
+    # Redondear y ajustar residual al último corte con valor > 0
+    rounded = [int(round(x)) for x in raw]
+    diff = int(round(hrs)) - sum(rounded)
+    if diff != 0:
+        for i in range(n - 1, -1, -1):
+            if rounded[i] > 0:
+                rounded[i] += diff
+                break
+        else:
+            rounded[-1] += diff
+    return rounded
+
+
+def _derive_dedicacion(emp):
+    """Devuelve 'Tiempo Completo' | 'Medio Tiempo' | 'Catedrático' | None."""
+    try:
+        ewi = getattr(emp, "employee_work_info", None)
+        if ewi and ewi.job_position_id:
+            name = (ewi.job_position_id.job_position or "").strip()
+            low = name.lower()
+            if "tiempo completo" in low:
+                return "Tiempo Completo"
+            if "medio tiempo" in low:
+                return "Medio Tiempo"
+            if "catedr" in low or "hora c" in low:
+                return "Catedrático"
+            return name or None
+    except Exception:
+        pass
+    return None
+
+
+def _dedicacion_by_hrs(total_hrs_semana):
+    """Fallback: clasifica por hrs/semana totales del docente."""
+    h = float(total_hrs_semana or 0)
+    if h >= 40:
+        return "Tiempo Completo"
+    if h >= 20:
+        return "Medio Tiempo"
+    return "Catedrático"
+
+
+DEDICACION_ORDER = {"Catedrático": 0, "Medio Tiempo": 1, "Tiempo Completo": 2}
+
+
 def _calcular_consolidado(periodo: str, tipo: str, ciclo: str = ""):
     """
     Calcula consolidado on-demand desde CargaAcademica.
@@ -152,6 +253,160 @@ def consolidado(request):
         "corte_hasta": corte_hasta, "q": q,
         "periodos": periodos, "ciclos": ciclos,
         "total": len(rows),
+    })
+
+
+@login_required
+def detalle(request):
+    """
+    Detalle de Prenómina — formato UniSinú (una fila por clase,
+    agrupado por Dedicación Académica → Docente con subtotales).
+    """
+    periodo = request.GET.get("periodo", "2026-1")
+    corte_sel = request.GET.get("corte") or ""     # 1..4 o "" para mostrar todos
+    dedicacion_sel = request.GET.get("dedicacion", "")
+    campus_sel = request.GET.get("campus", "")
+    q = (request.GET.get("q") or "").strip().lower()
+
+    # Cortes únicos por num_corte (tomamos las fechas del primero que aparezca)
+    cortes_qs = Corte.objects.filter(periodo=periodo).order_by("num_corte")
+    cortes_map = {}
+    for c in cortes_qs:
+        if c.num_corte not in cortes_map:
+            cortes_map[c.num_corte] = {
+                "num": c.num_corte,
+                "fecha_inicio": c.fecha_inicio,
+                "fecha_fin": c.fecha_fin,
+                "emitido": c.emitido,
+            }
+    cortes_list = sorted(cortes_map.values(), key=lambda x: x["num"])
+
+    # Rango de fechas global para el subtítulo
+    fecha_corte_ini = cortes_list[0]["fecha_inicio"] if cortes_list else None
+    fecha_corte_fin = cortes_list[-1]["fecha_fin"] if cortes_list else None
+
+    # Carga académica del periodo (filtramos por ciclo que coincide con periodo si aplica)
+    clases = (CargaAcademica.objects
+              .select_related("docente", "programa")
+              .exclude(docente__isnull=True))
+    if campus_sel:
+        clases = clases.filter(campus=campus_sel)
+
+    # Agrupar por docente
+    by_doc = {}
+    for cl in clases:
+        d = cl.docente
+        if not d:
+            continue
+        key = d.id
+        if key not in by_doc:
+            by_doc[key] = {
+                "employee": d,
+                "documento": (d.badge_id or "").strip(),
+                "instructor_id": (d.badge_id or "").strip()[-5:],  # últimos 5
+                "nombre": f"{d.employee_first_name} {d.employee_last_name}".strip(),
+                "clases": [],
+                "hrs_semana": 0.0,
+                "hrs_semestre": 0.0,
+                "cortes_total": [0] * len(cortes_list),
+                "campus": cl.campus or "",
+                "programa": cl.programa.department if cl.programa else "",
+            }
+        grp = by_doc[key]
+        hrs_corte = _calc_horas_por_corte(
+            cl.hrs_semestre, cl.fecha_inicial, cl.fecha_final, cortes_list
+        )
+        clase_row = {
+            "campus": cl.campus or "",
+            "programa": cl.programa.department if cl.programa else "",
+            "num_clase": cl.num_clase or "",
+            "catalogo": cl.catalogo or "",
+            "asignatura": cl.descripcion or "",
+            "componente": cl.componente or "",
+            "observacion": "" if cl.estado_clase == "Activo" else (cl.estado_clase or ""),
+            "hrs_semana": int(round(float(cl.hrs_semanal or 0))),
+            "hrs_semestre": int(round(float(cl.hrs_semestre or 0))),
+            "fecha_inicial": cl.fecha_inicial or "",
+            "fecha_final": cl.fecha_final or "",
+            "cortes": hrs_corte,
+        }
+        grp["clases"].append(clase_row)
+        grp["hrs_semana"] += float(cl.hrs_semanal or 0)
+        grp["hrs_semestre"] += float(cl.hrs_semestre or 0)
+        for i, v in enumerate(hrs_corte):
+            grp["cortes_total"][i] += v
+
+    # Derivar dedicación por docente
+    for grp in by_doc.values():
+        ded = _derive_dedicacion(grp["employee"])
+        if not ded:
+            ded = _dedicacion_by_hrs(grp["hrs_semana"])
+        grp["dedicacion"] = ded
+
+    # Filtro búsqueda y dedicación
+    docentes = list(by_doc.values())
+    if dedicacion_sel:
+        docentes = [d for d in docentes if d["dedicacion"] == dedicacion_sel]
+    if q:
+        docentes = [d for d in docentes
+                    if q in d["nombre"].lower() or q in d["documento"].lower()]
+
+    # Ordenar: por dedicación, luego nombre
+    docentes.sort(key=lambda d: (DEDICACION_ORDER.get(d["dedicacion"], 99),
+                                  d["nombre"].lower()))
+
+    # Agrupar en secciones por dedicación
+    secciones_map = {}
+    for d in docentes:
+        ded = d["dedicacion"]
+        if ded not in secciones_map:
+            secciones_map[ded] = {
+                "dedicacion": ded,
+                "docentes": [],
+                "hrs_semana": 0,
+                "hrs_semestre": 0,
+                "cortes_total": [0] * len(cortes_list),
+            }
+        secciones_map[ded]["docentes"].append(d)
+        secciones_map[ded]["hrs_semana"] += d["hrs_semana"]
+        secciones_map[ded]["hrs_semestre"] += d["hrs_semestre"]
+        for i, v in enumerate(d["cortes_total"]):
+            secciones_map[ded]["cortes_total"][i] += v
+
+    secciones = sorted(secciones_map.values(),
+                       key=lambda s: DEDICACION_ORDER.get(s["dedicacion"], 99))
+
+    # Enteros en totales de docente y sección
+    for d in docentes:
+        d["hrs_semana"] = int(round(d["hrs_semana"]))
+        d["hrs_semestre"] = int(round(d["hrs_semestre"]))
+    for s in secciones:
+        s["hrs_semana"] = int(round(s["hrs_semana"]))
+        s["hrs_semestre"] = int(round(s["hrs_semestre"]))
+
+    # Catálogos para filtros
+    periodos = sorted(set(Corte.objects.values_list("periodo", flat=True))) or ["2026-1"]
+    campuses = [{"code": c[0], "label": c[1]} for c in CAMPUS_CHOICES]
+
+    # Corte Romano para título
+    romano = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI"}
+    corte_label = romano.get(int(corte_sel), corte_sel) if corte_sel else "—"
+
+    return render(request, "academic_payroll/detalle.html", {
+        "secciones": secciones,
+        "cortes_list": cortes_list,
+        "periodo": periodo,
+        "periodos": periodos,
+        "corte_sel": corte_sel,
+        "corte_label": corte_label,
+        "dedicacion_sel": dedicacion_sel,
+        "campus_sel": campus_sel,
+        "campuses": campuses,
+        "q": q,
+        "total_docentes": len(docentes),
+        "fecha_corte_ini": fecha_corte_ini,
+        "fecha_corte_fin": fecha_corte_fin,
+        "dedicaciones": ["Catedrático", "Medio Tiempo", "Tiempo Completo"],
     })
 
 

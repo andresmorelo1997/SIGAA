@@ -1,0 +1,218 @@
+{% extends 'index.html' %}
+{% load i18n static %}
+
+{% block content %}
+<style>
+  .prenom-wrap { font-size: 11.5px; }
+  .prenom-header { text-align:center; padding: 14px 10px 6px; }
+  .prenom-header h1 { font-size: 14px; font-weight: 700; margin: 0; color: #002D62; text-transform: uppercase; letter-spacing: 0.5px; }
+  .prenom-header h2 { font-size: 12px; font-weight: 600; margin: 2px 0; color: #111; }
+  .prenom-header .meta { font-size: 11px; color: #555; margin-top: 2px; }
+
+  .prenom-filters { display:flex; flex-wrap:wrap; gap: 8px; align-items:end; padding: 8px 12px; background:#f7f9fc; border:1px solid #e1e6ef; border-radius: 6px; margin-bottom: 10px; }
+  .prenom-filters label { font-size: 11px; color:#506070; display:block; font-weight:600; margin-bottom:2px; }
+  .prenom-filters select, .prenom-filters input { border:1px solid #d3dae3; border-radius:4px; padding:5px 8px; font-size:12px; min-width: 130px; }
+  .prenom-filters .grow { flex: 1; min-width: 180px; }
+  .prenom-filters button { background:#a6192e; color:white; border:none; border-radius:4px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; }
+  .prenom-filters .btn-print { background:#2b3a55; }
+  .prenom-filters .btn-export { background:#1b7a3c; }
+
+  table.prenom-table { width:100%; border-collapse: collapse; font-size: 10.5px; }
+  table.prenom-table thead th {
+    background: #dbeaf6; color:#002D62; border:1px solid #8daac7;
+    padding: 4px 5px; text-align:center; font-weight:700;
+    position: sticky; top: 0;
+  }
+  table.prenom-table td { border:1px solid #bfd0e0; padding: 3px 5px; text-align:center; }
+  table.prenom-table td.left { text-align:left; }
+  table.prenom-table tr.docente td { background:#ffffff; }
+  table.prenom-table tr.subtotal td {
+    background:#cfe4f4 !important; font-weight:700;
+  }
+  table.prenom-table tr.dedicacion-head td {
+    background:#002D62; color:white; font-weight:700;
+    padding: 6px 8px; text-align:left; font-size:12px;
+  }
+  .badge-observacion { color:#a6192e; font-weight:600; }
+
+  @media print {
+    body * { visibility:hidden; }
+    #prenom-print, #prenom-print * { visibility:visible; }
+    #prenom-print { position:absolute; left:0; top:0; width:100%; }
+    .prenom-filters, .oh-sidebar, .oh-navbar, .oh-titlebar { display:none !important; }
+  }
+</style>
+
+<div class="oh-titlebar">
+  <div class="oh-titlebar__container">
+    <h1 class="oh-titlebar__title">{% trans "Prenómina de Docentes" %}</h1>
+    <p class="oh-titlebar__subtitle">
+      {{ total_docentes }} {% trans "docentes" %} · {% trans "Periodo" %} <strong>{{ periodo }}</strong>
+      · {% trans "Corte" %} <strong>{{ corte_label }}</strong>
+    </p>
+  </div>
+  <div class="oh-titlebar__actions">
+    <a href="{% url 'payroll-consolidado' %}" class="oh-btn oh-btn--light">
+      <ion-icon name="grid-outline"></ion-icon> {% trans "Resumen" %}
+    </a>
+    <a href="{% url 'payroll-cortes' %}" class="oh-btn oh-btn--light">
+      <ion-icon name="calendar-outline"></ion-icon> {% trans "Cortes" %}
+    </a>
+  </div>
+</div>
+
+<!-- Filtros -->
+<form method="get" class="prenom-filters">
+  <div>
+    <label>{% trans "Periodo" %}</label>
+    <select name="periodo">
+      {% for p in periodos %}
+        <option value="{{ p }}" {% if p == periodo %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>{% trans "Corte" %}</label>
+    <select name="corte">
+      <option value="">— {% trans "Todos" %} —</option>
+      {% for c in cortes_list %}
+        <option value="{{ c.num }}" {% if c.num|stringformat:'s' == corte_sel %}selected{% endif %}>
+          {% trans "Corte" %} {{ c.num }}{% if c.emitido %} ✓{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>{% trans "Dedicación" %}</label>
+    <select name="dedicacion">
+      <option value="">— {% trans "Todas" %} —</option>
+      {% for d in dedicaciones %}
+        <option value="{{ d }}" {% if d == dedicacion_sel %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>{% trans "Campus" %}</label>
+    <select name="campus">
+      <option value="">— {% trans "Todos" %} —</option>
+      {% for c in campuses %}
+        <option value="{{ c.code }}" {% if c.code == campus_sel %}selected{% endif %}>{{ c.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="grow">
+    <label>{% trans "Buscar docente" %}</label>
+    <input type="text" name="q" value="{{ q|default:'' }}" placeholder="{% trans 'Nombre o cédula…' %}">
+  </div>
+  <button type="submit" title="Filtrar">
+    <ion-icon name="search-outline"></ion-icon> {% trans "Filtrar" %}
+  </button>
+  <button type="button" class="btn-print" onclick="window.print()">
+    <ion-icon name="print-outline"></ion-icon> {% trans "Imprimir" %}
+  </button>
+</form>
+
+<!-- Contenido imprimible -->
+<div id="prenom-print" class="prenom-wrap">
+  <div class="prenom-header">
+    <h1>{% trans "UNIVERSIDAD DEL SINÚ ELÍAS BECHARA ZAINÚM" %}</h1>
+    <h2>{% trans "Detalle de Prenómina" %} {{ corte_label }} {% trans "Cohorte Docentes: Catedrático, Medio Tiempo y Tiempo Completo" %}</h2>
+    {% if fecha_corte_ini and fecha_corte_fin %}
+    <div class="meta">
+      {% trans "Fecha de Corte" %}: {{ fecha_corte_ini|date:"d" }} de {{ fecha_corte_ini|date:"F" }} al {{ fecha_corte_fin|date:"d" }} de {{ fecha_corte_fin|date:"F" }} del {{ fecha_corte_fin|date:"Y" }}
+    </div>
+    {% endif %}
+  </div>
+
+  <table class="prenom-table">
+    <thead>
+      <tr>
+        <th style="width: 80px;">{% trans "DEDICACIÓN" %}<br>{% trans "ACADÉMICA" %}</th>
+        <th style="width: 150px;">{% trans "Nombre Instructor" %}</th>
+        <th style="width: 70px;">{% trans "DOCUMENTO" %}</th>
+        <th style="width: 55px;">{% trans "Instructor" %}</th>
+        <th style="width: 50px;">{% trans "Campus" %}</th>
+        <th style="width: 130px;">{% trans "PROGRAMA ACADÉMICO" %}</th>
+        <th style="width: 50px;">{% trans "N° Clase" %}</th>
+        <th style="width: 65px;">{% trans "Catálogo" %}</th>
+        <th style="width: 150px;">{% trans "Asignaturas" %}</th>
+        <th style="width: 40px;">{% trans "Cpto" %}</th>
+        <th style="width: 70px;">{% trans "OBSERVACIÓN" %}</th>
+        <th style="width: 45px;">{% trans "Hrs Semana" %}</th>
+        <th style="width: 50px;">{% trans "Hrs Semestre" %}</th>
+        <th style="width: 65px;">{% trans "Fecha Inicial" %}</th>
+        <th style="width: 65px;">{% trans "Fecha Final" %}</th>
+        {% for c in cortes_list %}
+          <th style="width: 45px;">{% trans "Corte" %} {{ c.num }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in secciones %}
+      {% for doc in s.docentes %}
+        {% for cl in doc.clases %}
+          <tr class="docente">
+            <td>{{ s.dedicacion }}</td>
+            <td class="left">{{ doc.nombre }}</td>
+            <td>{{ doc.documento }}</td>
+            <td>{{ doc.instructor_id }}</td>
+            <td>{{ cl.campus }}</td>
+            <td class="left">{{ cl.programa }}</td>
+            <td>{{ cl.num_clase }}</td>
+            <td>{{ cl.catalogo }}</td>
+            <td class="left">{{ cl.asignatura }}</td>
+            <td>{{ cl.componente }}</td>
+            <td class="badge-observacion">{{ cl.observacion|default:"-" }}</td>
+            <td>{{ cl.hrs_semana }}</td>
+            <td>{{ cl.hrs_semestre }}</td>
+            <td>{{ cl.fecha_inicial }}</td>
+            <td>{{ cl.fecha_final }}</td>
+            {% for v in cl.cortes %}
+              <td>{{ v }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        {# Subtotal por docente #}
+        <tr class="subtotal">
+          <td>{{ s.dedicacion }}</td>
+          <td class="left">{% trans "Total" %} {{ doc.nombre }}</td>
+          <td colspan="9"></td>
+          <td>{{ doc.hrs_semana }}</td>
+          <td>{{ doc.hrs_semestre }}</td>
+          <td colspan="2"></td>
+          {% for v in doc.cortes_total %}
+            <td>{{ v }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+      {# Total de sección (dedicación) #}
+      <tr class="subtotal" style="background:#a6192e !important; color:white;">
+        <td colspan="2" class="left" style="color:white;">{% trans "Total" %} {{ s.dedicacion }}</td>
+        <td colspan="9"></td>
+        <td style="color:white;">{{ s.hrs_semana }}</td>
+        <td style="color:white;">{{ s.hrs_semestre }}</td>
+        <td colspan="2"></td>
+        {% for v in s.cortes_total %}
+          <td style="color:white;">{{ v }}</td>
+        {% endfor %}
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="20" style="text-align:center; padding: 40px; color:#999;">
+          {% if q %}
+            {% trans "Sin coincidencias para" %} "<strong>{{ q }}</strong>".
+          {% else %}
+            {% trans "Sin datos para este periodo." %}
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="display:flex; justify-content:space-between; padding:10px; font-size:10px; color:#666;">
+    <div>{% trans "Fecha de impresión" %}: {% now "d/m/Y h:i a" %}</div>
+    <div>{% trans "Página" %} 1</div>
+  </div>
+</div>
+{% endblock %}
