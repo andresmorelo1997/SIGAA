@@ -65,7 +65,13 @@
           <td class="oh-sticky-table__td">
             <span class="oh-badge oh-badge--info">{{ p.semestre|default:"—" }}</span>
           </td>
-          <td class="oh-sticky-table__td">{{ p.catalogo }}</td>
+          <td class="oh-sticky-table__td">
+            <a href="{% url 'academic-load-list' %}?search={{ p.catalogo }}"
+               class="text-decoration-none"
+               title="{% trans 'Ver clases programadas de esta asignatura' %}">
+              <strong>{{ p.catalogo }}</strong>
+            </a>
+          </td>
           <td class="oh-sticky-table__td">{{ p.asignatura }}</td>
           <td class="oh-sticky-table__td text-end">{{ p.creditos|default:"-" }}</td>
           <td class="oh-sticky-table__td text-end">{{ p.hrs_semanal|default:"-" }}</td>

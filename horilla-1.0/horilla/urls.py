@@ -17,6 +17,7 @@ Including another URLconf
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import include, path, re_path
 
 import notifications.urls
@@ -28,10 +29,19 @@ def health_check(request):
     return JsonResponse({"status": "ok"}, status=200)
 
 
+def sigaa_home(request):
+    """Landing SIGAA · redirige al dashboard académico si hay sesión, al login si no."""
+    if request.user.is_authenticated:
+        return redirect("academic-dashboard")
+    return redirect("login")
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
+    # SIGAA: redirect home al dashboard antes de delegar a base.urls
+    path("", sigaa_home, name="sigaa-home"),
     path("", include("base.urls")),
     path("", include("horilla_automations.urls")),
     path("", include("horilla_views.urls")),

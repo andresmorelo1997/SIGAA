@@ -9,6 +9,10 @@ IMG_SRC = "images/ui/calendar-clear-outline.svg"
 
 SUBMENUS = [
     {
+        "menu": trans("Dashboard SIGAA"),
+        "redirect": reverse("academic-dashboard"),
+    },
+    {
         "menu": trans("Programación"),
         "redirect": reverse("academic-load-list"),
     },
