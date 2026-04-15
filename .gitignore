@@ -50,6 +50,13 @@ next-env.d.ts
 *.pdf
 test-*.mjs
 
-# Reference project used only for UI design tokens — not part of SIGAA code
-/horilla-1.0/
+# SIGAA-Horilla local artifacts (no commit)
+/horilla-1.0/venv/
+/horilla-1.0/.env
+/horilla-1.0/sigaa.db
+/horilla-1.0/db.sqlite3
+/horilla-1.0/__pycache__/
+/horilla-1.0/**/__pycache__/
+/horilla-1.0/staticfiles/
+/horilla-1.0/media/
 /horilla-1.0.zip

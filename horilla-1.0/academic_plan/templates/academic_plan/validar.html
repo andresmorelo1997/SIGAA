@@ -1,0 +1,124 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <section class="oh-titlebar">
+    <h1 class="oh-titlebar__title">{% trans "Validación de Carga Académica" %}</h1>
+    <p class="oh-titlebar__subtitle">{% trans "Cruza el plan vs la programación" %}</p>
+  </section>
+
+  <form method="get" class="oh-card mb-3">
+    <label class="oh-label">{% trans "Programa" %}</label>
+    <select name="programa" onchange="this.form.submit()" class="form-select" style="max-width: 400px;">
+      <option value="">— {% trans "Seleccione" %} —</option>
+      {% for p in programas %}
+      <option value="{{ p }}" {% if p == programa %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if programa %}
+    <!-- Resumen -->
+    <div class="row g-3 mb-3">
+      <div class="col-md-3">
+        <div class="oh-card">
+          <div class="text-muted small">{% trans "Total asignaturas plan" %}</div>
+          <div class="fw-bold" style="font-size:1.5rem;">{{ resumen.total }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="oh-card" style="border-left:4px solid #209E5B;">
+          <div class="text-muted small">{% trans "Programadas correctamente" %}</div>
+          <div class="fw-bold text-success" style="font-size:1.5rem;">{{ resumen.ok }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="oh-card" style="border-left:4px solid #CC3D35;">
+          <div class="text-muted small">{% trans "Sin programación" %}</div>
+          <div class="fw-bold text-danger" style="font-size:1.5rem;">{{ resumen.sin_carga }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="oh-card" style="border-left:4px solid #F5B93D;">
+          <div class="text-muted small">{% trans "Diferencia de horas" %}</div>
+          <div class="fw-bold text-warning" style="font-size:1.5rem;">{{ resumen.diferencia }}</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>{% trans "Detalle del plan" %}</h3>
+    <div class="oh-card oh-card--no-padding">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#18181b; color:white;">
+            <th style="padding:6px 10px;">{% trans "Catálogo" %}</th>
+            <th>{% trans "Asignatura" %}</th>
+            <th>{% trans "Sem." %}</th>
+            <th class="text-end">Hrs plan</th>
+            <th class="text-end">Hrs carga</th>
+            <th>{% trans "Docente" %}</th>
+            <th>{% trans "Estado" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in sin_carga %}
+          <tr>
+            <td style="padding:4px 10px;">{{ d.catalogo }}</td>
+            <td>{{ d.asignatura|truncatechars:50 }}</td>
+            <td>{{ d.semestre }}</td>
+            <td class="text-end">{{ d.hrs_plan }}</td>
+            <td class="text-end">{{ d.hrs_carga|default:"—" }}</td>
+            <td><small>{{ d.docente|default:"—" }}</small></td>
+            <td>
+              {% if d.estado == 'ok' %}
+                <span class="oh-badge oh-badge--success">{% trans "OK" %}</span>
+              {% elif d.estado == 'sin_carga' %}
+                <span class="oh-badge oh-badge--danger">{% trans "Sin carga" %}</span>
+              {% else %}
+                <span class="oh-badge oh-badge--warning">{% trans "Diferencia" %}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if huerfanas %}
+    <h3 class="mt-4 text-warning">
+      {% trans "Programadas fuera del plan" %} ({{ resumen.huerfanas }})
+    </h3>
+    <div class="oh-card oh-card--no-padding" style="background:#FEF7E5;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#F5B93D; color:#212121;">
+            <th style="padding:6px 10px;">{% trans "Catálogo" %}</th>
+            <th>{% trans "Descripción" %}</th>
+            <th>{% trans "Docente" %}</th>
+            <th class="text-end">Hrs/sem.re</th>
+            <th>{% trans "Ciclo" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in huerfanas %}
+          <tr>
+            <td style="padding:4px 10px;">{{ h.catalogo }}</td>
+            <td>{{ h.descripcion|truncatechars:50 }}</td>
+            <td><small>{{ h.docente }}</small></td>
+            <td class="text-end">{{ h.hrs_semestre }}</td>
+            <td>{{ h.ciclo }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  {% else %}
+    <div class="oh-card text-center text-muted p-5">
+      <ion-icon name="checkmark-done-circle-outline" style="font-size:48px;"></ion-icon>
+      <p class="mt-3">{% trans "Seleccione un programa para ver la validación cruzada." %}</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

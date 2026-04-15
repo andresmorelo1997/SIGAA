@@ -1,0 +1,29 @@
+{% extends 'index.html' %}
+{% load static i18n %}
+
+{% block content %}
+<div class="oh-wrapper" style="max-width: 700px; margin: 0 auto;">
+  <section class="oh-titlebar">
+    <h1 class="oh-titlebar__title">{% trans "Importar Carga Académica" %}</h1>
+    <p class="oh-titlebar__subtitle">{% trans "Subir archivo Excel: US_PROG_CLASES, LC_PROG o US_DATOS" %}</p>
+  </section>
+
+  <form method="post" enctype="multipart/form-data" class="oh-card">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="oh-label">{% trans "Archivo Excel" %}</label>
+      {{ form.archivo }}
+      {% if form.archivo.errors %}<p class="text-danger">{{ form.archivo.errors }}</p>{% endif %}
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="oh-btn oh-btn--primary">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {% trans "Cargar y previsualizar" %}
+      </button>
+      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--light">{% trans "Cancelar" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

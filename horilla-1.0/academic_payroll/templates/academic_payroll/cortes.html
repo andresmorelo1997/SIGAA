@@ -1,0 +1,50 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <section class="oh-titlebar">
+    <h1 class="oh-titlebar__title">{% trans "Cortes de Prenómina" %}</h1>
+    <p class="oh-titlebar__subtitle">{% trans "Configuración de cortes por periodo y grado" %}</p>
+  </section>
+
+  <div class="oh-card oh-card--no-padding">
+    <table style="width:100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background:#18181b; color:white;">
+          <th style="padding:6px 10px;">{% trans "Periodo" %}</th>
+          <th>{% trans "Grado" %}</th>
+          <th>N°</th>
+          <th>{% trans "Inicio" %}</th>
+          <th>{% trans "Fin" %}</th>
+          <th>{% trans "Descripción" %}</th>
+          <th>{% trans "Estado" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cortes %}
+        <tr>
+          <td style="padding:4px 10px;">{{ c.periodo }}</td>
+          <td>{{ c.get_grado_display }}</td>
+          <td>{{ c.num_corte }}</td>
+          <td>{{ c.fecha_inicio|date:"d/m/Y" }}</td>
+          <td>{{ c.fecha_fin|date:"d/m/Y" }}</td>
+          <td>{{ c.descripcion|default:"-" }}</td>
+          <td>
+            {% if c.emitido %}
+              <span class="oh-badge oh-badge--success">{% trans "Emitido" %}</span>
+            {% else %}
+              <span class="oh-badge oh-badge--neutral">{% trans "Pendiente" %}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center p-4 text-muted">
+          {% trans "No hay cortes definidos. Configúrelos en el panel de administración." %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
