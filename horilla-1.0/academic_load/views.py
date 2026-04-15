@@ -16,6 +16,7 @@ import uuid
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
@@ -483,7 +484,9 @@ def busqueda_global(request):
 # ---------------------------------------------------------------- DASHBOARD SIGAA
 @login_required
 def dashboard_sigaa(request):
-    """Dashboard integrador: métricas cruzadas del sistema académico."""
+    """Dashboard integrador: métricas cruzadas del sistema académico.
+    Usa cache 5 min por ciclo para acelerar cargas repetidas.
+    """
     from django.db.models import Sum, Count
     from academic_plan.models import PlanEstudio
     try:
@@ -496,6 +499,29 @@ def dashboard_sigaa(request):
         .exclude(ciclo_lectivo="").values_list("ciclo_lectivo", flat=True)
     ), reverse=True)
     ciclo = request.GET.get("ciclo", ciclos[0] if ciclos else "")
+
+    # Cache de métricas pesadas por ciclo (5 min)
+    cache_key = f"sigaa_dashboard_v1:{ciclo or 'all'}"
+    cached = cache.get(cache_key)
+    if cached:
+        # Aún así sobreescribimos saludo/nombre por usuario, para personalizar
+        from django.utils import timezone as _tz
+        h = _tz.localtime().hour
+        if h < 12: saludo = "Buenos días"
+        elif h < 19: saludo = "Buenas tardes"
+        else: saludo = "Buenas noches"
+        nombre = ""
+        try:
+            emp = request.user.employee_get
+            if emp: nombre = emp.employee_first_name
+        except Exception:
+            nombre = request.user.get_short_name() or request.user.username
+        ctx = dict(cached)
+        ctx["saludo"] = saludo
+        ctx["nombre_usuario"] = nombre
+        ctx["ciclos"] = ciclos
+        ctx["ciclo"] = ciclo
+        return render(request, "academic_load/dashboard_sigaa.html", ctx)
 
     carga_qs = CargaAcademica.objects.all()
     if ciclo:
@@ -603,18 +629,23 @@ def dashboard_sigaa(request):
     except Exception:
         nombre = request.user.get_short_name() or request.user.username
 
-    return render(request, "academic_load/dashboard_sigaa.html", {
+    payload = {
         "kpis": kpis,
-        "ciclos": ciclos,
-        "ciclo": ciclo,
         "top_docentes": top_docentes,
         "por_campus": por_campus,
         "por_grado": por_grado,
         "programas_criticos": programas_criticos[:5],
         "por_ciclo": por_ciclo,
+    }
+    # Cache 5 min los datos pesados (sin saludo/ciclos/user)
+    cache.set(cache_key, payload, 300)
+
+    return render(request, "academic_load/dashboard_sigaa.html", dict(payload, **{
+        "ciclos": ciclos,
+        "ciclo": ciclo,
         "saludo": saludo,
         "nombre_usuario": nombre,
-    })
+    }))
 
 
 # ---------------------------------------------------------------- EMPLOYEE TAB
