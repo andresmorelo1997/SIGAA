@@ -7,11 +7,18 @@
       <ion-icon name="school-outline"></ion-icon>
       {% trans "Resumen de Carga Académica" %}
     </h4>
-    <a href="{% url 'academic-load-list' %}?search={{ employee.badge_id|default:'' }}"
-       class="oh-btn oh-btn--light oh-btn--sm">
-      <ion-icon name="open-outline" class="me-1"></ion-icon>
-      {% trans "Ver en módulo" %}
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'academic-load-export' %}?search={{ employee.badge_id|default:'' }}"
+         class="oh-btn oh-btn--secondary oh-btn--sm">
+        <ion-icon name="download-outline" class="me-1"></ion-icon>
+        {% trans "Exportar a Excel" %}
+      </a>
+      <a href="{% url 'academic-load-list' %}?search={{ employee.badge_id|default:'' }}"
+         class="oh-btn oh-btn--light oh-btn--sm">
+        <ion-icon name="open-outline" class="me-1"></ion-icon>
+        {% trans "Ver en módulo" %}
+      </a>
+    </div>
   </div>
 
   <div class="row g-3 p-3">

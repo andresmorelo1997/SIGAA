@@ -327,6 +327,43 @@ def history_list(request):
     return render(request, "academic_load/history.html", {"history": history})
 
 
+# ---------------------------------------------------------------- STATUS / HEALTH
+@login_required
+def status_json(request):
+    """Status JSON del sistema — métricas para monitoreo."""
+    from django.http import JsonResponse
+    from academic_plan.models import PlanEstudio
+    from academic_payroll.models import Corte, PrenominaDocente
+    try:
+        from employee.models import Employee
+    except Exception:
+        Employee = None
+
+    last_import = ImportHistory.objects.order_by("-created_at").first()
+
+    return JsonResponse({
+        "brand": "SIGAA — Universidad del Sinú",
+        "version": "1.0",
+        "data": {
+            "docentes": Employee.objects.count() if Employee else 0,
+            "clases_total": CargaAcademica.objects.count(),
+            "clases_con_fk": CargaAcademica.objects.filter(docente__isnull=False).count(),
+            "asignaturas_plan": PlanEstudio.objects.count(),
+            "programas_plan": PlanEstudio.objects.values("programa_codigo").distinct().count(),
+            "cortes_configurados": Corte.objects.count(),
+            "snapshots_emitidos": PrenominaDocente.objects.filter(estado="emitido").count(),
+            "importaciones": ImportHistory.objects.count(),
+        },
+        "last_import": {
+            "filename": last_import.filename if last_import else None,
+            "date": last_import.created_at.isoformat() if last_import else None,
+            "status": last_import.status if last_import else None,
+            "records": last_import.records_inserted if last_import else 0,
+        } if last_import else None,
+        "sigaa_hide_money": True,
+    })
+
+
 # ---------------------------------------------------------------- DOCENTES SIN CLASES
 @login_required
 def docentes_sin_carga(request):
