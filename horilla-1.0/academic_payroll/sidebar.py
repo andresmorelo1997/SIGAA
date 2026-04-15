@@ -5,7 +5,8 @@ MENU = trans("Prenómina Docente")
 IMG_SRC = "images/ui/leave.svg"
 
 SUBMENUS = [
-    {"menu": trans("Consolidado"), "redirect": reverse("payroll-consolidado")},
+    {"menu": trans("Detalle oficial"), "redirect": reverse("payroll-detalle")},
+    {"menu": trans("Resumen consolidado"), "redirect": reverse("payroll-consolidado")},
     {"menu": trans("Cortes"), "redirect": reverse("payroll-cortes")},
     {"menu": trans("Histórico emitidos"), "redirect": reverse("payroll-historicos")},
 ]
