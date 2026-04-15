@@ -3,14 +3,18 @@ academic_payroll.views
 ======================
 Vistas del módulo Prenómina Docente.
 """
+import io
 from datetime import datetime, date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 from django.db.models import Q
 
@@ -133,6 +137,62 @@ def consolidado(request):
 def cortes_view(request):
     cortes = Corte.objects.all().order_by("periodo", "grado", "num_corte")
     return render(request, "academic_payroll/cortes.html", {"cortes": cortes})
+
+
+@login_required
+def consolidado_export(request):
+    """Exporta el consolidado de prenómina (en HORAS) a Excel."""
+    periodo = request.GET.get("periodo", "2026-1")
+    tipo = request.GET.get("tipo", "PREGRADO")
+    ciclo = request.GET.get("ciclo", "")
+
+    rows, cortes_info = _calcular_consolidado(periodo, tipo, ciclo)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Prenomina {periodo}"[:31]
+
+    # Encabezado
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill("solid", fgColor="A6192E")  # rojo UniSinú
+
+    headers = ["N°", "Cédula", "Docente", "Campus", "Programa",
+               "Hrs/sem", "Hrs/sem.re"]
+    for c in cortes_info:
+        headers.append(f"Corte {c['num']}")
+    headers += ["Hrs prenómina", "Saldo horas"]
+    ws.append(headers)
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+
+    # Filas
+    for i, r in enumerate(rows, start=1):
+        row = [i, r["instructor_id"], r["nombre"], r["campus"], r["programa"],
+               r["hrs_semana"], r["hrs_semestre"]]
+        row += r["cortes"]
+        row += [r["hrs_prenomina"], r["saldo"]]
+        ws.append(row)
+
+    # Auto-ancho básico
+    for col in ws.columns:
+        letter = col[0].column_letter
+        ws.column_dimensions[letter].width = 18
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    filename = f"prenomina_{tipo.lower()}_{periodo}"
+    if ciclo:
+        filename += f"_{ciclo}"
+    filename += ".xlsx"
+    resp = HttpResponse(
+        buf.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return resp
 
 
 # ──────────────────────── EMPLOYEE TAB ────────────────────────

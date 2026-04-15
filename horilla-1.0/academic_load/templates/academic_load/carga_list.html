@@ -10,6 +10,11 @@
       <p class="oh-titlebar__subtitle">{{ total }} {% trans "clases programadas" %}</p>
     </div>
     <div class="oh-titlebar__actions">
+      <a href="{% url 'academic-load-export' %}?{{ request.GET.urlencode }}"
+         class="oh-btn oh-btn--light">
+        <ion-icon name="download-outline" class="me-2"></ion-icon>
+        {% trans "Exportar Excel" %}
+      </a>
       <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary">
         <ion-icon name="cloud-upload-outline" class="me-2"></ion-icon>
         {% trans "Importar Excel" %}

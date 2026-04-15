@@ -3,7 +3,7 @@ academic_plan.views — Listado, importador y validación cruzada.
 """
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, F, OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -12,6 +12,58 @@ from academic_load.models import CargaAcademica
 from base.models import Department
 from .import_helpers import parse_plan
 from .models import PlanEstudio
+
+
+@login_required
+def plan_faltantes(request):
+    """Asignaturas del plan sin clase programada — panel clave para planeación."""
+    programa = request.GET.get("programa", "")
+    ciclo = request.GET.get("ciclo", "")
+
+    # Catálogos con carga programada (opcionalmente filtrado por ciclo)
+    carga_cats_qs = CargaAcademica.objects.exclude(catalogo__isnull=True).exclude(catalogo="")
+    if ciclo:
+        carga_cats_qs = carga_cats_qs.filter(ciclo_lectivo=ciclo)
+    carga_cats = set(carga_cats_qs.values_list("catalogo", flat=True).distinct())
+
+    plan = PlanEstudio.objects.all()
+    if programa:
+        plan = plan.filter(programa_codigo=programa)
+
+    sin_programar = plan.exclude(catalogo__in=carga_cats).order_by(
+        "programa_codigo", "semestre", "catalogo"
+    )
+
+    # Resumen por programa
+    from collections import defaultdict
+    resumen = defaultdict(lambda: {"total": 0, "faltantes": 0, "hrs_faltantes": 0})
+    for p in plan:
+        r = resumen[p.programa_codigo]
+        r["total"] += 1
+        if p.catalogo not in carga_cats:
+            r["faltantes"] += 1
+            r["hrs_faltantes"] += p.hrs_semestre or 0
+    resumen_list = [
+        {"programa": k, **v,
+         "cobertura": round(100 * (v["total"] - v["faltantes"]) / v["total"], 1) if v["total"] else 0}
+        for k, v in sorted(resumen.items())
+    ]
+
+    ciclos = sorted(set(
+        CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True).exclude(ciclo_lectivo="")
+        .values_list("ciclo_lectivo", flat=True)
+    ), reverse=True)
+    programas = list(PlanEstudio.objects.values_list("programa_codigo", flat=True).distinct())
+
+    return render(request, "academic_plan/faltantes.html", {
+        "sin_programar": sin_programar[:500],
+        "resumen": resumen_list,
+        "ciclos": ciclos,
+        "programas": programas,
+        "programa": programa,
+        "ciclo": ciclo,
+        "total_faltantes": sin_programar.count(),
+    })
 
 
 @login_required

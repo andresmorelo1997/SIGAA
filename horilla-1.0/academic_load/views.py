@@ -9,6 +9,7 @@ Vistas del módulo Carga Académica:
 """
 from __future__ import annotations
 
+import io
 import os
 import tempfile
 import uuid
@@ -21,6 +22,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 from base.models import Department
 from employee.models import Employee
@@ -73,6 +77,67 @@ def carga_list(request):
             "grado_choices": GRADO_CHOICES,
         },
     )
+
+
+# ---------------------------------------------------------------- EXPORT
+@login_required
+def carga_export(request):
+    """Exporta la carga académica filtrada a Excel (mismos filtros que /academic/)."""
+    qs = CargaAcademica.objects.select_related("docente", "programa").all()
+    form = FilterForm(request.GET or None)
+    if form.is_valid():
+        d = form.cleaned_data
+        if d.get("search"):
+            t = d["search"]
+            qs = qs.filter(
+                Q(descripcion__icontains=t) | Q(catalogo__icontains=t)
+                | Q(nombre_instructor__icontains=t) | Q(instructor_id_raw__icontains=t)
+            )
+        if d.get("campus"): qs = qs.filter(campus__in=d["campus"])
+        if d.get("grado"): qs = qs.filter(grado__in=d["grado"])
+        if d.get("estado"): qs = qs.filter(estado_clase__in=d["estado"])
+        if d.get("ciclo_lectivo"): qs = qs.filter(ciclo_lectivo=d["ciclo_lectivo"])
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Carga Académica"
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill("solid", fgColor="A6192E")
+    headers = ["N°", "N° Clase", "Catálogo", "Asignatura", "Ciclo", "Campus",
+               "Grado", "Cédula docente", "Docente", "Hrs/sem", "Hrs/sem.re",
+               "Estado"]
+    ws.append(headers)
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+
+    for i, c in enumerate(qs.iterator(), start=1):
+        ws.append([
+            i,
+            c.num_clase or "",
+            c.catalogo or "",
+            c.descripcion or "",
+            c.ciclo_lectivo or "",
+            c.campus or "",
+            c.grado or "",
+            c.instructor_id_raw or "",
+            c.nombre_instructor or "",
+            c.hrs_semanal or 0,
+            c.hrs_semestre or 0,
+            c.estado_clase or "",
+        ])
+    for col in ws.columns:
+        ws.column_dimensions[col[0].column_letter].width = 18
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    resp = HttpResponse(
+        buf.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp["Content-Disposition"] = 'attachment; filename="carga_academica.xlsx"'
+    return resp
 
 
 # ---------------------------------------------------------------- IMPORT

@@ -8,4 +8,5 @@ SUBMENUS = [
     {"menu": trans("Asignaturas"), "redirect": reverse("plan-list")},
     {"menu": trans("Importar Plan"), "redirect": reverse("plan-import")},
     {"menu": trans("Validación de Carga"), "redirect": reverse("plan-validar")},
+    {"menu": trans("Asignaturas sin programar"), "redirect": reverse("plan-faltantes")},
 ]

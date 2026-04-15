@@ -9,6 +9,13 @@
       <h1 class="oh-titlebar__title">{% trans "Prenómina Docente — Consolidado" %}</h1>
       <p class="oh-titlebar__subtitle">{{ total }} {% trans "docentes" %} · {{ periodo }} · {{ tipo }}</p>
     </div>
+    <div class="oh-titlebar__actions">
+      <a href="{% url 'payroll-export' %}?periodo={{ periodo }}&tipo={{ tipo }}&ciclo={{ ciclo }}"
+         class="oh-btn oh-btn--secondary">
+        <ion-icon name="download-outline" class="me-2"></ion-icon>
+        {% trans "Exportar Excel" %}
+      </a>
+    </div>
   </div>
 
   <!-- Filtros -->

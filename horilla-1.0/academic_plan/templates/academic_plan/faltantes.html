@@ -1,0 +1,154 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <!-- Titlebar -->
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Asignaturas sin programar" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {% trans "Plan de estudios vs carga académica" %}
+        {% if total_faltantes %}· <strong class="text-danger">{{ total_faltantes }} {% trans "faltantes" %}</strong>{% endif %}
+      </p>
+    </div>
+    <div class="oh-titlebar__actions">
+      <a href="{% url 'plan-validar' %}{% if programa %}?programa={{ programa }}{% endif %}"
+         class="oh-btn oh-btn--light">
+        <ion-icon name="swap-horizontal-outline" class="me-1"></ion-icon>
+        {% trans "Validación cruzada" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <form method="get" class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="filter-outline"></ion-icon>
+        {% trans "Filtros" %}
+      </h4>
+    </div>
+    <div class="row g-3 p-3">
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "Programa" %}</label>
+        <select name="programa" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos" %} —</option>
+          {% for p in programas %}
+            <option value="{{ p }}" {% if p == programa %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "Ciclo lectivo (carga)" %}</label>
+        <select name="ciclo" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos los ciclos" %} —</option>
+          {% for c in ciclos %}
+            <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <!-- Resumen por programa -->
+  <div class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="analytics-outline"></ion-icon>
+        {% trans "Cobertura por programa" %}
+      </h4>
+    </div>
+    <div class="oh-sticky-table-container">
+      <table class="oh-sticky-table">
+        <thead class="oh-sticky-table__thead">
+          <tr>
+            <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Plan" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Faltantes" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Hrs faltantes" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Cobertura" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in resumen %}
+          <tr class="oh-sticky-table__tr">
+            <td class="oh-sticky-table__td">
+              <a href="?programa={{ r.programa }}{% if ciclo %}&ciclo={{ ciclo }}{% endif %}"
+                 class="text-decoration-none"><strong>{{ r.programa }}</strong></a>
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ r.total }}</td>
+            <td class="oh-sticky-table__td text-end">
+              {% if r.faltantes %}
+                <span class="oh-badge oh-badge--danger">{{ r.faltantes }}</span>
+              {% else %}
+                <span class="oh-badge oh-badge--success">0</span>
+              {% endif %}
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ r.hrs_faltantes|floatformat:0 }}</td>
+            <td class="oh-sticky-table__td text-end">
+              {% if r.cobertura >= 90 %}
+                <span class="oh-badge oh-badge--success">{{ r.cobertura }}%</span>
+              {% elif r.cobertura >= 60 %}
+                <span class="oh-badge oh-badge--warning">{{ r.cobertura }}%</span>
+              {% else %}
+                <span class="oh-badge oh-badge--danger">{{ r.cobertura }}%</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Detalle faltantes -->
+  {% if sin_programar %}
+  <div class="oh-card">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {% trans "Asignaturas sin clase programada" %}
+        <small class="text-muted">({{ sin_programar|length }} {% trans "mostradas de" %} {{ total_faltantes }})</small>
+      </h4>
+    </div>
+    <div class="oh-sticky-table-container">
+      <table class="oh-sticky-table">
+        <thead class="oh-sticky-table__thead">
+          <tr>
+            <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Semestre" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Catálogo" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Asignatura" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Créditos" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Hrs plan" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in sin_programar %}
+          <tr class="oh-sticky-table__tr">
+            <td class="oh-sticky-table__td"><strong>{{ p.programa_codigo }}</strong></td>
+            <td class="oh-sticky-table__td">
+              <span class="oh-badge oh-badge--info">{{ p.semestre|default:"—" }}</span>
+            </td>
+            <td class="oh-sticky-table__td">{{ p.catalogo }}</td>
+            <td class="oh-sticky-table__td">{{ p.asignatura }}</td>
+            <td class="oh-sticky-table__td text-end">{{ p.creditos|default:"-" }}</td>
+            <td class="oh-sticky-table__td text-end">{{ p.hrs_semestre|default:0|floatformat:0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="oh-card text-center p-5">
+    <div class="text-success">
+      <ion-icon name="checkmark-circle-outline" style="font-size:48px;"></ion-icon>
+      <h3 class="mt-3">{% trans "Sin asignaturas faltantes" %}</h3>
+      <p class="text-muted">{% trans "Todas las asignaturas del plan tienen clase programada en carga académica." %}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
