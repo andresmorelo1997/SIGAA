@@ -303,10 +303,12 @@ def _do_import(request, file_bytes: bytes, filename: str, info: dict, campus_cho
 
         request.session.pop("pending_import", None)
 
+        total_archivo = info["total_rows"]
+        pct = round(100 * inserted / total_archivo, 1) if total_archivo else 0
         msg = (
-            f"Importación completa: {inserted} clases insertadas"
-            + (f", {docentes_creados} docentes nuevos creados" if docentes_creados else "")
-            + (f", {skipped} omitidas (campus filtrados)" if skipped else "")
+            f"Importación completa: {inserted} de {total_archivo} clases ({pct}%) insertadas"
+            + (f" · {docentes_creados} docentes nuevos creados" if docentes_creados else "")
+            + (f" · {skipped} omitidas por filtro de campus" if skipped else "")
             + "."
         )
         messages.success(request, msg)

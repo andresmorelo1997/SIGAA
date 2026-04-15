@@ -30,10 +30,31 @@ def health_check(request):
 
 
 def sigaa_home(request):
-    """Landing SIGAA · redirige al dashboard académico si hay sesión, al login si no."""
-    if request.user.is_authenticated:
+    """Landing SIGAA · comportamiento según rol del usuario.
+
+    - Anónimo → /login/
+    - Staff/superuser → Dashboard académico con todos los KPIs
+    - Docente normal (Employee sin permisos de staff) → su propio tab de
+      Carga Académica (para ver solo sus clases y horas).
+    """
+    user = request.user
+    if not user.is_authenticated:
+        return redirect("login")
+
+    # Superuser/staff → dashboard global
+    if user.is_staff or user.is_superuser:
         return redirect("academic-dashboard")
-    return redirect("login")
+
+    # Docente normal → su employee-view-individual
+    try:
+        emp = user.employee_get
+        if emp:
+            return redirect("employee-view-individual", emp.id)
+    except Exception:
+        pass
+
+    # Fallback
+    return redirect("academic-dashboard")
 
 
 urlpatterns = [
