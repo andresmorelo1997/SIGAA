@@ -1,0 +1,202 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <!-- Titlebar -->
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Dashboard SIGAA" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {% trans "Panel integrador · Universidad del Sinú" %}
+        {% if ciclo %} · <strong>{% trans "Ciclo" %} {{ ciclo }}</strong>{% endif %}
+      </p>
+    </div>
+    <div class="oh-titlebar__actions">
+      <form method="get" class="d-flex gap-2">
+        <select name="ciclo" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos los ciclos" %} —</option>
+          {% for c in ciclos %}
+          <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-2 col-6">
+      <div class="oh-card">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Docentes" %}</div>
+          <div class="oh-card__title mt-1">{{ kpis.total_docentes }}</div>
+          <small class="text-muted">{{ kpis.docentes_con_carga }} {% trans "con carga" %}</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="oh-card">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Clases" %}</div>
+          <div class="oh-card__title mt-1">{{ kpis.total_clases }}</div>
+          <small class="text-muted">{% trans "programadas" %}</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="oh-card">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Asignaturas plan" %}</div>
+          <div class="oh-card__title mt-1">{{ kpis.total_asignaturas_plan }}</div>
+          <small class="text-muted">{{ kpis.total_programas }} {% trans "programas" %}</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 col-6">
+      <div class="oh-card">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Horas totales" %}</div>
+          <div class="oh-card__title mt-1">{{ kpis.hrs_totales }}</div>
+          <small class="text-muted">{% trans "de semestre" %}</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="oh-card oh-card--success">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Cobertura Plan vs Carga" %}</div>
+          <div class="oh-card__title mt-1">{{ kpis.cobertura_pct }}%</div>
+          <small class="text-muted">{{ kpis.cobertura_asignaturas }} {% trans "asignaturas del plan con clase programada" %}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accesos rápidos -->
+  <div class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title"><ion-icon name="flash-outline"></ion-icon> {% trans "Accesos rápidos" %}</h4>
+    </div>
+    <div class="p-3 d-flex flex-wrap gap-2">
+      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="list-outline" class="me-1"></ion-icon> {% trans "Carga Académica" %}
+      </a>
+      <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="cloud-upload-outline" class="me-1"></ion-icon> {% trans "Importar Carga" %}
+      </a>
+      <a href="{% url 'plan-list' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="book-outline" class="me-1"></ion-icon> {% trans "Plan de Estudios" %}
+      </a>
+      <a href="{% url 'plan-validar' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="checkmark-circle-outline" class="me-1"></ion-icon> {% trans "Validar Plan vs Carga" %}
+      </a>
+      <a href="{% url 'payroll-consolidado' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="time-outline" class="me-1"></ion-icon> {% trans "Prenómina Docente" %}
+      </a>
+      <a href="{% url 'reports-index' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="document-text-outline" class="me-1"></ion-icon> {% trans "Reportes SNIES" %}
+      </a>
+      <a href="{% url 'employee-view' %}" class="oh-btn oh-btn--light">
+        <ion-icon name="people-outline" class="me-1"></ion-icon> {% trans "Lista de Docentes" %}
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Top docentes -->
+    <div class="col-md-6">
+      <div class="oh-card">
+        <div class="oh-card__header">
+          <h4 class="oh-card__title"><ion-icon name="trophy-outline"></ion-icon> {% trans "Top 10 docentes por horas" %}</h4>
+        </div>
+        <div class="oh-sticky-table-container">
+          <table class="oh-sticky-table">
+            <thead class="oh-sticky-table__thead">
+              <tr>
+                <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+                <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+                <th class="oh-sticky-table__th text-end">{% trans "Horas" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in top_docentes %}
+              <tr class="oh-sticky-table__tr">
+                <td class="oh-sticky-table__td">
+                  <a href="{% url 'employee-view-individual' d.docente__id %}" class="text-decoration-none">
+                    {{ d.docente__employee_first_name }} {{ d.docente__employee_last_name }}
+                  </a>
+                </td>
+                <td class="oh-sticky-table__td text-end">{{ d.clases }}</td>
+                <td class="oh-sticky-table__td text-end"><strong>{{ d.hrs|floatformat:1 }}</strong></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center p-3 text-muted">{% trans "Sin datos aún." %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Por campus -->
+    <div class="col-md-3">
+      <div class="oh-card">
+        <div class="oh-card__header">
+          <h4 class="oh-card__title"><ion-icon name="business-outline"></ion-icon> {% trans "Por campus" %}</h4>
+        </div>
+        <div class="oh-sticky-table-container">
+          <table class="oh-sticky-table">
+            <thead class="oh-sticky-table__thead">
+              <tr>
+                <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
+                <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+                <th class="oh-sticky-table__th text-end">{% trans "Hrs" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in por_campus %}
+              <tr class="oh-sticky-table__tr">
+                <td class="oh-sticky-table__td"><span class="oh-badge oh-badge--info">{{ c.campus }}</span></td>
+                <td class="oh-sticky-table__td text-end">{{ c.n }}</td>
+                <td class="oh-sticky-table__td text-end">{{ c.hrs|floatformat:0 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Por grado -->
+    <div class="col-md-3">
+      <div class="oh-card">
+        <div class="oh-card__header">
+          <h4 class="oh-card__title"><ion-icon name="school-outline"></ion-icon> {% trans "Por grado" %}</h4>
+        </div>
+        <div class="oh-sticky-table-container">
+          <table class="oh-sticky-table">
+            <thead class="oh-sticky-table__thead">
+              <tr>
+                <th class="oh-sticky-table__th">{% trans "Grado" %}</th>
+                <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+                <th class="oh-sticky-table__th text-end">{% trans "Hrs" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for g in por_grado %}
+              <tr class="oh-sticky-table__tr">
+                <td class="oh-sticky-table__td">{{ g.grado }}</td>
+                <td class="oh-sticky-table__td text-end">{{ g.n }}</td>
+                <td class="oh-sticky-table__td text-end">{{ g.hrs|floatformat:0 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

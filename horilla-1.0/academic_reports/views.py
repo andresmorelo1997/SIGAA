@@ -24,7 +24,7 @@ REPORTES = {
     "profesores-asignaturas": "Profesores por Asignatura",
     "planta-profesoral": "Planta Profesoral",
     "horas-docentes": "Horas Docente",
-    "escala-salarial": "Escala Salarial",
+    "cobertura-plan": "Cobertura del Plan (horas)",
     "nuevas-plazas": "Nuevas Plazas",
     "reemplazos": "Reemplazos",
     "no-continuan": "No Continúan",
@@ -79,9 +79,38 @@ def _build_rows(tipo: str) -> tuple[list[str], list[list]]:
                 for c in CargaAcademica.objects.all().select_related("docente")[:1000]]
         return headers, rows
 
-    # Reportes con datos no disponibles aún (escala-salarial / nuevas-plazas / etc.)
+    if tipo == "cobertura-plan":
+        # Cruza plan vs carga — % horas planeadas vs horas programadas
+        from academic_plan.models import PlanEstudio
+        headers = ["Programa", "Asignaturas plan", "Programadas", "Sin programar",
+                   "Hrs plan", "Hrs carga", "% cobertura"]
+        rows = []
+        programas = PlanEstudio.objects.values_list("programa_codigo", flat=True).distinct()
+        for pcode in sorted(programas):
+            plan = PlanEstudio.objects.filter(programa_codigo=pcode)
+            plan_cats = set(plan.values_list("catalogo", flat=True))
+            carga = CargaAcademica.objects.filter(catalogo__in=plan_cats)
+            programadas = carga.values_list("catalogo", flat=True).distinct().count()
+            hrs_plan = plan.aggregate(s=Sum("hrs_semestre"))["s"] or 0
+            hrs_carga = carga.aggregate(s=Sum("hrs_semestre"))["s"] or 0
+            cobertura = round(100 * hrs_carga / hrs_plan, 1) if hrs_plan else 0
+            rows.append([pcode, plan.count(), programadas,
+                         plan.count() - programadas,
+                         round(hrs_plan, 1), round(hrs_carga, 1),
+                         f"{cobertura}%"])
+        return headers, rows
+
+    if tipo == "nivel-formacion":
+        headers = ["Nivel", "Cantidad"]
+        # Heurística: usa "qualification" del work_info si existe
+        agg = Employee.objects.values("employee_work_info__qualification__title") \
+            .annotate(n=Count("id")).order_by("-n")
+        return headers, [[r["employee_work_info__qualification__title"] or "Sin registrar",
+                          r["n"]] for r in agg]
+
+    # Reportes con datos no disponibles aún (nuevas-plazas / reemplazos / no-continuan)
     return ["Mensaje"], [[f"Datos pendientes — el reporte '{REPORTES.get(tipo, tipo)}' "
-                          "se calcula con datos que aún no están cargados."]]
+                          "requiere información histórica que aún no se ha cargado."]]
 
 
 @login_required

@@ -248,6 +248,122 @@ def history_list(request):
     return render(request, "academic_load/history.html", {"history": history})
 
 
+# ---------------------------------------------------------------- DASHBOARD SIGAA
+@login_required
+def dashboard_sigaa(request):
+    """Dashboard integrador: métricas cruzadas del sistema académico."""
+    from django.db.models import Sum, Count
+    from academic_plan.models import PlanEstudio
+    try:
+        from employee.models import Employee
+    except Exception:
+        Employee = None
+
+    ciclos = sorted(set(
+        CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True)
+        .exclude(ciclo_lectivo="").values_list("ciclo_lectivo", flat=True)
+    ), reverse=True)
+    ciclo = request.GET.get("ciclo", ciclos[0] if ciclos else "")
+
+    carga_qs = CargaAcademica.objects.all()
+    if ciclo:
+        carga_qs = carga_qs.filter(ciclo_lectivo=ciclo)
+
+    # KPI
+    kpis = {
+        "total_docentes": (Employee.objects.count() if Employee else 0),
+        "total_clases": carga_qs.count(),
+        "total_asignaturas_plan": PlanEstudio.objects.count(),
+        "total_programas": PlanEstudio.objects.values("programa_codigo").distinct().count(),
+        "hrs_totales": round(carga_qs.aggregate(s=Sum("hrs_semestre"))["s"] or 0, 1),
+        "docentes_con_carga": carga_qs.exclude(docente__isnull=True).values("docente").distinct().count(),
+    }
+
+    # Cobertura plan vs carga
+    plan_cats = set(PlanEstudio.objects.values_list("catalogo", flat=True))
+    carga_cats = set(carga_qs.values_list("catalogo", flat=True))
+    cobertura_total = len(plan_cats & carga_cats)
+    kpis["cobertura_asignaturas"] = cobertura_total
+    kpis["cobertura_pct"] = round(100 * cobertura_total / len(plan_cats), 1) if plan_cats else 0
+
+    # Top docentes por horas
+    top_docentes = list(
+        carga_qs.exclude(docente__isnull=True)
+        .values("docente__id", "docente__employee_first_name", "docente__employee_last_name")
+        .annotate(hrs=Sum("hrs_semestre"), clases=Count("id"))
+        .order_by("-hrs")[:10]
+    )
+
+    # Distribución por campus
+    por_campus = list(
+        carga_qs.exclude(campus__isnull=True).exclude(campus="")
+        .values("campus").annotate(n=Count("id"), hrs=Sum("hrs_semestre"))
+        .order_by("-n")
+    )
+
+    # Distribución por grado
+    por_grado = list(
+        carga_qs.exclude(grado__isnull=True).exclude(grado="")
+        .values("grado").annotate(n=Count("id"), hrs=Sum("hrs_semestre"))
+        .order_by("-n")
+    )
+
+    return render(request, "academic_load/dashboard_sigaa.html", {
+        "kpis": kpis,
+        "ciclos": ciclos,
+        "ciclo": ciclo,
+        "top_docentes": top_docentes,
+        "por_campus": por_campus,
+        "por_grado": por_grado,
+    })
+
+
+# ---------------------------------------------------------------- EMPLOYEE TAB
+@login_required
+def academic_load_employee_tab(request, emp_id: int):
+    """Renderiza la pestaña 'Carga Académica' dentro del detalle de un docente.
+
+    Busca clases por FK `docente` o por `instructor_id_raw` (cédula padded
+    a 10 dígitos). Devuelve todas las clases históricas del docente
+    agrupadas por ciclo lectivo.
+    """
+    from django.db.models import Sum, Count
+    emp = get_object_or_404(Employee, pk=emp_id)
+
+    # Cruce robusto: por FK o por instructor_id_raw (cédula)
+    cedula_raw = (emp.badge_id or "").strip()
+    cedula_padded = cedula_raw.zfill(10) if cedula_raw.isdigit() else cedula_raw
+    clases = CargaAcademica.objects.filter(
+        Q(docente_id=emp.id)
+        | Q(instructor_id_raw=cedula_raw)
+        | Q(instructor_id_raw=cedula_padded)
+    ).order_by("-ciclo_lectivo", "catalogo")
+
+    # Resumen por ciclo
+    resumen = (
+        clases.values("ciclo_lectivo", "grado", "campus")
+        .annotate(
+            n_clases=Count("id"),
+            hrs_semanal=Sum("hrs_semanal"),
+            hrs_semestre=Sum("hrs_semestre"),
+        )
+        .order_by("-ciclo_lectivo", "grado")
+    )
+
+    totales = clases.aggregate(
+        n=Count("id"),
+        hs=Sum("hrs_semanal"),
+        hsr=Sum("hrs_semestre"),
+    )
+
+    return render(request, "academic_load/tab_carga_docente.html", {
+        "employee": emp,
+        "clases": clases[:300],
+        "resumen": resumen,
+        "totales": totales,
+    })
+
+
 @login_required
 def history_download(request, pk: int):
     h = get_object_or_404(ImportHistory, pk=pk)

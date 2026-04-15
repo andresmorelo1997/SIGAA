@@ -76,7 +76,15 @@
         <tr class="oh-sticky-table__tr">
           <td class="oh-sticky-table__td">{{ forloop.counter }}</td>
           <td class="oh-sticky-table__td">
-            <strong>{{ r.nombre }}</strong>
+            {% if r.docente_id %}
+              <a href="{% url 'employee-view-individual' r.docente_id %}"
+                 class="text-decoration-none"
+                 title="{% trans 'Ver detalle del docente' %}">
+                <strong>{{ r.nombre }}</strong>
+              </a>
+            {% else %}
+              <strong>{{ r.nombre }}</strong>
+            {% endif %}
             <small class="text-muted d-block">{{ r.instructor_id }}</small>
           </td>
           <td class="oh-sticky-table__td">

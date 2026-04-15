@@ -1,0 +1,124 @@
+{% load i18n %}
+{# SIGAA · Universidad del Sinú · Tab Carga Académica del Docente #}
+
+<div class="oh-card mb-3">
+  <div class="oh-card__header d-flex justify-content-between align-items-center">
+    <h4 class="oh-card__title mb-0">
+      <ion-icon name="school-outline"></ion-icon>
+      {% trans "Resumen de Carga Académica" %}
+    </h4>
+    <a href="{% url 'academic-load-list' %}?search={{ employee.badge_id|default:'' }}"
+       class="oh-btn oh-btn--light oh-btn--sm">
+      <ion-icon name="open-outline" class="me-1"></ion-icon>
+      {% trans "Ver en módulo" %}
+    </a>
+  </div>
+
+  <div class="row g-3 p-3">
+    <div class="col-md-3">
+      <div class="text-muted small">{% trans "Total clases" %}</div>
+      <div class="fw-bold mt-1" style="font-size:1.4rem;">{{ totales.n|default:0 }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted small">{% trans "Horas semanales" %}</div>
+      <div class="fw-bold mt-1" style="font-size:1.4rem;">{{ totales.hs|default:0|floatformat:1 }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted small">{% trans "Horas semestre" %}</div>
+      <div class="fw-bold mt-1" style="font-size:1.4rem;">{{ totales.hsr|default:0|floatformat:1 }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted small">{% trans "Cédula" %}</div>
+      <div class="fw-bold mt-1">{{ employee.badge_id|default:"—" }}</div>
+    </div>
+  </div>
+</div>
+
+{% if resumen %}
+<div class="oh-card mb-3">
+  <div class="oh-card__header">
+    <h4 class="oh-card__title">
+      <ion-icon name="analytics-outline"></ion-icon>
+      {% trans "Resumen por ciclo lectivo" %}
+    </h4>
+  </div>
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Grado" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in resumen %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ r.ciclo_lectivo|default:"—" }}</strong></td>
+          <td class="oh-sticky-table__td">{{ r.grado|default:"—" }}</td>
+          <td class="oh-sticky-table__td">
+            <span class="oh-badge oh-badge--info">{{ r.campus|default:"—" }}</span>
+          </td>
+          <td class="oh-sticky-table__td text-end">{{ r.n_clases }}</td>
+          <td class="oh-sticky-table__td text-end">{{ r.hrs_semanal|default:0|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ r.hrs_semestre|default:0|floatformat:1 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="oh-card mb-3">
+  <div class="oh-card__header">
+    <h4 class="oh-card__title">
+      <ion-icon name="list-outline"></ion-icon>
+      {% trans "Detalle de clases" %}
+      <small class="text-muted">({{ clases|length }} {% trans "mostradas" %})</small>
+    </h4>
+  </div>
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Catálogo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Asignatura" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
+          <th class="oh-sticky-table__th">{% trans "Estado" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clases %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ c.catalogo|default:"—" }}</strong></td>
+          <td class="oh-sticky-table__td">{{ c.descripcion|truncatechars:45 }}</td>
+          <td class="oh-sticky-table__td">{{ c.ciclo_lectivo|default:"—" }}</td>
+          <td class="oh-sticky-table__td">
+            <span class="oh-badge oh-badge--info">{{ c.campus|default:"—" }}</span>
+          </td>
+          <td class="oh-sticky-table__td text-end">{{ c.hrs_semanal|default:0|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ c.hrs_semestre|default:0|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td">
+            {% if c.estado_clase == 'Activo' %}
+              <span class="oh-badge oh-badge--success">{{ c.estado_clase }}</span>
+            {% else %}
+              <span class="oh-badge oh-badge--warning">{{ c.estado_clase|default:"—" }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center p-4 text-muted">
+          {% trans "Este docente no tiene clases registradas aún." %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -300,3 +300,14 @@ def enable_profile_edit(request):
             ACCESSBILITY_FEATURE.append(("profile_edit", _("Profile Edit Access")))
 
     return {"profile_edit_enabled": enable}
+
+
+def sigaa_flags(request):
+    """SIGAA · Universidad del Sinú — flags globales.
+    SIGAA_HIDE_MONEY: oculta toda la UI de dinero/salario/contrato del sistema.
+    El sistema solo mide HORAS de carga académica docente.
+    """
+    return {
+        "SIGAA_HIDE_MONEY": True,
+        "SIGAA_BRAND": "SIGAA — Universidad del Sinú",
+    }

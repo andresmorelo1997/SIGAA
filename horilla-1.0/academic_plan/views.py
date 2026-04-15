@@ -120,12 +120,14 @@ def plan_validar(request):
             ),
             "docente": (f"{m.docente.employee_first_name} {m.docente.employee_last_name}"
                         if m and m.docente else None),
+            "docente_id": (m.docente.id if m and m.docente else None),
         })
 
     huerfanas = [
         {"catalogo": c.catalogo, "descripcion": c.descripcion,
          "docente": (f"{c.docente.employee_first_name} {c.docente.employee_last_name}"
                      if c.docente else "—"),
+         "docente_id": (c.docente.id if c.docente else None),
          "hrs_semestre": c.hrs_semestre or 0, "ciclo": c.ciclo_lectivo or ""}
         for c in carga_qs if c.catalogo not in plan_catalogos
     ][:200]

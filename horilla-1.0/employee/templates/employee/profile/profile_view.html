@@ -166,7 +166,32 @@
                 				{% endif %}
               				{% endif %}
 
-							{% if "payroll"|app_installed %}
+							{# ───── SIGAA · Universidad del Sinú · tabs académicos ───── #}
+							<li data-cell-index="30" data-cell-title="{% trans 'Carga Académica' %}" class="oh-general__tab">
+								<a
+								hx-get="{% url 'academic-load-employee-tab' employee.id %}"
+								hx-target="#academic_load_target"
+								data-action="general-tab"
+								data-target="#academic_load_target"
+								class="oh-general__tab-link"
+								role="button"
+								>{% trans "Carga Académica" %}</a
+								>
+							</li>
+							<li data-cell-index="31" data-cell-title="{% trans 'Prenómina Docente' %}" class="oh-general__tab">
+								<a
+								hx-get="{% url 'academic-payroll-employee-tab' employee.id %}"
+								hx-target="#academic_payroll_target"
+								data-action="general-tab"
+								data-target="#academic_payroll_target"
+								class="oh-general__tab-link"
+								role="button"
+								>{% trans "Prenómina Docente" %}</a
+								>
+							</li>
+							{# ────────────────────────────────────────────────────────── #}
+
+							{% if "payroll"|app_installed and not SIGAA_HIDE_MONEY %}
 								<li data-cell-index="16" data-cell-title="{% trans 'Payroll' %}" class="oh-general__tab">
 									<a
 									href="#"
@@ -178,7 +203,7 @@
 								</li>
 							{% endif %}
 
-							{% if "payroll"|app_installed %}
+							{% if "payroll"|app_installed and not SIGAA_HIDE_MONEY %}
 								<li data-cell-index="15" data-cell-title="{% trans 'Allowance & Deduction' %}" class="oh-general__tab">
 									<a
 									hx-get="{% url 'allowances-deductions-tab' employee.id %}"
@@ -247,7 +272,7 @@
 								>
 							</li>
 
-							{% if "payroll"|app_installed %}
+							{% if "payroll"|app_installed and not SIGAA_HIDE_MONEY %}
 							<li data-cell-index="10" data-cell-title="{% trans 'Bonus Points' %}" class="oh-general__tab">
 								<a
 								hx-get="{% url 'bonus-points-tab' employee.id %}"
@@ -299,7 +324,7 @@
 							</div>
 						{% endif %}
 
-						{% if "payroll"|app_installed %}
+						{% if "payroll"|app_installed and not SIGAA_HIDE_MONEY %}
 							<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="payroll">
 								{% include 'tabs/payroll-tab.html' %}
 							</div>
@@ -310,7 +335,7 @@
 							</div>
 						{% endif %}
 
-						{% if "payroll"|app_installed %}
+						{% if "payroll"|app_installed and not SIGAA_HIDE_MONEY %}
 						<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="bonus_points_target">
 							{% include "tabs/bonus_points.html" %}
 						</div>
@@ -321,7 +346,7 @@
 							<div id="resignation_hx_target" class="mt-2"></div>
 						</div>
 
-						{% if "payroll"|app_installed %}
+						{% if "payroll"|app_installed and not SIGAA_HIDE_MONEY %}
 							<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="allowance_deduction"></div>
 						{% endif %}
 
@@ -353,6 +378,10 @@
 						<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="note_target">
 						{% include 'tabs/note_tab.html' %}
 						</div>
+
+						{# ───── SIGAA · contenedores HTMX ───── #}
+						<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="academic_load_target"></div>
+						<div class="oh-general__tab-target oh-profile__info-tab mb-4 d-none" id="academic_payroll_target"></div>
 
 					</div>
 				</div>

@@ -95,7 +95,14 @@
               <td class="oh-sticky-table__td">{{ d.semestre }}</td>
               <td class="oh-sticky-table__td text-end">{{ d.hrs_plan }}</td>
               <td class="oh-sticky-table__td text-end">{{ d.hrs_carga|default:"—" }}</td>
-              <td class="oh-sticky-table__td">{{ d.docente|default:"—" }}</td>
+              <td class="oh-sticky-table__td">
+                {% if d.docente_id %}
+                  <a href="{% url 'employee-view-individual' d.docente_id %}"
+                     class="text-decoration-none">{{ d.docente }}</a>
+                {% else %}
+                  <span class="text-muted">{{ d.docente|default:"—" }}</span>
+                {% endif %}
+              </td>
               <td class="oh-sticky-table__td">
                 {% if d.estado == 'ok' %}
                   <span class="oh-badge oh-badge--success">{% trans "OK" %}</span>
@@ -137,7 +144,14 @@
             <tr class="oh-sticky-table__tr">
               <td class="oh-sticky-table__td"><strong>{{ h.catalogo }}</strong></td>
               <td class="oh-sticky-table__td">{{ h.descripcion|truncatechars:50 }}</td>
-              <td class="oh-sticky-table__td">{{ h.docente }}</td>
+              <td class="oh-sticky-table__td">
+                {% if h.docente_id %}
+                  <a href="{% url 'employee-view-individual' h.docente_id %}"
+                     class="text-decoration-none">{{ h.docente }}</a>
+                {% else %}
+                  {{ h.docente }}
+                {% endif %}
+              </td>
               <td class="oh-sticky-table__td text-end">{{ h.hrs_semestre }}</td>
               <td class="oh-sticky-table__td">{{ h.ciclo }}</td>
             </tr>

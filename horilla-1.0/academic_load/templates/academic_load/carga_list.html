@@ -93,7 +93,17 @@
           </td>
           <td class="oh-sticky-table__td">{{ c.get_grado_display|default:c.grado|default:"-" }}</td>
           <td class="oh-sticky-table__td">{{ c.ciclo_lectivo|default:"-" }}</td>
-          <td class="oh-sticky-table__td">{{ c.nombre_instructor|default:"-" }}</td>
+          <td class="oh-sticky-table__td">
+            {% if c.docente_id %}
+              <a href="{% url 'employee-view-individual' c.docente_id %}"
+                 class="text-decoration-none"
+                 title="{% trans 'Ver detalle del docente' %}">
+                <strong>{{ c.nombre_instructor|default:"-" }}</strong>
+              </a>
+            {% else %}
+              <span class="text-muted">{{ c.nombre_instructor|default:"-" }}</span>
+            {% endif %}
+          </td>
           <td class="oh-sticky-table__td text-end">{{ c.hrs_semanal|default:"-" }}</td>
           <td class="oh-sticky-table__td text-end">{{ c.hrs_semestre|default:"-" }}</td>
           <td class="oh-sticky-table__td">

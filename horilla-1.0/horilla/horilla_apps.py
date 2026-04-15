@@ -54,7 +54,7 @@ SIDEBARS = [
     # ───────── Académicos (custom SIGAA) ─────────
     "academic_load",     # Carga académica + importador Excel
     "academic_plan",     # Plan de estudios + validación cruce
-    "academic_payroll",  # Prenómina docente · cortes
+    "academic_payroll",  # Prenómina docente · cortes (HORAS, no dinero)
     "academic_reports",  # Reportes SNIES
     # ───────── Reusados de Horilla ─────────
     "employee",      # Docentes (= Empleados)
@@ -68,6 +68,7 @@ SIDEBARS = [
     # "asset",       # activos físicos — no aplica
     # "helpdesk",    # mesa de ayuda — no aplica
     # "project",     # gestión proyectos — no aplica
+    # "payroll",     # nómina en $ — SIGAA solo maneja HORAS
 ]
 
 # Activamos white labelling para usar el branding UniSinú/SIGAA

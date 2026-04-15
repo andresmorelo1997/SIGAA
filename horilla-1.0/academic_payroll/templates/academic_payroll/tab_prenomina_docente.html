@@ -1,0 +1,128 @@
+{% load i18n %}
+{# SIGAA · Universidad del Sinú · Tab Prenómina Docente (HORAS — no valores) #}
+
+<div class="oh-card mb-3">
+  <div class="oh-card__header d-flex justify-content-between align-items-center">
+    <h4 class="oh-card__title mb-0">
+      <ion-icon name="time-outline"></ion-icon>
+      {% trans "Prenómina Docente" %} —
+      <small class="text-muted">{% trans "consolidado en horas" %}</small>
+    </h4>
+    <a href="{% url 'payroll-consolidado' %}" class="oh-btn oh-btn--light oh-btn--sm">
+      <ion-icon name="open-outline" class="me-1"></ion-icon>
+      {% trans "Ver consolidado global" %}
+    </a>
+  </div>
+
+  <div class="row g-3 p-3">
+    <div class="col-md-4">
+      <div class="text-muted small">{% trans "Total clases" %}</div>
+      <div class="fw-bold mt-1" style="font-size:1.4rem;">{{ totales.n|default:0 }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="text-muted small">{% trans "Horas semanales totales" %}</div>
+      <div class="fw-bold mt-1" style="font-size:1.4rem;">{{ totales.hs|default:0|floatformat:1 }}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="text-muted small">{% trans "Horas semestre totales" %}</div>
+      <div class="fw-bold mt-1" style="font-size:1.4rem;">{{ totales.hsr|default:0|floatformat:1 }}</div>
+    </div>
+  </div>
+</div>
+
+{% if filas %}
+<div class="oh-card mb-3">
+  <div class="oh-card__header">
+    <h4 class="oh-card__title">
+      <ion-icon name="bar-chart-outline"></ion-icon>
+      {% trans "Consolidado por ciclo (horas)" %}
+    </h4>
+  </div>
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
+          <th class="oh-sticky-table__th text-end">{% trans "N° cortes" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Hrs prenómina" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Saldo horas" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in filas %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ f.ciclo }}</strong></td>
+          <td class="oh-sticky-table__td text-end">{{ f.n_clases }}</td>
+          <td class="oh-sticky-table__td text-end">{{ f.hrs_semana|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ f.hrs_semestre|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ f.n_cortes }}</td>
+          <td class="oh-sticky-table__td text-end"><strong>{{ f.hrs_prenomina|floatformat:1 }}</strong></td>
+          <td class="oh-sticky-table__td text-end">
+            {% if f.saldo < 0 %}
+              <span class="oh-badge oh-badge--danger">{{ f.saldo|floatformat:1 }}</span>
+            {% elif f.saldo > 0 %}
+              <span class="oh-badge oh-badge--warning">{{ f.saldo|floatformat:1 }}</span>
+            {% else %}
+              <span class="oh-badge oh-badge--success">{{ f.saldo|floatformat:1 }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="oh-card mb-3">
+  <div class="oh-card__header">
+    <h4 class="oh-card__title">
+      <ion-icon name="flag-outline"></ion-icon>
+      {% trans "Desglose por corte" %}
+    </h4>
+  </div>
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
+          {% for n in "123456" %}
+            <th class="oh-sticky-table__th text-end">{% trans "Corte" %} {{ n }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in filas %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ f.ciclo }}</strong></td>
+          {% for c in f.cortes %}
+            <td class="oh-sticky-table__td text-end">{{ c|floatformat:1 }}</td>
+          {% endfor %}
+          {% for i in "123456"|make_list|slice:":6" %}
+            {% if forloop.counter > f.n_cortes %}<td class="oh-sticky-table__td text-end text-muted">—</td>{% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="p-3 text-muted small">
+    <ion-icon name="information-circle-outline"></ion-icon>
+    {% trans "Las horas se distribuyen proporcionalmente entre los cortes configurados para el grado. Todos los valores están en HORAS — SIGAA no maneja dinero." %}
+  </div>
+</div>
+
+{% else %}
+<div class="oh-card text-center p-5">
+  <div class="text-muted">
+    <ion-icon name="time-outline" style="font-size:48px;"></ion-icon>
+    <p class="mt-3">{% trans "Este docente no tiene carga académica registrada para calcular prenómina." %}</p>
+    <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary mt-2">
+      <ion-icon name="cloud-upload-outline" class="me-1"></ion-icon>
+      {% trans "Importar carga académica" %}
+    </a>
+  </div>
+</div>
+{% endif %}
