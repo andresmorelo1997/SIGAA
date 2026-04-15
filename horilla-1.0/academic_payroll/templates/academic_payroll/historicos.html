@@ -1,0 +1,105 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Prenóminas históricas (emitidas)" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {% trans "Snapshots congelados de cortes emitidos · solo HORAS" %}
+        · {{ total }} {% trans "registros" %}
+      </p>
+    </div>
+  </div>
+
+  <form method="get" class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="filter-outline"></ion-icon>
+        {% trans "Filtros" %}
+      </h4>
+    </div>
+    <div class="row g-3 p-3">
+      <div class="col-md-3">
+        <label class="oh-label">{% trans "Periodo" %}</label>
+        <select name="periodo" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos" %} —</option>
+          {% for p in periodos %}
+            <option value="{{ p }}" {% if p == periodo %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="oh-label">{% trans "Tipo" %}</label>
+        <select name="tipo" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos" %} —</option>
+          {% for t in tipos %}
+            <option value="{{ t }}" {% if t == tipo %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Periodo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Tipo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Hrs/sem" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Hrs/sem.re" %}</th>
+          <th class="oh-sticky-table__th text-end">C1</th>
+          <th class="oh-sticky-table__th text-end">C2</th>
+          <th class="oh-sticky-table__th text-end">C3</th>
+          <th class="oh-sticky-table__th text-end">C4</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Hrs prenómina" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Saldo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Emitido en corte" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in snapshots %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ s.periodo }}</strong></td>
+          <td class="oh-sticky-table__td">
+            <span class="oh-badge oh-badge--info">{{ s.tipo }}</span>
+          </td>
+          <td class="oh-sticky-table__td">
+            <a href="{% url 'employee-view-individual' s.docente_id %}" class="text-decoration-none">
+              {{ s.docente.employee_first_name }} {{ s.docente.employee_last_name }}
+            </a>
+            <small class="text-muted d-block">{{ s.docente.badge_id }}</small>
+          </td>
+          <td class="oh-sticky-table__td text-end">{{ s.hrs_semana|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ s.hrs_semestre|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ s.corte_1|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ s.corte_2|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ s.corte_3|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ s.corte_4|floatformat:1 }}</td>
+          <td class="oh-sticky-table__td text-end"><strong>{{ s.hrs_prenomina|floatformat:1 }}</strong></td>
+          <td class="oh-sticky-table__td text-end">
+            {% if s.saldo < 0 %}
+              <span class="oh-badge oh-badge--danger">{{ s.saldo|floatformat:1 }}</span>
+            {% elif s.saldo > 0 %}
+              <span class="oh-badge oh-badge--warning">{{ s.saldo|floatformat:1 }}</span>
+            {% else %}
+              <span class="oh-badge oh-badge--success">{{ s.saldo|floatformat:1 }}</span>
+            {% endif %}
+          </td>
+          <td class="oh-sticky-table__td">
+            {% if s.num_corte_emitido %}Corte {{ s.num_corte_emitido }}{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="12" class="text-center p-4 text-muted">
+          {% trans "No hay snapshots emitidos. Emita un corte desde la lista de cortes." %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

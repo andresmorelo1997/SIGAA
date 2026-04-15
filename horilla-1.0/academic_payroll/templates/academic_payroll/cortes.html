@@ -47,9 +47,19 @@
             {% endif %}
           </td>
           <td class="oh-sticky-table__td">
-            <a href="{% url 'payroll-corte-edit' c.id %}" class="oh-btn oh-btn--light oh-btn--sm">
+            <a href="{% url 'payroll-corte-edit' c.id %}"
+               class="oh-btn oh-btn--light oh-btn--sm"
+               title="{% trans 'Editar' %}">
               <ion-icon name="create-outline"></ion-icon>
             </a>
+            {% if not c.emitido %}
+            <a href="{% url 'payroll-corte-emitir' c.id %}"
+               class="oh-btn oh-btn--secondary oh-btn--sm"
+               title="{% trans 'Emitir y congelar corte' %}"
+               onclick="return confirm('{% trans "¿Emitir este corte? Las horas quedarán congeladas." %}')">
+              <ion-icon name="send-outline"></ion-icon>
+            </a>
+            {% endif %}
           </td>
         </tr>
         {% empty %}

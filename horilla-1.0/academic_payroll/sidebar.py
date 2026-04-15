@@ -7,4 +7,5 @@ IMG_SRC = "images/ui/time-outline.svg"
 SUBMENUS = [
     {"menu": trans("Consolidado"), "redirect": reverse("payroll-consolidado")},
     {"menu": trans("Cortes"), "redirect": reverse("payroll-cortes")},
+    {"menu": trans("Histórico emitidos"), "redirect": reverse("payroll-historicos")},
 ]

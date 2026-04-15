@@ -162,6 +162,88 @@ def corte_edit(request, pk: int):
 
 
 @login_required
+def historicos(request):
+    """Muestra snapshots PrenominaDocente emitidos (auditoría)."""
+    periodo = request.GET.get("periodo", "")
+    tipo = request.GET.get("tipo", "")
+    qs = PrenominaDocente.objects.select_related("docente").filter(estado="emitido")
+    if periodo:
+        qs = qs.filter(periodo=periodo)
+    if tipo:
+        qs = qs.filter(tipo=tipo)
+
+    periodos = sorted(set(PrenominaDocente.objects.values_list("periodo", flat=True).distinct()))
+    tipos = ["PREGRADO", "POSGRADO"]
+
+    return render(request, "academic_payroll/historicos.html", {
+        "snapshots": qs[:500],
+        "total": qs.count(),
+        "periodos": periodos,
+        "tipos": tipos,
+        "periodo": periodo,
+        "tipo": tipo,
+    })
+
+
+@login_required
+def corte_emitir(request, pk: int):
+    """Emite/congela un corte: crea snapshots PrenominaDocente con las horas
+    consolidadas en ese momento. Al re-importar carga académica, estos
+    snapshots no cambian."""
+    corte = get_object_or_404(Corte, pk=pk)
+
+    if corte.emitido:
+        messages.warning(request, f"El corte {corte.num_corte} de {corte.periodo} ya fue emitido.")
+        return HttpResponseRedirect(reverse("payroll-cortes"))
+
+    from django.utils import timezone as _tz
+    tipo = "POSGRADO" if corte.grado.upper() in ("POSG", "MSTR", "DOCT", "ESP") else "PREGRADO"
+    rows, _cortes = _calcular_consolidado(corte.periodo, tipo)
+
+    creados = 0
+    for r in rows:
+        docente_id = r.get("docente_id")
+        if not docente_id:
+            continue
+        hrs_prenomina = r["hrs_prenomina"]
+        try:
+            pd, created = PrenominaDocente.objects.update_or_create(
+                periodo=corte.periodo,
+                tipo=tipo,
+                docente_id=docente_id,
+                defaults={
+                    "hrs_semana": r["hrs_semana"],
+                    "hrs_semestre": r["hrs_semestre"],
+                    "corte_1": r["cortes"][0] if len(r["cortes"]) > 0 else 0,
+                    "corte_2": r["cortes"][1] if len(r["cortes"]) > 1 else 0,
+                    "corte_3": r["cortes"][2] if len(r["cortes"]) > 2 else 0,
+                    "corte_4": r["cortes"][3] if len(r["cortes"]) > 3 else 0,
+                    "corte_5": r["cortes"][4] if len(r["cortes"]) > 4 else 0,
+                    "corte_6": r["cortes"][5] if len(r["cortes"]) > 5 else 0,
+                    "hrs_prenomina": hrs_prenomina,
+                    "saldo": r["saldo"],
+                    "estado": "emitido",
+                    "num_corte_emitido": corte.num_corte,
+                },
+            )
+            if created:
+                creados += 1
+        except Exception as e:
+            messages.error(request, f"Error en {r['nombre']}: {e}")
+
+    corte.emitido = True
+    corte.fecha_emision = _tz.now()
+    corte.save(update_fields=["emitido", "fecha_emision"])
+
+    messages.success(
+        request,
+        f"Corte {corte.num_corte} · {corte.periodo} · {corte.grado} emitido. "
+        f"{len(rows)} docentes consolidados ({creados} nuevos snapshots).",
+    )
+    return HttpResponseRedirect(reverse("payroll-cortes"))
+
+
+@login_required
 def consolidado_export(request):
     """Exporta el consolidado de prenómina (en HORAS) a Excel."""
     periodo = request.GET.get("periodo", "2026-1")
