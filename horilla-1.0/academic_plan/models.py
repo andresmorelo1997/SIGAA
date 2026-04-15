@@ -32,6 +32,7 @@ class PlanEstudio(models.Model):
     cohorte = models.CharField(_("Cohorte"), max_length=20, blank=True, null=True)
     grado = models.CharField(_("Grado"), max_length=10, blank=True, null=True)
     modalidad = models.CharField(_("Modalidad"), max_length=50, blank=True, null=True)
+    campus = models.CharField(_("Campus"), max_length=10, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

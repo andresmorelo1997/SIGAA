@@ -3,51 +3,72 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Reportes SNIES" %}</h1>
-    <p class="oh-titlebar__subtitle">{% trans "Centro de reportes para Ministerio de Educación" %}</p>
+  <!-- Titlebar -->
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Reportes SNIES" %}</h1>
+      <p class="oh-titlebar__subtitle">{% trans "Centro de reportes para el Ministerio de Educación Nacional" %}</p>
+    </div>
     <div class="oh-titlebar__actions">
       <a href="{% url 'reports-export' %}?tipo={{ tipo }}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="download-outline"></ion-icon> {% trans "Exportar Excel" %}
+        <ion-icon name="download-outline" class="me-2"></ion-icon>
+        {% trans "Exportar Excel" %}
       </a>
     </div>
-  </section>
+  </div>
 
-  <!-- Selector de tipo -->
+  <!-- Selector de tipo de reporte -->
   <form method="get" class="oh-card mb-3">
-    <label class="oh-label">{% trans "Tipo de reporte" %}</label>
-    <div class="row g-2">
-      {% for k, label in reportes.items %}
-        <div class="col-auto">
-          <button type="submit" name="tipo" value="{{ k }}"
-            class="oh-btn {% if k == tipo %}oh-btn--primary{% else %}oh-btn--light{% endif %}">
-            {{ label }}
-          </button>
-        </div>
-      {% endfor %}
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="document-text-outline"></ion-icon>
+        {% trans "Tipo de reporte" %}
+      </h4>
+    </div>
+    <div class="p-3">
+      <div class="row g-2">
+        {% for k, label in reportes.items %}
+          <div class="col-auto">
+            <button type="submit" name="tipo" value="{{ k }}"
+              class="oh-btn {% if k == tipo %}oh-btn--secondary{% else %}oh-btn--light{% endif %}">
+              {{ label }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
     </div>
   </form>
 
-  <div class="oh-card">
-    <h3>{{ tipo_label }} <small class="text-muted">— {{ total }} {% trans "registros" %}</small></h3>
+  <!-- Resultado del reporte -->
+  <div class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        {{ tipo_label }}
+        <small class="text-muted">— {{ total }} {% trans "registros" %}</small>
+      </h4>
+    </div>
+  </div>
 
-    <table class="oh-sticky-table mt-3" style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background:#18181b; color:white;">
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
           {% for h in headers %}
-          <th style="padding:6px 10px;">{{ h }}</th>
+            <th class="oh-sticky-table__th">{{ h }}</th>
           {% endfor %}
         </tr>
       </thead>
       <tbody>
         {% for r in rows %}
-        <tr>
+        <tr class="oh-sticky-table__tr">
           {% for cell in r %}
-          <td style="padding:4px 10px;">{{ cell }}</td>
+            <td class="oh-sticky-table__td">{{ cell }}</td>
           {% endfor %}
         </tr>
         {% empty %}
-        <tr><td colspan="20" class="text-center p-4 text-muted">{% trans "Sin datos." %}</td></tr>
+        <tr><td colspan="20" class="text-center p-4 text-muted">
+          {% trans "Sin datos para este reporte." %}
+        </td></tr>
         {% endfor %}
       </tbody>
     </table>

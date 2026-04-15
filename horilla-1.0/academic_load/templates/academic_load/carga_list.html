@@ -1,42 +1,50 @@
 {% extends 'index.html' %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block content %}
 <div class="oh-wrapper">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Carga Académica" %}</h1>
-    <p class="oh-titlebar__subtitle">{{ total }} {% trans "clases programadas" %}</p>
+  <!-- Titlebar Horilla -->
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Carga Académica" %}</h1>
+      <p class="oh-titlebar__subtitle">{{ total }} {% trans "clases programadas" %}</p>
+    </div>
     <div class="oh-titlebar__actions">
       <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <ion-icon name="cloud-upload-outline" class="me-2"></ion-icon>
         {% trans "Importar Excel" %}
       </a>
     </div>
-  </section>
+  </div>
 
-  <!-- Filtros tipo Excel -->
-  <form method="get" class="oh-card mb-4">
-    <div class="row g-3">
+  <!-- Filtros (Horilla style) -->
+  <form method="get" class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="filter-outline"></ion-icon>
+        {% trans "Filtros" %}
+      </h4>
+    </div>
+    <div class="row g-3 p-3">
       <div class="col-md-3">
         <label class="oh-label">{% trans "Búsqueda" %}</label>
         {{ filter_form.search }}
       </div>
       <div class="col-md-3">
         <label class="oh-label">{% trans "Campus" %}</label>
-        <div class="oh-multi-select" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 6px;">
+        <div class="oh-multi-select">
           {{ filter_form.campus }}
         </div>
       </div>
       <div class="col-md-2">
         <label class="oh-label">{% trans "Grado" %}</label>
-        <div class="oh-multi-select" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 6px;">
+        <div class="oh-multi-select">
           {{ filter_form.grado }}
         </div>
       </div>
       <div class="col-md-2">
         <label class="oh-label">{% trans "Estado" %}</label>
-        <div class="oh-multi-select" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 6px;">
+        <div class="oh-multi-select">
           {{ filter_form.estado }}
         </div>
       </div>
@@ -45,68 +53,81 @@
         {{ filter_form.ciclo_lectivo }}
       </div>
     </div>
-    <div class="mt-3">
-      <button type="submit" class="oh-btn oh-btn--primary">
-        <ion-icon name="filter-outline"></ion-icon>
+    <div class="oh-card__footer--border-top p-3">
+      <button type="submit" class="oh-btn oh-btn--secondary">
         {% trans "Aplicar filtros" %}
       </button>
-      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--light">{% trans "Limpiar" %}</a>
+      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--light">
+        {% trans "Limpiar" %}
+      </a>
     </div>
   </form>
 
-  <!-- Tabla -->
-  <div class="oh-card oh-card--no-padding">
-    <table class="oh-sticky-table" style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background: #18181b; color: white;">
-          <th style="padding: 6px 10px;">N°</th>
-          <th>Catálogo</th>
-          <th>Descripción</th>
-          <th>Campus</th>
-          <th>Grado</th>
-          <th>Ciclo</th>
-          <th>Docente</th>
-          <th class="text-end">Hrs/sem</th>
-          <th class="text-end">Hrs/sem.re</th>
-          <th>Estado</th>
+  <!-- Tabla Horilla -->
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">N°</th>
+          <th class="oh-sticky-table__th">{% trans "Catálogo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Descripción" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Grado" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
+          <th class="oh-sticky-table__th">{% trans "Estado" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for c in page %}
-        <tr>
-          <td>{{ c.num_clase|default:"-" }}</td>
-          <td><strong>{{ c.catalogo|default:"-" }}</strong></td>
-          <td>{{ c.descripcion|truncatechars:60 }}</td>
-          <td><span class="oh-badge oh-badge--info">{{ c.get_campus_display|default:c.campus|default:"-" }}</span></td>
-          <td>{{ c.get_grado_display|default:c.grado|default:"-" }}</td>
-          <td>{{ c.ciclo_lectivo|default:"-" }}</td>
-          <td>{{ c.nombre_instructor|default:"-" }}</td>
-          <td class="text-end">{{ c.hrs_semanal|default:"-" }}</td>
-          <td class="text-end">{{ c.hrs_semestre|default:"-" }}</td>
-          <td>
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td">{{ c.num_clase|default:"-" }}</td>
+          <td class="oh-sticky-table__td"><strong>{{ c.catalogo|default:"-" }}</strong></td>
+          <td class="oh-sticky-table__td">{{ c.descripcion|truncatechars:60 }}</td>
+          <td class="oh-sticky-table__td">
+            {% if c.campus %}
+              <span class="oh-badge oh-badge--info">{{ c.get_campus_display|default:c.campus }}</span>
+            {% else %}-{% endif %}
+          </td>
+          <td class="oh-sticky-table__td">{{ c.get_grado_display|default:c.grado|default:"-" }}</td>
+          <td class="oh-sticky-table__td">{{ c.ciclo_lectivo|default:"-" }}</td>
+          <td class="oh-sticky-table__td">{{ c.nombre_instructor|default:"-" }}</td>
+          <td class="oh-sticky-table__td text-end">{{ c.hrs_semanal|default:"-" }}</td>
+          <td class="oh-sticky-table__td text-end">{{ c.hrs_semestre|default:"-" }}</td>
+          <td class="oh-sticky-table__td">
             {% if c.estado_clase == 'Activo' %}
               <span class="oh-badge oh-badge--success">{{ c.estado_clase }}</span>
             {% else %}
-              <span class="oh-badge oh-badge--warning">{{ c.estado_clase }}</span>
+              <span class="oh-badge oh-badge--warning">{{ c.estado_clase|default:"-" }}</span>
             {% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="10" class="text-center p-4 text-muted">{% trans "No hay clases programadas todavía." %}</td></tr>
+        <tr><td colspan="10" class="text-center p-4 text-muted">
+          {% trans "No hay clases programadas todavía. Suba un archivo Excel desde Importar." %}
+        </td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <!-- Paginación -->
+  <!-- Paginación Horilla -->
   {% if page.paginator.num_pages > 1 %}
   <div class="oh-pagination mt-3">
-    <span>{% trans "Página" %} {{ page.number }} {% trans "de" %} {{ page.paginator.num_pages }}</span>
+    <span class="oh-pagination__info">
+      {% trans "Página" %} {{ page.number }} {% trans "de" %} {{ page.paginator.num_pages }}
+    </span>
     {% if page.has_previous %}
-      <a href="?page={{ page.previous_page_number }}" class="oh-btn oh-btn--light">‹ {% trans "Anterior" %}</a>
+      <a href="?page={{ page.previous_page_number }}" class="oh-btn oh-btn--light oh-btn--sm">
+        ‹ {% trans "Anterior" %}
+      </a>
     {% endif %}
     {% if page.has_next %}
-      <a href="?page={{ page.next_page_number }}" class="oh-btn oh-btn--light">{% trans "Siguiente" %} ›</a>
+      <a href="?page={{ page.next_page_number }}" class="oh-btn oh-btn--light oh-btn--sm">
+        {% trans "Siguiente" %} ›
+      </a>
     {% endif %}
   </div>
   {% endif %}

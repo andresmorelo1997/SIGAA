@@ -3,42 +3,46 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Historial de Importaciones" %}</h1>
-    <p class="oh-titlebar__subtitle">{% trans "Bitácora de archivos Excel procesados" %}</p>
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Historial de Importaciones" %}</h1>
+      <p class="oh-titlebar__subtitle">{% trans "Bitácora de archivos Excel procesados" %}</p>
+    </div>
     <div class="oh-titlebar__actions">
       <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <ion-icon name="cloud-upload-outline" class="me-2"></ion-icon>
         {% trans "Nueva importación" %}
       </a>
     </div>
-  </section>
+  </div>
 
-  <div class="oh-card oh-card--no-padding">
-    <table style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background: #18181b; color: white;">
-          <th style="padding: 6px 10px;">{% trans "Archivo" %}</th>
-          <th>{% trans "Tipo" %}</th>
-          <th>{% trans "Ciclo" %}</th>
-          <th>{% trans "Campus" %}</th>
-          <th class="text-end">{% trans "Insertados" %}</th>
-          <th class="text-end">{% trans "Omitidos" %}</th>
-          <th>{% trans "Estado" %}</th>
-          <th>{% trans "Fecha" %}</th>
-          <th>{% trans "Acciones" %}</th>
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Archivo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Tipo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Insertados" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Omitidos" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Estado" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Fecha" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Acciones" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for h in history %}
-        <tr>
-          <td style="padding: 6px 10px;">{{ h.filename|truncatechars:40 }}</td>
-          <td><span class="oh-badge oh-badge--info">{{ h.file_type }}</span></td>
-          <td>{{ h.ciclo_lectivo|default:"-" }}</td>
-          <td><small>{{ h.campus|default:"-" }}</small></td>
-          <td class="text-end">{{ h.records_inserted }}</td>
-          <td class="text-end">{{ h.records_skipped }}</td>
-          <td>
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ h.filename|truncatechars:40 }}</strong></td>
+          <td class="oh-sticky-table__td">
+            <span class="oh-badge oh-badge--info">{{ h.file_type }}</span>
+          </td>
+          <td class="oh-sticky-table__td">{{ h.ciclo_lectivo|default:"—" }}</td>
+          <td class="oh-sticky-table__td"><small>{{ h.campus|default:"—" }}</small></td>
+          <td class="oh-sticky-table__td text-end">{{ h.records_inserted }}</td>
+          <td class="oh-sticky-table__td text-end">{{ h.records_skipped }}</td>
+          <td class="oh-sticky-table__td">
             {% if h.status == 'completed' %}
               <span class="oh-badge oh-badge--success">{{ h.get_status_display }}</span>
             {% elif h.status == 'error' %}
@@ -47,17 +51,21 @@
               <span class="oh-badge oh-badge--warning">{{ h.get_status_display }}</span>
             {% endif %}
           </td>
-          <td><small>{{ h.created_at|date:"d/m/Y H:i" }}</small></td>
-          <td>
+          <td class="oh-sticky-table__td"><small>{{ h.created_at|date:"d/m/Y H:i" }}</small></td>
+          <td class="oh-sticky-table__td">
             {% if h.file_blob %}
-              <a href="{% url 'academic-load-history-download' h.pk %}" class="oh-btn oh-btn--light" style="padding: 2px 8px;">
+              <a href="{% url 'academic-load-history-download' h.pk %}"
+                 class="oh-btn oh-btn--light oh-btn--sm"
+                 title="{% trans 'Descargar' %}">
                 <ion-icon name="download-outline"></ion-icon>
               </a>
             {% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="9" class="text-center p-4 text-muted">{% trans "Aún no hay importaciones." %}</td></tr>
+        <tr><td colspan="9" class="text-center p-4 text-muted">
+          {% trans "Aún no hay importaciones registradas." %}
+        </td></tr>
         {% endfor %}
       </tbody>
     </table>

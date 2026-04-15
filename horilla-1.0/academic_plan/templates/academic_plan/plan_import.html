@@ -1,0 +1,27 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper" style="max-width: 720px; margin: 0 auto;">
+  <section class="oh-titlebar">
+    <h1 class="oh-titlebar__title">{% trans "Importar Plan de Estudios" %}</h1>
+    <p class="oh-titlebar__subtitle">{% trans "Subir uno o varios archivos Excel del plan académico" %}</p>
+  </section>
+
+  <form method="post" enctype="multipart/form-data" class="oh-card">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="oh-label">{% trans "Archivos Excel (.xlsx)" %}</label>
+      <input type="file" name="archivos" multiple accept=".xlsx,.xls,.xlsm" class="form-control">
+      <small class="text-muted">{% trans "Puede seleccionar varios archivos a la vez (Cmd/Ctrl + click)." %}</small>
+    </div>
+    <div class="mt-4">
+      <button type="submit" class="oh-btn oh-btn--secondary">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {% trans "Importar planes" %}
+      </button>
+      <a href="{% url 'plan-list' %}" class="oh-btn oh-btn--light">{% trans "Cancelar" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

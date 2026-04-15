@@ -43,6 +43,11 @@ urlpatterns = [
     ),
     path("i18n/", include("django.conf.urls.i18n")),
     path("health/", health_check),
+    # ───────── SIGAA · Universidad del Sinú ─────────
+    path("academic/", include("academic_load.urls")),
+    path("plan/", include("academic_plan.urls")),
+    path("prenomina/", include("academic_payroll.urls")),
+    path("reports/", include("academic_reports.urls")),
 ]
 
 # if settings.DEBUG:

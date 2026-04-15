@@ -2,27 +2,44 @@
 {% load static i18n %}
 
 {% block content %}
-<div class="oh-wrapper" style="max-width: 700px; margin: 0 auto;">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Importar Carga Académica" %}</h1>
-    <p class="oh-titlebar__subtitle">{% trans "Subir archivo Excel: US_PROG_CLASES, LC_PROG o US_DATOS" %}</p>
-  </section>
+<div class="oh-wrapper" style="max-width: 720px; margin: 0 auto;">
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Importar Carga Académica" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {% trans "Subir archivo Excel (US_PROG_CLASES, LC_PROG o US_DATOS)" %}
+      </p>
+    </div>
+  </div>
 
   <form method="post" enctype="multipart/form-data" class="oh-card">
     {% csrf_token %}
-
-    <div class="mb-3">
-      <label class="oh-label">{% trans "Archivo Excel" %}</label>
-      {{ form.archivo }}
-      {% if form.archivo.errors %}<p class="text-danger">{{ form.archivo.errors }}</p>{% endif %}
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {% trans "Archivo Excel" %}
+      </h4>
     </div>
 
-    <div class="mt-4">
-      <button type="submit" class="oh-btn oh-btn--primary">
-        <ion-icon name="cloud-upload-outline"></ion-icon>
+    <div class="p-3">
+      <label class="oh-label">{% trans "Archivo Excel (.xlsx)" %}</label>
+      {{ form.archivo }}
+      {% if form.archivo.errors %}
+        <p class="text-danger mt-2">{{ form.archivo.errors }}</p>
+      {% endif %}
+      <small class="text-muted">
+        {% trans "Formatos aceptados: .xlsx, .xls, .xlsm" %}
+      </small>
+    </div>
+
+    <div class="oh-card__footer--border-top p-3">
+      <button type="submit" class="oh-btn oh-btn--secondary">
+        <ion-icon name="eye-outline" class="me-2"></ion-icon>
         {% trans "Cargar y previsualizar" %}
       </button>
-      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--light">{% trans "Cancelar" %}</a>
+      <a href="{% url 'academic-load-list' %}" class="oh-btn oh-btn--light">
+        {% trans "Cancelar" %}
+      </a>
     </div>
   </form>
 </div>

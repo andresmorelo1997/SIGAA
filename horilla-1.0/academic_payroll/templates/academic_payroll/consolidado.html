@@ -3,16 +3,26 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Prenómina Docente" %} — {% trans "Consolidado" %}</h1>
-    <p class="oh-titlebar__subtitle">{{ total }} {% trans "docentes" %} · {{ periodo }} · {{ tipo }}</p>
-  </section>
+  <!-- Titlebar -->
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Prenómina Docente — Consolidado" %}</h1>
+      <p class="oh-titlebar__subtitle">{{ total }} {% trans "docentes" %} · {{ periodo }} · {{ tipo }}</p>
+    </div>
+  </div>
 
+  <!-- Filtros -->
   <form method="get" class="oh-card mb-3">
-    <div class="row g-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="filter-outline"></ion-icon>
+        {% trans "Filtros" %}
+      </h4>
+    </div>
+    <div class="row g-3 p-3">
       <div class="col-md-3">
         <label class="oh-label">{% trans "Periodo" %}</label>
-        <select name="periodo" class="form-select">
+        <select name="periodo" class="oh-select">
           {% for p in periodos %}
           <option value="{{ p }}" {% if p == periodo %}selected{% endif %}>{{ p }}</option>
           {% endfor %}
@@ -20,14 +30,14 @@
       </div>
       <div class="col-md-3">
         <label class="oh-label">{% trans "Tipo" %}</label>
-        <select name="tipo" class="form-select">
-          <option value="PREGRADO" {% if tipo == 'PREGRADO' %}selected{% endif %}>Pregrado</option>
-          <option value="POSGRADO" {% if tipo == 'POSGRADO' %}selected{% endif %}>Posgrado</option>
+        <select name="tipo" class="oh-select">
+          <option value="PREGRADO" {% if tipo == 'PREGRADO' %}selected{% endif %}>{% trans "Pregrado" %}</option>
+          <option value="POSGRADO" {% if tipo == 'POSGRADO' %}selected{% endif %}>{% trans "Posgrado" %}</option>
         </select>
       </div>
       <div class="col-md-3">
         <label class="oh-label">{% trans "Ciclo lectivo" %}</label>
-        <select name="ciclo" class="form-select">
+        <select name="ciclo" class="oh-select">
           <option value="">— {% trans "Todos" %} —</option>
           {% for c in ciclos %}
           <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
@@ -35,48 +45,57 @@
         </select>
       </div>
       <div class="col-md-3 d-flex align-items-end">
-        <button class="oh-btn oh-btn--primary">{% trans "Calcular" %}</button>
+        <button type="submit" class="oh-btn oh-btn--secondary w-100">
+          <ion-icon name="calculator-outline" class="me-2"></ion-icon>
+          {% trans "Calcular" %}
+        </button>
       </div>
     </div>
   </form>
 
-  <div class="oh-card oh-card--no-padding">
-    <table style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background: #18181b; color: white;">
-          <th style="padding:6px 10px;">N°</th>
-          <th>{% trans "Docente" %}</th>
-          <th>{% trans "Campus" %}</th>
-          <th>{% trans "Programa" %}</th>
-          <th class="text-end">Hrs/sem</th>
-          <th class="text-end">Hrs/sem.re</th>
+  <!-- Tabla consolidado -->
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">N°</th>
+          <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
           {% for c in cortes_info %}
-            <th class="text-end">Corte {{ c.num }}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Corte" %} {{ c.num }}</th>
           {% endfor %}
-          <th class="text-end">{% trans "Hrs prenómina" %}</th>
-          <th class="text-end">{% trans "Saldo" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Hrs prenómina" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Saldo" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for r in rows %}
-        <tr>
-          <td style="padding:4px 10px;">{{ forloop.counter }}</td>
-          <td><strong>{{ r.nombre }}</strong> <small class="text-muted">{{ r.instructor_id }}</small></td>
-          <td><span class="oh-badge oh-badge--info">{{ r.campus|default:"-" }}</span></td>
-          <td><small>{{ r.programa|truncatechars:30 }}</small></td>
-          <td class="text-end">{{ r.hrs_semana }}</td>
-          <td class="text-end">{{ r.hrs_semestre }}</td>
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td">{{ forloop.counter }}</td>
+          <td class="oh-sticky-table__td">
+            <strong>{{ r.nombre }}</strong>
+            <small class="text-muted d-block">{{ r.instructor_id }}</small>
+          </td>
+          <td class="oh-sticky-table__td">
+            <span class="oh-badge oh-badge--info">{{ r.campus|default:"-" }}</span>
+          </td>
+          <td class="oh-sticky-table__td">{{ r.programa|truncatechars:30 }}</td>
+          <td class="oh-sticky-table__td text-end">{{ r.hrs_semana }}</td>
+          <td class="oh-sticky-table__td text-end">{{ r.hrs_semestre }}</td>
           {% for v in r.cortes %}
-            <td class="text-end">{{ v }}</td>
+            <td class="oh-sticky-table__td text-end">{{ v }}</td>
           {% endfor %}
-          <td class="text-end"><strong>{{ r.hrs_prenomina }}</strong></td>
-          <td class="text-end">
+          <td class="oh-sticky-table__td text-end"><strong>{{ r.hrs_prenomina }}</strong></td>
+          <td class="oh-sticky-table__td text-end">
             {% if r.saldo < 0 %}
-              <span class="text-danger">{{ r.saldo }}</span>
+              <span class="oh-badge oh-badge--danger">{{ r.saldo }}</span>
             {% elif r.saldo > 0 %}
-              <span class="text-warning">{{ r.saldo }}</span>
+              <span class="oh-badge oh-badge--warning">{{ r.saldo }}</span>
             {% else %}
-              <span class="text-success">{{ r.saldo }}</span>
+              <span class="oh-badge oh-badge--success">{{ r.saldo }}</span>
             {% endif %}
           </td>
         </tr>

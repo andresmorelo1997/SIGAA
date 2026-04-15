@@ -3,56 +3,77 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <section class="oh-titlebar">
-    <h1 class="oh-titlebar__title">{% trans "Plan de Estudios" %}</h1>
-    <p class="oh-titlebar__subtitle">{{ total }} {% trans "asignaturas" %}</p>
+  <!-- Titlebar -->
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Plan de Estudios" %}</h1>
+      <p class="oh-titlebar__subtitle">{{ total }} {% trans "asignaturas registradas" %}</p>
+    </div>
     <div class="oh-titlebar__actions">
+      <a href="{% url 'plan-import' %}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="cloud-upload-outline" class="me-2"></ion-icon>
+        {% trans "Importar Excel" %}
+      </a>
       <a href="{% url 'plan-validar' %}" class="oh-btn oh-btn--secondary">
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
-        {% trans "Validar contra carga académica" %}
+        <ion-icon name="checkmark-circle-outline" class="me-2"></ion-icon>
+        {% trans "Validar contra Carga" %}
       </a>
     </div>
-  </section>
+  </div>
 
+  <!-- Filtro -->
   <form method="get" class="oh-card mb-3">
-    <label class="oh-label">{% trans "Programa" %}</label>
-    <select name="programa" onchange="this.form.submit()" class="form-select" style="max-width: 400px;">
-      <option value="">— {% trans "Todos" %} —</option>
-      {% for p in programas %}
-      <option value="{{ p.programa_codigo }}" {% if p.programa_codigo == programa_filtro %}selected{% endif %}>
-        {{ p.programa_codigo }} — {{ p.n }} asignaturas — {{ p.creditos }} créditos
-      </option>
-      {% endfor %}
-    </select>
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="filter-outline"></ion-icon>
+        {% trans "Filtrar por programa" %}
+      </h4>
+    </div>
+    <div class="row g-3 p-3">
+      <div class="col-md-6">
+        <label class="oh-label">{% trans "Programa" %}</label>
+        <select name="programa" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos los programas" %} —</option>
+          {% for p in programas %}
+          <option value="{{ p.programa_codigo }}" {% if p.programa_codigo == programa_filtro %}selected{% endif %}>
+            {{ p.programa_codigo }} — {{ p.n }} {% trans "asignaturas" %} — {{ p.creditos }} {% trans "créditos" %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
   </form>
 
-  <div class="oh-card oh-card--no-padding">
-    <table style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background:#18181b; color:white;">
-          <th style="padding:6px 10px;">{% trans "Programa" %}</th>
-          <th>{% trans "Semestre" %}</th>
-          <th>{% trans "Catálogo" %}</th>
-          <th>{% trans "Asignatura" %}</th>
-          <th class="text-end">{% trans "Créditos" %}</th>
-          <th class="text-end">Hrs/sem</th>
-          <th class="text-end">Hrs/sem.re</th>
+  <!-- Tabla Horilla -->
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Semestre" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Catálogo" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Asignatura" %}</th>
+          <th class="oh-sticky-table__th text-end">{% trans "Créditos" %}</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
         </tr>
       </thead>
       <tbody>
         {% for p in qs %}
-        <tr>
-          <td style="padding:4px 10px;"><strong>{{ p.programa_codigo }}</strong></td>
-          <td>{{ p.semestre }}</td>
-          <td>{{ p.catalogo }}</td>
-          <td>{{ p.asignatura }}</td>
-          <td class="text-end">{{ p.creditos }}</td>
-          <td class="text-end">{{ p.hrs_semanal }}</td>
-          <td class="text-end">{{ p.hrs_semestre }}</td>
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ p.programa_codigo }}</strong></td>
+          <td class="oh-sticky-table__td">
+            <span class="oh-badge oh-badge--info">{{ p.semestre|default:"—" }}</span>
+          </td>
+          <td class="oh-sticky-table__td">{{ p.catalogo }}</td>
+          <td class="oh-sticky-table__td">{{ p.asignatura }}</td>
+          <td class="oh-sticky-table__td text-end">{{ p.creditos|default:"-" }}</td>
+          <td class="oh-sticky-table__td text-end">{{ p.hrs_semanal|default:"-" }}</td>
+          <td class="oh-sticky-table__td text-end">{{ p.hrs_semestre|default:"-" }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7" class="text-center p-4 text-muted">
-          {% trans "Aún no hay plan de estudios cargado. Subir vía importador de Carga Académica → tipo US_PROG_PLAN." %}
+          {% trans "Aún no hay plan de estudios cargado. Suba un archivo Excel desde Importar." %}
         </td></tr>
         {% endfor %}
       </tbody>
