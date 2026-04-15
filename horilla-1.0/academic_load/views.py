@@ -551,6 +551,19 @@ def dashboard_sigaa(request):
     for d in top_docentes:
         d["pct"] = round(100 * (d["hrs"] or 0) / max_hrs_top, 1)
 
+    # Evolución por ciclo (últimos 6)
+    por_ciclo = list(
+        CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True)
+        .exclude(ciclo_lectivo="")
+        .values("ciclo_lectivo")
+        .annotate(n=Count("id"), hrs=Sum("hrs_semestre"))
+        .order_by("-ciclo_lectivo")[:6]
+    )
+    por_ciclo = list(reversed(por_ciclo))  # de antiguo a reciente
+    max_ciclo = max((c["n"] for c in por_ciclo), default=1)
+    for c in por_ciclo:
+        c["pct"] = round(100 * c["n"] / max_ciclo, 1)
+
     # Programas críticos (cobertura < 50%)
     from collections import defaultdict
     plan_por_prog = defaultdict(set)
@@ -598,6 +611,7 @@ def dashboard_sigaa(request):
         "por_campus": por_campus,
         "por_grado": por_grado,
         "programas_criticos": programas_criticos[:5],
+        "por_ciclo": por_ciclo,
         "saludo": saludo,
         "nombre_usuario": nombre,
     })

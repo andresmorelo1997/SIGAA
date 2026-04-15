@@ -155,6 +155,32 @@
     </div>
   </div>
 
+  <!-- Evolución por ciclo -->
+  {% if por_ciclo %}
+  <div class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="trending-up-outline"></ion-icon>
+        {% trans "Evolución por ciclo lectivo" %}
+        <small class="text-muted">({% trans "últimos" %} {{ por_ciclo|length }})</small>
+      </h4>
+    </div>
+    <div class="p-3">
+      {% for c in por_ciclo %}
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small">
+          <strong>{% trans "Ciclo" %} {{ c.ciclo_lectivo }}</strong>
+          <span>{{ c.n }} {% trans "clases" %} · {{ c.hrs|floatformat:0 }} h</span>
+        </div>
+        <div style="height:12px; background:#eee; border-radius:6px; overflow:hidden;">
+          <div style="width:{{ c.pct }}%; height:12px; background:#A6192E; border-radius:6px;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="row g-3">
     <!-- Top docentes -->
     <div class="col-md-6">
