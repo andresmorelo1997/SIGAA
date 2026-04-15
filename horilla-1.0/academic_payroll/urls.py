@@ -10,4 +10,5 @@ urlpatterns = [
     path("historicos/", views.historicos, name="payroll-historicos"),
     path("export/", views.consolidado_export, name="payroll-export"),
     path("employee-tab/<int:emp_id>/", views.academic_payroll_employee_tab, name="academic-payroll-employee-tab"),
+    path("constancia/<int:emp_id>/", views.constancia_horas, name="payroll-constancia"),
 ]

@@ -1,0 +1,115 @@
+{% load i18n static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% trans "Constancia de horas académicas" %} · {{ employee.employee_first_name }} {{ employee.employee_last_name }}</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 32px auto; color: #222; padding: 0 24px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #A6192E; padding-bottom: 12px; margin-bottom: 24px; }
+    .brand { font-size: 14px; color: #666; }
+    .brand strong { display: block; font-size: 20px; color: #A6192E; }
+    .title { font-size: 22px; color: #A6192E; margin: 0; font-weight: bold; }
+    .fecha { color: #666; font-size: 13px; text-align: right; }
+    .datos-docente { background: #f7f7f9; padding: 16px; border-left: 4px solid #A6192E; margin-bottom: 24px; border-radius: 4px; }
+    .datos-docente h3 { margin: 0 0 8px; color: #333; font-size: 16px; }
+    .datos-docente div { font-size: 14px; line-height: 1.6; }
+    .datos-docente strong { display: inline-block; min-width: 120px; color: #555; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+    thead tr { background: #A6192E; color: white; }
+    th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+    td.text-end, th.text-end { text-align: right; }
+    tfoot td { background: #f4f4f6; font-weight: bold; }
+    .firmas { margin-top: 80px; display: flex; justify-content: space-around; }
+    .firma { text-align: center; width: 40%; }
+    .firma .line { border-top: 1px solid #333; margin-top: 48px; padding-top: 6px; font-size: 12px; color: #555; }
+    .nota { margin-top: 32px; font-size: 11px; color: #666; font-style: italic; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 0; max-width: 100%; }
+    }
+    .no-print { text-align: right; margin-bottom: 12px; }
+    .no-print button { background: #A6192E; color: white; border: 0; padding: 8px 20px; cursor: pointer; border-radius: 4px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button onclick="window.print()">{% trans "Imprimir" %}</button>
+    <a href="{% url 'employee-view-individual' employee.id %}" style="margin-left: 12px;">← {% trans "Volver" %}</a>
+  </div>
+
+  <div class="header">
+    <div class="brand">
+      <strong>SIGAA</strong>
+      Universidad del Sinú
+    </div>
+    <div class="fecha">
+      {% trans "Expedida el" %} {{ fecha|date:"d/m/Y H:i" }}
+    </div>
+  </div>
+
+  <h1 class="title">{% trans "Constancia de horas académicas" %}</h1>
+
+  <div class="datos-docente">
+    <h3>{% trans "Datos del docente" %}</h3>
+    <div><strong>{% trans "Nombre:" %}</strong> {{ employee.employee_first_name }} {{ employee.employee_last_name }}</div>
+    <div><strong>{% trans "Cédula:" %}</strong> {{ employee.badge_id|default:"—" }}</div>
+    <div><strong>{% trans "Email:" %}</strong> {{ employee.email|default:"—" }}</div>
+    {% if employee.employee_work_info %}
+      {% if employee.employee_work_info.job_position_id %}
+      <div><strong>{% trans "Dedicación:" %}</strong> {{ employee.employee_work_info.job_position_id }}</div>
+      {% endif %}
+      {% if employee.employee_work_info.department_id %}
+      <div><strong>{% trans "Departamento:" %}</strong> {{ employee.employee_work_info.department_id }}</div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <p>{% trans "Por medio de la presente se hace constar que el docente en mención tiene asignada la siguiente carga académica en horas:" %}</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>{% trans "Ciclo lectivo" %}</th>
+        <th class="text-end">{% trans "N° clases" %}</th>
+        <th class="text-end">{% trans "Hrs/semana" %}</th>
+        <th class="text-end">{% trans "Hrs totales del semestre" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in ciclos_qs %}
+      <tr>
+        <td><strong>{{ r.ciclo_lectivo }}</strong></td>
+        <td class="text-end">{{ r.n }}</td>
+        <td class="text-end">{{ r.hs|default:0|floatformat:1 }}</td>
+        <td class="text-end">{{ r.hsr|default:0|floatformat:1 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center; color:#999;">
+        {% trans "Este docente no tiene carga académica registrada." %}
+      </td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>{% trans "TOTALES" %}</td>
+        <td class="text-end">{{ totales.n|default:0 }}</td>
+        <td class="text-end">{{ totales.hs|default:0|floatformat:1 }}</td>
+        <td class="text-end">{{ totales.hsr|default:0|floatformat:1 }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <p class="nota">
+    {% trans "Esta constancia refleja exclusivamente horas académicas registradas en el Sistema Integrado de Gestión Académica Administrativa (SIGAA) de la Universidad del Sinú. No constituye certificación laboral ni incluye información salarial." %}
+  </p>
+
+  <div class="firmas">
+    <div class="firma">
+      <div class="line">{% trans "Jefe Académico" %}</div>
+    </div>
+    <div class="firma">
+      <div class="line">{% trans "Docente" %}</div>
+    </div>
+  </div>
+</body>
+</html>

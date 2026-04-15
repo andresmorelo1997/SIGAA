@@ -301,6 +301,37 @@ def consolidado_export(request):
 
 # ──────────────────────── EMPLOYEE TAB ────────────────────────
 @login_required
+def constancia_horas(request, emp_id: int):
+    """Constancia imprimible de horas académicas del docente (vista limpia)."""
+    emp = get_object_or_404(Employee, pk=emp_id)
+    cedula_raw = (emp.badge_id or "").strip()
+    cedula_padded = cedula_raw.zfill(10) if cedula_raw.isdigit() else cedula_raw
+
+    clases = CargaAcademica.objects.filter(
+        Q(docente_id=emp.id)
+        | Q(instructor_id_raw=cedula_raw)
+        | Q(instructor_id_raw=cedula_padded)
+    ).order_by("-ciclo_lectivo", "catalogo")
+
+    ciclos_qs = (
+        clases.exclude(ciclo_lectivo__isnull=True).exclude(ciclo_lectivo="")
+        .values("ciclo_lectivo")
+        .annotate(n=Count("id"), hs=Sum("hrs_semanal"), hsr=Sum("hrs_semestre"))
+        .order_by("-ciclo_lectivo")
+    )
+
+    totales = clases.aggregate(n=Count("id"), hs=Sum("hrs_semanal"), hsr=Sum("hrs_semestre"))
+
+    from django.utils import timezone as _tz
+    return render(request, "academic_payroll/constancia_horas.html", {
+        "employee": emp,
+        "ciclos_qs": ciclos_qs,
+        "totales": totales,
+        "fecha": _tz.now(),
+    })
+
+
+@login_required
 def academic_payroll_employee_tab(request, emp_id: int):
     """Renderiza la pestaña 'Prenómina Docente' dentro del detalle del docente.
 

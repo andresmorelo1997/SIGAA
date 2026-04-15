@@ -8,10 +8,18 @@
       {% trans "Prenómina Docente" %} —
       <small class="text-muted">{% trans "consolidado en horas" %}</small>
     </h4>
-    <a href="{% url 'payroll-consolidado' %}" class="oh-btn oh-btn--light oh-btn--sm">
-      <ion-icon name="open-outline" class="me-1"></ion-icon>
-      {% trans "Ver consolidado global" %}
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'payroll-constancia' employee.id %}"
+         target="_blank"
+         class="oh-btn oh-btn--secondary oh-btn--sm">
+        <ion-icon name="print-outline" class="me-1"></ion-icon>
+        {% trans "Imprimir constancia" %}
+      </a>
+      <a href="{% url 'payroll-consolidado' %}" class="oh-btn oh-btn--light oh-btn--sm">
+        <ion-icon name="open-outline" class="me-1"></ion-icon>
+        {% trans "Consolidado global" %}
+      </a>
+    </div>
   </div>
 
   <div class="row g-3 p-3">
