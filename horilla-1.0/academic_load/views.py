@@ -325,6 +325,33 @@ def history_list(request):
     return render(request, "academic_load/history.html", {"history": history})
 
 
+# ---------------------------------------------------------------- BUSQUEDA GLOBAL
+@login_required
+def busqueda_global(request):
+    """Busca docentes por nombre o cédula y redirige o lista resultados."""
+    from employee.models import Employee
+    q = (request.GET.get("q") or "").strip()
+    if not q:
+        return HttpResponseRedirect(reverse("academic-dashboard"))
+
+    candidatos = Employee.objects.filter(
+        Q(employee_first_name__icontains=q)
+        | Q(employee_last_name__icontains=q)
+        | Q(badge_id__icontains=q)
+        | Q(email__icontains=q)
+    )[:50]
+    # Si hay exactamente uno, redirige al detail
+    count = candidatos.count()
+    if count == 1:
+        return HttpResponseRedirect(reverse("employee-view-individual", args=[candidatos[0].id]))
+
+    return render(request, "academic_load/busqueda.html", {
+        "q": q,
+        "resultados": candidatos,
+        "total": count,
+    })
+
+
 # ---------------------------------------------------------------- DASHBOARD SIGAA
 @login_required
 def dashboard_sigaa(request):

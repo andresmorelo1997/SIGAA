@@ -13,6 +13,14 @@
       </p>
     </div>
     <div class="oh-titlebar__actions">
+      <form method="get" action="{% url 'academic-busqueda' %}" class="d-flex gap-2">
+        <input type="text" name="q"
+               placeholder="{% trans 'Buscar docente por nombre o cédula…' %}"
+               class="oh-input" style="min-width: 260px;">
+        <button type="submit" class="oh-btn oh-btn--secondary">
+          <ion-icon name="search-outline"></ion-icon>
+        </button>
+      </form>
       <form method="get" class="d-flex gap-2">
         <select name="ciclo" onchange="this.form.submit()" class="oh-select">
           <option value="">— {% trans "Todos los ciclos" %} —</option>

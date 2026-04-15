@@ -1,0 +1,82 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Resultados de búsqueda" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {% trans "Término:" %} <strong>"{{ q }}"</strong>
+        · {{ total }} {% trans "coincidencias" %}
+      </p>
+    </div>
+    <div class="oh-titlebar__actions">
+      <a href="{% url 'academic-dashboard' %}" class="oh-btn oh-btn--light">
+        <ion-icon name="arrow-back-outline" class="me-1"></ion-icon>
+        {% trans "Volver al dashboard" %}
+      </a>
+    </div>
+  </div>
+
+  <div class="oh-card mb-3">
+    <form method="get" class="p-3">
+      <div class="row g-2">
+        <div class="col-md-9">
+          <input type="text" name="q" value="{{ q }}" class="oh-input w-100"
+                 placeholder="{% trans 'Buscar por nombre, cédula o email…' %}"
+                 autofocus>
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="oh-btn oh-btn--secondary w-100">
+            <ion-icon name="search-outline" class="me-1"></ion-icon>
+            {% trans "Buscar" %}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Cédula" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Email" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Dedicación" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Acciones" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in resultados %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ e.badge_id|default:"—" }}</strong></td>
+          <td class="oh-sticky-table__td">
+            {{ e.employee_first_name }} {{ e.employee_last_name }}
+          </td>
+          <td class="oh-sticky-table__td">{{ e.email|default:"—" }}</td>
+          <td class="oh-sticky-table__td">
+            {% if e.employee_work_info and e.employee_work_info.job_position_id %}
+              {{ e.employee_work_info.job_position_id }}
+            {% else %}—{% endif %}
+          </td>
+          <td class="oh-sticky-table__td">
+            <a href="{% url 'employee-view-individual' e.id %}"
+               class="oh-btn oh-btn--light oh-btn--sm"
+               title="{% trans 'Ver detalle' %}">
+              <ion-icon name="eye-outline"></ion-icon>
+              {% trans "Ver detalle" %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center p-4 text-muted">
+          {% trans "Sin coincidencias. Intente con otro término." %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

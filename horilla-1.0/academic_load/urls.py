@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path("", views.carga_list, name="academic-load-list"),
     path("dashboard/", views.dashboard_sigaa, name="academic-dashboard"),
+    path("buscar/", views.busqueda_global, name="academic-busqueda"),
     path("export/", views.carga_export, name="academic-load-export"),
     path("import/", views.import_upload, name="academic-load-import"),
     path("import/preview/", views.import_preview, name="academic-load-import-preview"),
