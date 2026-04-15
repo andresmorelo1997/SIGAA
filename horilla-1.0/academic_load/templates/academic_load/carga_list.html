@@ -84,8 +84,12 @@
           <th class="oh-sticky-table__th">{% trans "Grado" %}</th>
           <th class="oh-sticky-table__th">{% trans "Ciclo" %}</th>
           <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
-          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
-          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
+          <th class="oh-sticky-table__th text-end" title="{% trans 'Horas a la semana que el docente dicta' %}">
+            Hrs/sem <ion-icon name="help-circle-outline" style="font-size:12px;"></ion-icon>
+          </th>
+          <th class="oh-sticky-table__th text-end" title="{% trans 'Horas totales del semestre (hrs/sem × # semanas)' %}">
+            Hrs/sem.re <ion-icon name="help-circle-outline" style="font-size:12px;"></ion-icon>
+          </th>
           <th class="oh-sticky-table__th">{% trans "Estado" %}</th>
         </tr>
       </thead>
