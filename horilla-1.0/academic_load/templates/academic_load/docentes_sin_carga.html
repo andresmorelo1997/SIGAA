@@ -1,0 +1,96 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Docentes sin carga asignada" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {{ total }} {% trans "de" %} {{ total_docentes }} {% trans "docentes" %}
+        {% if ciclo %}· {% trans "Ciclo" %} <strong>{{ ciclo }}</strong>{% endif %}
+      </p>
+    </div>
+    <div class="oh-titlebar__actions">
+      <a href="{% url 'academic-dashboard' %}" class="oh-btn oh-btn--light">
+        <ion-icon name="arrow-back-outline" class="me-1"></ion-icon>
+        {% trans "Dashboard" %}
+      </a>
+    </div>
+  </div>
+
+  <form method="get" class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title">
+        <ion-icon name="filter-outline"></ion-icon>
+        {% trans "Filtrar por ciclo" %}
+      </h4>
+    </div>
+    <div class="row g-3 p-3">
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "Ciclo lectivo" %}</label>
+        <select name="ciclo" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos los ciclos (nunca ha dictado)" %} —</option>
+          {% for c in ciclos %}
+            <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-8 d-flex align-items-end">
+        <small class="text-muted">
+          {% trans "Sin filtro: docentes que nunca han aparecido en carga académica." %}
+          {% trans "Con ciclo: docentes sin clases en ese ciclo específico." %}
+        </small>
+      </div>
+    </div>
+  </form>
+
+  <div class="oh-sticky-table-container">
+    <table class="oh-sticky-table">
+      <thead class="oh-sticky-table__thead">
+        <tr>
+          <th class="oh-sticky-table__th">{% trans "Cédula" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Email" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Dedicación" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Departamento" %}</th>
+          <th class="oh-sticky-table__th">{% trans "Acciones" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in docentes %}
+        <tr class="oh-sticky-table__tr">
+          <td class="oh-sticky-table__td"><strong>{{ e.badge_id|default:"—" }}</strong></td>
+          <td class="oh-sticky-table__td">
+            {{ e.employee_first_name }} {{ e.employee_last_name }}
+          </td>
+          <td class="oh-sticky-table__td">{{ e.email|default:"—" }}</td>
+          <td class="oh-sticky-table__td">
+            {% if e.employee_work_info and e.employee_work_info.job_position_id %}
+              {{ e.employee_work_info.job_position_id }}
+            {% else %}—{% endif %}
+          </td>
+          <td class="oh-sticky-table__td">
+            {% if e.employee_work_info and e.employee_work_info.department_id %}
+              {{ e.employee_work_info.department_id }}
+            {% else %}—{% endif %}
+          </td>
+          <td class="oh-sticky-table__td">
+            <a href="{% url 'employee-view-individual' e.id %}"
+               class="oh-btn oh-btn--light oh-btn--sm">
+              <ion-icon name="eye-outline"></ion-icon>
+              {% trans "Ver detalle" %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center p-4 text-success">
+          <ion-icon name="checkmark-done-circle-outline" style="font-size:32px;"></ion-icon>
+          <p class="mt-2">{% trans "Todos los docentes tienen clases asignadas." %}</p>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

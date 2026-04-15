@@ -327,6 +327,38 @@ def history_list(request):
     return render(request, "academic_load/history.html", {"history": history})
 
 
+# ---------------------------------------------------------------- DOCENTES SIN CLASES
+@login_required
+def docentes_sin_carga(request):
+    """Docentes (Employee) sin CargaAcademica vinculada. Filtrable por ciclo."""
+    from employee.models import Employee
+    from django.db.models import Count
+
+    ciclo = request.GET.get("ciclo", "")
+    ciclos = sorted(set(
+        CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True).exclude(ciclo_lectivo="")
+        .values_list("ciclo_lectivo", flat=True)
+    ), reverse=True)
+
+    # IDs de docentes con carga (opcionalmente filtrado por ciclo)
+    carga_qs = CargaAcademica.objects.exclude(docente__isnull=True)
+    if ciclo:
+        carga_qs = carga_qs.filter(ciclo_lectivo=ciclo)
+    docentes_con_carga = set(carga_qs.values_list("docente_id", flat=True).distinct())
+
+    sin_carga = (Employee.objects.exclude(id__in=docentes_con_carga)
+                 .select_related("employee_work_info")
+                 .order_by("employee_first_name"))
+
+    return render(request, "academic_load/docentes_sin_carga.html", {
+        "docentes": sin_carga[:500],
+        "total": sin_carga.count(),
+        "ciclos": ciclos,
+        "ciclo": ciclo,
+        "total_docentes": Employee.objects.count(),
+    })
+
+
 # ---------------------------------------------------------------- BUSQUEDA GLOBAL
 @login_required
 def busqueda_global(request):
