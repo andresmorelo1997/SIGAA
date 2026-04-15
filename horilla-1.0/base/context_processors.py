@@ -171,12 +171,12 @@ def white_labelling_company(request):
             company = hq
 
         return {
-            "white_label_company_name": company.company if company else "SIGAA — Universidad del Sinú",
+            "white_label_company_name": company.company if company else "Universidad del Sinú",
             "white_label_company": company,
         }
     else:
         return {
-            "white_label_company_name": "SIGAA — Universidad del Sinú",
+            "white_label_company_name": "Universidad del Sinú",
             "white_label_company": None,
         }
 
@@ -309,5 +309,5 @@ def sigaa_flags(request):
     """
     return {
         "SIGAA_HIDE_MONEY": True,
-        "SIGAA_BRAND": "SIGAA — Universidad del Sinú",
+        "SIGAA_BRAND": "Universidad del Sinú",
     }

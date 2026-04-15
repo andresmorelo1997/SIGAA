@@ -569,7 +569,8 @@ def dashboard_sigaa(request):
         ctx["ciclo"] = ciclo
         return render(request, "academic_load/dashboard_sigaa.html", ctx)
 
-    carga_qs = CargaAcademica.objects.all()
+    # SIGAA: excluir campus CARTG del dashboard (decisión de negocio)
+    carga_qs = CargaAcademica.objects.exclude(campus="CARTG")
     if ciclo:
         carga_qs = carga_qs.filter(ciclo_lectivo=ciclo)
 

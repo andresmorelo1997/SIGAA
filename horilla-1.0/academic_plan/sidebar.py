@@ -2,7 +2,7 @@ from django.urls import reverse_lazy as reverse
 from django.utils.translation import gettext_lazy as trans
 
 MENU = trans("Plan de Estudios")
-IMG_SRC = "images/ui/book-outline.svg"
+IMG_SRC = "images/ui/pms.svg"
 
 SUBMENUS = [
     {"menu": trans("Asignaturas"), "redirect": reverse("plan-list")},

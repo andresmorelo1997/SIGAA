@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as trans
 from accessibility.methods import check_is_accessible
 from base.templatetags.basefilters import is_reportingmanager
 
-MENU = trans("Employee")
+MENU = trans("Docentes")
 IMG_SRC = "images/ui/employees.svg"
 
 SUBMENUS = [

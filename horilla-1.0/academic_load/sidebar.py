@@ -5,11 +5,11 @@ from django.urls import reverse_lazy as reverse
 from django.utils.translation import gettext_lazy as trans
 
 MENU = trans("Carga Académica")
-IMG_SRC = "images/ui/calendar-clear-outline.svg"
+IMG_SRC = "images/ui/attendances.svg"
 
 SUBMENUS = [
     {
-        "menu": trans("Dashboard SIGAA"),
+        "menu": trans("Panel de Planta Profesoral"),
         "redirect": reverse("academic-dashboard"),
     },
     {

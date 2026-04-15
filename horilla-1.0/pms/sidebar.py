@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as trans
 
 from base.templatetags.basefilters import is_reportingmanager
 
-MENU = trans("Performance")
+MENU = trans("Escalafón Docente")
 IMG_SRC = "images/ui/pms.svg"
 
 

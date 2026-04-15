@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as trans
 from base.templatetags.basefilters import is_leave_approval_manager, is_reportingmanager
 from leave.templatetags.leavefilters import is_compensatory
 
-MENU = trans("Leave")
+MENU = trans("Novedades")
 IMG_SRC = "images/ui/leave.svg"
 
 SUBMENUS = [
