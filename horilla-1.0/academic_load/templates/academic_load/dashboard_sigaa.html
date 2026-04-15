@@ -6,7 +6,9 @@
   <!-- Titlebar -->
   <div class="oh-titlebar">
     <div class="oh-titlebar__container">
-      <h1 class="oh-titlebar__title">{% trans "Dashboard SIGAA" %}</h1>
+      <h1 class="oh-titlebar__title">
+        {% if nombre_usuario %}{{ saludo }}, {{ nombre_usuario }}{% else %}{% trans "Dashboard SIGAA" %}{% endif %}
+      </h1>
       <p class="oh-titlebar__subtitle">
         {% trans "Panel integrador · Universidad del Sinú" %}
         {% if ciclo %} · <strong>{% trans "Ciclo" %} {{ ciclo }}</strong>{% endif %}

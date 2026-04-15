@@ -515,6 +515,24 @@ def dashboard_sigaa(request):
             })
     programas_criticos.sort(key=lambda x: x["pct"])
 
+    # Saludo según hora (servidor corre en America/Bogota)
+    from django.utils import timezone as _tz
+    h = _tz.localtime().hour
+    if h < 12:
+        saludo = "Buenos días"
+    elif h < 19:
+        saludo = "Buenas tardes"
+    else:
+        saludo = "Buenas noches"
+
+    nombre = ""
+    try:
+        emp = request.user.employee_get
+        if emp:
+            nombre = emp.employee_first_name or request.user.get_short_name()
+    except Exception:
+        nombre = request.user.get_short_name() or request.user.username
+
     return render(request, "academic_load/dashboard_sigaa.html", {
         "kpis": kpis,
         "ciclos": ciclos,
@@ -523,6 +541,8 @@ def dashboard_sigaa(request):
         "por_campus": por_campus,
         "por_grado": por_grado,
         "programas_criticos": programas_criticos[:5],
+        "saludo": saludo,
+        "nombre_usuario": nombre,
     })
 
 
