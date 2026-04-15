@@ -11,4 +11,6 @@ urlpatterns = [
     path("export/", views.consolidado_export, name="payroll-export"),
     path("employee-tab/<int:emp_id>/", views.academic_payroll_employee_tab, name="academic-payroll-employee-tab"),
     path("constancia/<int:emp_id>/", views.constancia_horas, name="payroll-constancia"),
+    path("mi-prenomina/", views.mi_prenomina, name="mi-prenomina"),
+    path("mi-constancia/", views.mi_constancia, name="mi-constancia"),
 ]

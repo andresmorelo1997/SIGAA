@@ -301,6 +301,35 @@ def consolidado_export(request):
 
 # ──────────────────────── EMPLOYEE TAB ────────────────────────
 @login_required
+def mi_prenomina(request):
+    """Shortcut: redirige al employee detail del usuario logueado con tab prenómina.
+    Útil para compartir link directo al docente con sus horas."""
+    try:
+        emp = request.user.employee_get
+        if emp:
+            return HttpResponseRedirect(
+                f"{reverse('employee-view-individual', args=[emp.id])}#academic_payroll_target"
+            )
+    except Exception:
+        pass
+    messages.warning(request, "No tiene perfil de docente asociado.")
+    return HttpResponseRedirect(reverse("academic-dashboard"))
+
+
+@login_required
+def mi_constancia(request):
+    """Shortcut: constancia del docente logueado."""
+    try:
+        emp = request.user.employee_get
+        if emp:
+            return HttpResponseRedirect(reverse("payroll-constancia", args=[emp.id]))
+    except Exception:
+        pass
+    messages.warning(request, "No tiene perfil de docente asociado.")
+    return HttpResponseRedirect(reverse("academic-dashboard"))
+
+
+@login_required
 def constancia_horas(request, emp_id: int):
     """Constancia imprimible de horas académicas del docente (vista limpia)."""
     emp = get_object_or_404(Employee, pk=emp_id)
