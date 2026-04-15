@@ -30,9 +30,13 @@ def plan_faltantes(request):
     if programa:
         plan = plan.filter(programa_codigo=programa)
 
-    sin_programar = plan.exclude(catalogo__in=carga_cats).order_by(
+    sin_programar_qs = plan.exclude(catalogo__in=carga_cats).order_by(
         "programa_codigo", "semestre", "catalogo"
     )
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(sin_programar_qs, 100)
+    sin_programar = paginator.get_page(request.GET.get("page") or 1)
 
     # Resumen por programa
     from collections import defaultdict
@@ -56,13 +60,13 @@ def plan_faltantes(request):
     programas = list(PlanEstudio.objects.values_list("programa_codigo", flat=True).distinct())
 
     return render(request, "academic_plan/faltantes.html", {
-        "sin_programar": sin_programar[:500],
+        "sin_programar": sin_programar,
         "resumen": resumen_list,
         "ciclos": ciclos,
         "programas": programas,
         "programa": programa,
         "ciclo": ciclo,
-        "total_faltantes": sin_programar.count(),
+        "total_faltantes": sin_programar_qs.count(),
     })
 
 

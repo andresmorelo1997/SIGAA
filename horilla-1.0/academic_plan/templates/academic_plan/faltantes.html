@@ -109,7 +109,9 @@
       <h4 class="oh-card__title">
         <ion-icon name="alert-circle-outline"></ion-icon>
         {% trans "Asignaturas sin clase programada" %}
-        <small class="text-muted">({{ sin_programar|length }} {% trans "mostradas de" %} {{ total_faltantes }})</small>
+        <small class="text-muted">
+          ({% trans "Página" %} {{ sin_programar.number }} {% trans "de" %} {{ sin_programar.paginator.num_pages }} · {{ total_faltantes }} {% trans "total" %})
+        </small>
       </h4>
     </div>
     <div class="oh-sticky-table-container">
@@ -140,6 +142,22 @@
         </tbody>
       </table>
     </div>
+
+    {% if sin_programar.paginator.num_pages > 1 %}
+    <div class="oh-pagination p-3 d-flex gap-2 align-items-center">
+      <span class="oh-pagination__info">
+        {% trans "Página" %} {{ sin_programar.number }} / {{ sin_programar.paginator.num_pages }}
+      </span>
+      {% if sin_programar.has_previous %}
+        <a href="?page={{ sin_programar.previous_page_number }}{% if programa %}&programa={{ programa }}{% endif %}{% if ciclo %}&ciclo={{ ciclo }}{% endif %}"
+           class="oh-btn oh-btn--light oh-btn--sm">‹ {% trans "Anterior" %}</a>
+      {% endif %}
+      {% if sin_programar.has_next %}
+        <a href="?page={{ sin_programar.next_page_number }}{% if programa %}&programa={{ programa }}{% endif %}{% if ciclo %}&ciclo={{ ciclo }}{% endif %}"
+           class="oh-btn oh-btn--light oh-btn--sm">{% trans "Siguiente" %} ›</a>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
   {% else %}
   <div class="oh-card text-center p-5">
