@@ -365,6 +365,9 @@ def dashboard_sigaa(request):
         .values("campus").annotate(n=Count("id"), hrs=Sum("hrs_semestre"))
         .order_by("-n")
     )
+    max_campus = max((c["n"] for c in por_campus), default=1)
+    for c in por_campus:
+        c["pct"] = round(100 * c["n"] / max_campus, 1)
 
     # Distribución por grado
     por_grado = list(
@@ -372,6 +375,14 @@ def dashboard_sigaa(request):
         .values("grado").annotate(n=Count("id"), hrs=Sum("hrs_semestre"))
         .order_by("-n")
     )
+    max_grado = max((g["n"] for g in por_grado), default=1)
+    for g in por_grado:
+        g["pct"] = round(100 * g["n"] / max_grado, 1)
+
+    # Max horas de los top docentes para la barra
+    max_hrs_top = max((d["hrs"] or 0 for d in top_docentes), default=1)
+    for d in top_docentes:
+        d["pct"] = round(100 * (d["hrs"] or 0) / max_hrs_top, 1)
 
     return render(request, "academic_load/dashboard_sigaa.html", {
         "kpis": kpis,

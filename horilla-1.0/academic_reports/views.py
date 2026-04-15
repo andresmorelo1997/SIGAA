@@ -34,11 +34,32 @@ REPORTES = {
 def _build_rows(tipo: str) -> tuple[list[str], list[list]]:
     """Devuelve (headers, rows) para cada tipo de reporte."""
     if tipo == "actividad-academica":
-        headers = ["Cédula", "Docente", "Programa", "Actividad"]
+        # Cruza cada docente con sus clases y muestra programas que dicta
+        headers = ["Cédula", "Docente", "N° Clases", "Hrs/sem", "Hrs/sem.re",
+                   "Programas que dicta", "Ciclos"]
         rows = []
-        for e in Employee.objects.all()[:500]:
-            rows.append([e.badge_id or "", f"{e.employee_first_name} {e.employee_last_name}",
-                         "—", "Docencia"])
+        qs = CargaAcademica.objects.exclude(docente__isnull=True).select_related("docente")
+        por_docente = {}
+        for c in qs:
+            k = c.docente_id
+            d = por_docente.setdefault(k, {
+                "docente": c.docente, "hs": 0, "hsr": 0, "n": 0,
+                "programas": set(), "ciclos": set(),
+            })
+            d["hs"] += float(c.hrs_semanal or 0)
+            d["hsr"] += float(c.hrs_semestre or 0)
+            d["n"] += 1
+            if c.catalogo and len(c.catalogo) >= 5:
+                d["programas"].add(c.catalogo[-5:] if c.catalogo[-1].isalpha() else c.catalogo[:5])
+            if c.ciclo_lectivo: d["ciclos"].add(c.ciclo_lectivo)
+        for d in sorted(por_docente.values(), key=lambda x: (x["docente"].employee_first_name or "").lower()):
+            rows.append([
+                d["docente"].badge_id or "",
+                f"{d['docente'].employee_first_name} {d['docente'].employee_last_name}",
+                d["n"], round(d["hs"], 1), round(d["hsr"], 1),
+                ", ".join(sorted(d["programas"])[:10]),
+                ", ".join(sorted(d["ciclos"])),
+            ])
         return headers, rows
 
     if tipo == "dedicacion":
@@ -72,11 +93,17 @@ def _build_rows(tipo: str) -> tuple[list[str], list[list]]:
         return headers, rows
 
     if tipo == "profesores-asignaturas":
-        headers = ["Catálogo", "Asignatura", "Docente", "Hrs/sem"]
-        rows = [[c.catalogo or "", c.descripcion or "",
-                 f"{c.docente.employee_first_name} {c.docente.employee_last_name}" if c.docente else "—",
-                 c.hrs_semanal or 0]
-                for c in CargaAcademica.objects.all().select_related("docente")[:1000]]
+        headers = ["Catálogo", "Asignatura", "Docente", "Cédula",
+                   "Campus", "Ciclo", "Hrs/sem", "Hrs/sem.re"]
+        rows = []
+        for c in CargaAcademica.objects.all().select_related("docente"):
+            rows.append([
+                c.catalogo or "", c.descripcion or "",
+                f"{c.docente.employee_first_name} {c.docente.employee_last_name}" if c.docente else (c.nombre_instructor or "—"),
+                (c.docente.badge_id if c.docente else c.instructor_id_raw) or "",
+                c.campus or "", c.ciclo_lectivo or "",
+                c.hrs_semanal or 0, c.hrs_semestre or 0,
+            ])
         return headers, rows
 
     if tipo == "cobertura-plan":
@@ -101,16 +128,117 @@ def _build_rows(tipo: str) -> tuple[list[str], list[list]]:
         return headers, rows
 
     if tipo == "nivel-formacion":
-        headers = ["Nivel", "Cantidad"]
-        # Heurística: usa "qualification" del work_info si existe
-        agg = Employee.objects.values("employee_work_info__qualification__title") \
-            .annotate(n=Count("id")).order_by("-n")
-        return headers, [[r["employee_work_info__qualification__title"] or "Sin registrar",
-                          r["n"]] for r in agg]
+        # Agrupa por job_position (aprox. nivel de formación/posición)
+        headers = ["Dedicación / Cargo", "Cantidad de docentes"]
+        agg = Employee.objects.values(
+            "employee_work_info__job_position_id__job_position"
+        ).annotate(n=Count("id")).order_by("-n")
+        return headers, [[
+            r["employee_work_info__job_position_id__job_position"] or "Sin registrar",
+            r["n"],
+        ] for r in agg]
 
-    # Reportes con datos no disponibles aún (nuevas-plazas / reemplazos / no-continuan)
-    return ["Mensaje"], [[f"Datos pendientes — el reporte '{REPORTES.get(tipo, tipo)}' "
-                          "requiere información histórica que aún no se ha cargado."]]
+    if tipo == "nuevas-plazas":
+        # Docentes con clases en el último ciclo pero no en ciclos anteriores
+        ciclos = sorted(set(
+            CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True)
+            .exclude(ciclo_lectivo="").values_list("ciclo_lectivo", flat=True)
+        ), reverse=True)
+        headers = ["Cédula", "Docente", "Ciclo actual", "Clases nuevas", "Hrs/sem"]
+        rows = []
+        if len(ciclos) >= 1:
+            ultimo = ciclos[0]
+            anteriores = set()
+            if len(ciclos) > 1:
+                anteriores = set(CargaAcademica.objects.filter(
+                    ciclo_lectivo__in=ciclos[1:]
+                ).exclude(docente__isnull=True).values_list("docente_id", flat=True))
+            nuevas = CargaAcademica.objects.filter(
+                ciclo_lectivo=ultimo
+            ).exclude(docente__isnull=True).exclude(docente_id__in=anteriores)
+            # Agrupar por docente
+            por = {}
+            for c in nuevas.select_related("docente"):
+                d = por.setdefault(c.docente_id, {
+                    "docente": c.docente, "n": 0, "hs": 0, "ciclo": ultimo,
+                })
+                d["n"] += 1
+                d["hs"] += float(c.hrs_semanal or 0)
+            for d in sorted(por.values(), key=lambda x: x["docente"].employee_first_name or ""):
+                rows.append([
+                    d["docente"].badge_id or "",
+                    f"{d['docente'].employee_first_name} {d['docente'].employee_last_name}",
+                    d["ciclo"], d["n"], round(d["hs"], 1),
+                ])
+        return headers, rows
+
+    if tipo == "reemplazos":
+        # Asignaturas donde cambió el docente entre ciclos
+        headers = ["Catálogo", "Asignatura", "Docente anterior", "Docente actual", "Ciclo"]
+        rows = []
+        ciclos = sorted(set(
+            CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True)
+            .exclude(ciclo_lectivo="").values_list("ciclo_lectivo", flat=True)
+        ), reverse=True)
+        if len(ciclos) < 2:
+            return ["Mensaje"], [["Se necesitan al menos 2 ciclos lectivos para detectar reemplazos."]]
+        actual, anterior = ciclos[0], ciclos[1]
+        # Mapa catalogo → docente en anterior
+        ant = {}
+        for c in CargaAcademica.objects.filter(ciclo_lectivo=anterior).exclude(docente__isnull=True):
+            if c.catalogo:
+                ant[c.catalogo] = c.docente
+        for c in CargaAcademica.objects.filter(ciclo_lectivo=actual).exclude(docente__isnull=True):
+            if not c.catalogo or c.catalogo not in ant:
+                continue
+            prev = ant[c.catalogo]
+            if prev.id != c.docente_id:
+                rows.append([
+                    c.catalogo, c.descripcion,
+                    f"{prev.employee_first_name} {prev.employee_last_name}",
+                    f"{c.docente.employee_first_name} {c.docente.employee_last_name}",
+                    actual,
+                ])
+        return headers, rows
+
+    if tipo == "no-continuan":
+        # Docentes con clases en ciclo anterior, sin clases en el actual
+        headers = ["Cédula", "Docente", "Último ciclo con carga", "Hrs/sem último"]
+        rows = []
+        ciclos = sorted(set(
+            CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True)
+            .exclude(ciclo_lectivo="").values_list("ciclo_lectivo", flat=True)
+        ), reverse=True)
+        if len(ciclos) < 2:
+            return ["Mensaje"], [["Se necesitan al menos 2 ciclos lectivos para detectar docentes que no continúan."]]
+        actual = ciclos[0]
+        docentes_actual = set(
+            CargaAcademica.objects.filter(ciclo_lectivo=actual).exclude(docente__isnull=True)
+            .values_list("docente_id", flat=True)
+        )
+        docentes_ant = CargaAcademica.objects.filter(ciclo_lectivo__in=ciclos[1:]) \
+            .exclude(docente__isnull=True) \
+            .exclude(docente_id__in=docentes_actual)
+        por = {}
+        for c in docentes_ant.select_related("docente"):
+            d = por.setdefault(c.docente_id, {
+                "docente": c.docente, "ciclo": c.ciclo_lectivo, "hs": 0,
+            })
+            if c.ciclo_lectivo > d["ciclo"]:
+                d["ciclo"] = c.ciclo_lectivo
+                d["hs"] = 0
+            if c.ciclo_lectivo == d["ciclo"]:
+                d["hs"] += float(c.hrs_semanal or 0)
+        for d in sorted(por.values(), key=lambda x: x["docente"].employee_first_name or ""):
+            rows.append([
+                d["docente"].badge_id or "",
+                f"{d['docente'].employee_first_name} {d['docente'].employee_last_name}",
+                d["ciclo"], round(d["hs"], 1),
+            ])
+        return headers, rows
+
+    # Fallback (no debería llegar aquí)
+    return ["Mensaje"], [[f"Reporte '{REPORTES.get(tipo, tipo)}' no implementado aún."]]
 
 
 @login_required

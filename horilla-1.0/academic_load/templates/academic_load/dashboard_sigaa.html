@@ -129,6 +129,9 @@
                   <a href="{% url 'employee-view-individual' d.docente__id %}" class="text-decoration-none">
                     {{ d.docente__employee_first_name }} {{ d.docente__employee_last_name }}
                   </a>
+                  <div style="height:6px; background:#eee; border-radius:3px; margin-top:4px;">
+                    <div style="width:{{ d.pct }}%; height:6px; background:#A6192E; border-radius:3px;"></div>
+                  </div>
                 </td>
                 <td class="oh-sticky-table__td text-end">{{ d.clases }}</td>
                 <td class="oh-sticky-table__td text-end"><strong>{{ d.hrs|floatformat:1 }}</strong></td>
@@ -160,7 +163,12 @@
             <tbody>
               {% for c in por_campus %}
               <tr class="oh-sticky-table__tr">
-                <td class="oh-sticky-table__td"><span class="oh-badge oh-badge--info">{{ c.campus }}</span></td>
+                <td class="oh-sticky-table__td">
+                  <span class="oh-badge oh-badge--info">{{ c.campus }}</span>
+                  <div style="height:5px; background:#eee; border-radius:3px; margin-top:4px;">
+                    <div style="width:{{ c.pct }}%; height:5px; background:#A6192E; border-radius:3px;"></div>
+                  </div>
+                </td>
                 <td class="oh-sticky-table__td text-end">{{ c.n }}</td>
                 <td class="oh-sticky-table__td text-end">{{ c.hrs|floatformat:0 }}</td>
               </tr>
@@ -189,7 +197,12 @@
             <tbody>
               {% for g in por_grado %}
               <tr class="oh-sticky-table__tr">
-                <td class="oh-sticky-table__td">{{ g.grado }}</td>
+                <td class="oh-sticky-table__td">
+                  {{ g.grado }}
+                  <div style="height:5px; background:#eee; border-radius:3px; margin-top:4px;">
+                    <div style="width:{{ g.pct }}%; height:5px; background:#A6192E; border-radius:3px;"></div>
+                  </div>
+                </td>
                 <td class="oh-sticky-table__td text-end">{{ g.n }}</td>
                 <td class="oh-sticky-table__td text-end">{{ g.hrs|floatformat:0 }}</td>
               </tr>
