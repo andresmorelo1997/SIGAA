@@ -124,23 +124,32 @@ COLMAP = {
 }
 
 
-_SEMESTRE_RE = re.compile(
-    r"\b(I{1,4}|V|VI{0,3}|IX|X|XI{0,2}|[0-9]{1,2})\s*-?\s*[Ss]emestre\b"
-)
+# Patrones para detectar semestre en ambos órdenes:
+#   "I Semestre"    → "MMEPI20212 I Semestre"
+#   "Semestre I"    → "DMDER20212 Semestre I"
+_RE_ROMANO_NUM = r"(I{1,4}|V|VI{0,3}|IX|X|XI{0,2}|[1-9][0-9]?)"
+_SEMESTRE_RE_PRE = re.compile(rf"\b{_RE_ROMANO_NUM}\s*-?\s*[Ss]emestre\b")
+_SEMESTRE_RE_POST = re.compile(rf"\b[Ss]emestre\s*-?\s*{_RE_ROMANO_NUM}\b")
 
 
 def _parse_semestre_desde_descr(desc: str) -> str:
-    """Ej.: 'MMEPI20212 I Semestre' → 'I'; 'ESGSA20251 II Semestre' → 'II'."""
+    """Extrae el semestre de un Descr en cualquiera de los órdenes.
+
+    Ej.:
+      'MMEPI20212 I Semestre'    → 'I'
+      'DMDER20212 Semestre I'    → 'I'
+      'ESGSA20251 II Semestre'   → 'II'
+    """
     if not desc:
         return ""
-    m = _SEMESTRE_RE.search(desc)
+    # Primero intenta "Semestre X" (formato DMDER)
+    m = _SEMESTRE_RE_POST.search(desc)
     if m:
         return m.group(1)
-    # fallback: último token antes de 'Semestre'
-    parts = desc.split()
-    for i, p in enumerate(parts):
-        if p.lower().startswith("semestre") and i > 0:
-            return parts[i - 1]
+    # Luego "X Semestre" (formato MMEPI/ESGSA)
+    m = _SEMESTRE_RE_PRE.search(desc)
+    if m:
+        return m.group(1)
     return ""
 
 

@@ -148,9 +148,35 @@ def plan_import(request):
 @login_required
 def plan_validar(request):
     programa = request.GET.get("programa", "")
+    programas = sorted(PlanEstudio.objects.values_list("programa_codigo", flat=True).distinct())
+
     if not programa:
-        programas = list(PlanEstudio.objects.values_list("programa_codigo", flat=True).distinct())
-        return render(request, "academic_plan/validar.html", {"programas": programas, "programa": ""})
+        # Vista global: resumen por programa con cobertura vs carga académica
+        from collections import defaultdict
+        carga_cats_global = set(
+            CargaAcademica.objects.exclude(catalogo__isnull=True).exclude(catalogo="")
+            .values_list("catalogo", flat=True).distinct()
+        )
+        resumen_global = []
+        for p in programas:
+            plan_qs = PlanEstudio.objects.filter(programa_codigo=p)
+            cats = set(plan_qs.values_list("catalogo", flat=True))
+            cubiertos = len(cats & carga_cats_global)
+            total = len(cats)
+            hrs_plan = plan_qs.aggregate(s=Sum("hrs_semestre"))["s"] or 0
+            hrs_carga = (CargaAcademica.objects.filter(catalogo__in=cats)
+                         .aggregate(s=Sum("hrs_semestre"))["s"]) or 0
+            pct = round(100 * cubiertos / total, 1) if total else 0
+            resumen_global.append({
+                "programa": p, "total": total, "cubiertos": cubiertos,
+                "faltantes": total - cubiertos, "hrs_plan": round(hrs_plan, 1),
+                "hrs_carga": round(hrs_carga, 1), "pct": pct,
+            })
+        resumen_global.sort(key=lambda x: x["pct"])  # peores primero
+        return render(request, "academic_plan/validar.html", {
+            "programas": programas, "programa": "",
+            "resumen_global": resumen_global,
+        })
 
     plan = PlanEstudio.objects.filter(programa_codigo=programa)
     plan_catalogos = set(plan.values_list("catalogo", flat=True))

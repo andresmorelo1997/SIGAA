@@ -309,5 +309,6 @@ def sigaa_flags(request):
     """
     return {
         "SIGAA_HIDE_MONEY": True,
+        "SIGAA_MINIMAL_PROFILE": True,
         "SIGAA_BRAND": "Universidad del Sinú",
     }
