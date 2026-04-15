@@ -117,6 +117,8 @@ def consolidado(request):
     periodo = request.GET.get("periodo", "2026-1")
     tipo = request.GET.get("tipo", "PREGRADO")
     ciclo = request.GET.get("ciclo", "")
+    corte_hasta = request.GET.get("corte")  # Filtrar solo hasta el corte N
+    q = (request.GET.get("q") or "").strip().lower()
 
     # opciones disponibles
     periodos = sorted(set(Corte.objects.values_list("periodo", flat=True))) or ["2026-1"]
@@ -126,9 +128,28 @@ def consolidado(request):
     ))
 
     rows, cortes_info = _calcular_consolidado(periodo, tipo, ciclo)
+
+    # Limitar cortes a mostrar: si se pide "hasta corte N", solo C1..CN
+    if corte_hasta:
+        try:
+            n = int(corte_hasta)
+            cortes_info = [c for c in cortes_info if c["num"] <= n]
+            # Recalcular hrs_prenomina acumulado hasta el corte N
+            for r in rows:
+                r["cortes"] = r["cortes"][:n]
+                r["hrs_prenomina"] = round(sum(r["cortes"]), 2)
+                r["saldo"] = round(r["hrs_semestre"] - r["hrs_prenomina"], 2)
+        except ValueError:
+            pass
+
+    # Búsqueda por nombre o cédula
+    if q:
+        rows = [r for r in rows if q in (r["nombre"] or "").lower() or q in (r["instructor_id"] or "").lower()]
+
     return render(request, "academic_payroll/consolidado.html", {
         "rows": rows, "cortes_info": cortes_info,
         "periodo": periodo, "tipo": tipo, "ciclo": ciclo,
+        "corte_hasta": corte_hasta, "q": q,
         "periodos": periodos, "ciclos": ciclos,
         "total": len(rows),
     })

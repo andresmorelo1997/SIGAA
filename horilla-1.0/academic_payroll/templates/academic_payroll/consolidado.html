@@ -3,124 +3,138 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <!-- Titlebar -->
   <div class="oh-titlebar">
     <div class="oh-titlebar__container">
-      <h1 class="oh-titlebar__title">{% trans "Prenómina Docente — Consolidado" %}</h1>
-      <p class="oh-titlebar__subtitle">{{ total }} {% trans "docentes" %} · {{ periodo }} · {{ tipo }}</p>
+      <h1 class="oh-titlebar__title">{% trans "Prenómina Docente" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {{ total }} {% trans "docentes" %} · {% trans "Periodo" %} <strong>{{ periodo }}</strong> ·
+        {{ tipo }}{% if corte_hasta %} · <strong class="text-danger">{% trans "Acumulado hasta Corte" %} {{ corte_hasta }}</strong>{% endif %}
+      </p>
     </div>
     <div class="oh-titlebar__actions">
-      <a href="{% url 'payroll-export' %}?periodo={{ periodo }}&tipo={{ tipo }}&ciclo={{ ciclo }}"
-         class="oh-btn oh-btn--secondary">
-        <ion-icon name="download-outline" class="me-2"></ion-icon>
+      <a href="{% url 'payroll-export' %}?periodo={{ periodo }}&tipo={{ tipo }}&ciclo={{ ciclo }}" class="oh-btn oh-btn--secondary">
+        <ion-icon name="download-outline" class="me-1"></ion-icon>
         {% trans "Exportar Excel" %}
+      </a>
+      <a href="{% url 'payroll-cortes' %}" class="oh-btn oh-btn--light">
+        <ion-icon name="calendar-outline" class="me-1"></ion-icon>
+        {% trans "Cortes" %}
       </a>
     </div>
   </div>
 
   <!-- Filtros -->
   <form method="get" class="oh-card mb-3">
-    <div class="oh-card__header">
-      <h4 class="oh-card__title">
-        <ion-icon name="filter-outline"></ion-icon>
-        {% trans "Filtros" %}
-      </h4>
-    </div>
-    <div class="row g-3 p-3">
-      <div class="col-md-3">
-        <label class="oh-label">{% trans "Periodo" %}</label>
-        <select name="periodo" class="oh-select">
-          {% for p in periodos %}
-          <option value="{{ p }}" {% if p == periodo %}selected{% endif %}>{{ p }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label class="oh-label">{% trans "Tipo" %}</label>
-        <select name="tipo" class="oh-select">
-          <option value="PREGRADO" {% if tipo == 'PREGRADO' %}selected{% endif %}>{% trans "Pregrado" %}</option>
-          <option value="POSGRADO" {% if tipo == 'POSGRADO' %}selected{% endif %}>{% trans "Posgrado" %}</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label class="oh-label">{% trans "Ciclo lectivo" %}</label>
-        <select name="ciclo" class="oh-select">
-          <option value="">— {% trans "Todos" %} —</option>
-          {% for c in ciclos %}
-          <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3 d-flex align-items-end">
-        <button type="submit" class="oh-btn oh-btn--secondary w-100">
-          <ion-icon name="calculator-outline" class="me-2"></ion-icon>
-          {% trans "Calcular" %}
-        </button>
+    <div class="p-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-2">
+          <label class="oh-label">{% trans "Periodo" %}</label>
+          <select name="periodo" class="oh-select">
+            {% for p in periodos %}
+              <option value="{{ p }}" {% if p == periodo %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="oh-label">{% trans "Tipo" %}</label>
+          <select name="tipo" class="oh-select">
+            <option value="PREGRADO" {% if tipo == 'PREGRADO' %}selected{% endif %}>{% trans "Pregrado" %}</option>
+            <option value="POSGRADO" {% if tipo == 'POSGRADO' %}selected{% endif %}>{% trans "Posgrado" %}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="oh-label">{% trans "Hasta corte" %}</label>
+          <select name="corte" class="oh-select">
+            <option value="">— {% trans "Todos" %} —</option>
+            <option value="1" {% if corte_hasta == '1' %}selected{% endif %}>{% trans "Corte 1" %}</option>
+            <option value="2" {% if corte_hasta == '2' %}selected{% endif %}>{% trans "Corte 2" %}</option>
+            <option value="3" {% if corte_hasta == '3' %}selected{% endif %}>{% trans "Corte 3" %}</option>
+            <option value="4" {% if corte_hasta == '4' %}selected{% endif %}>{% trans "Corte 4" %}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="oh-label">{% trans "Ciclo" %}</label>
+          <select name="ciclo" class="oh-select">
+            <option value="">— {% trans "Todos" %} —</option>
+            {% for c in ciclos %}
+              <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="oh-label">{% trans "Buscar docente" %}</label>
+          <input type="text" name="q" value="{{ q|default:'' }}"
+                 class="oh-input w-100"
+                 placeholder="{% trans 'Nombre o cédula…' %}">
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="oh-btn oh-btn--secondary w-100">
+            <ion-icon name="search-outline"></ion-icon>
+          </button>
+        </div>
       </div>
     </div>
   </form>
 
   <!-- Tabla consolidado -->
-  <div class="oh-sticky-table-container">
-    <table class="oh-sticky-table">
-      <thead class="oh-sticky-table__thead">
-        <tr>
-          <th class="oh-sticky-table__th">N°</th>
-          <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
-          <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
-          <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
-          <th class="oh-sticky-table__th text-end" title="{% trans 'Horas a la semana que dicta' %}">Hrs/sem</th>
-          <th class="oh-sticky-table__th text-end" title="{% trans 'Horas totales del semestre' %}">Hrs/sem.re</th>
-          {% for c in cortes_info %}
-            <th class="oh-sticky-table__th text-end">{% trans "Corte" %} {{ c.num }}</th>
-          {% endfor %}
-          <th class="oh-sticky-table__th text-end">{% trans "Hrs prenómina" %}</th>
-          <th class="oh-sticky-table__th text-end">{% trans "Saldo" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in rows %}
-        <tr class="oh-sticky-table__tr">
-          <td class="oh-sticky-table__td">{{ forloop.counter }}</td>
-          <td class="oh-sticky-table__td">
-            {% if r.docente_id %}
-              <a href="{% url 'employee-view-individual' r.docente_id %}"
-                 class="text-decoration-none"
-                 title="{% trans 'Ver detalle del docente' %}">
-                <strong>{{ r.nombre }}</strong>
-              </a>
+  <div class="oh-card">
+    <div class="oh-sticky-table-container">
+      <table class="oh-sticky-table" style="text-align:center;">
+        <thead class="oh-sticky-table__thead">
+          <tr>
+            <th class="oh-sticky-table__th text-center">#</th>
+            <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
+            <th class="oh-sticky-table__th text-center" title="{% trans 'Horas a la semana' %}">H/sem</th>
+            <th class="oh-sticky-table__th text-center" title="{% trans 'Horas totales del semestre' %}">H/sem.re</th>
+            {% for c in cortes_info %}
+              <th class="oh-sticky-table__th text-center">C{{ c.num }}</th>
+            {% endfor %}
+            <th class="oh-sticky-table__th text-center" title="{% trans 'Total de horas hasta corte seleccionado' %}">{% trans "Hrs prenómina" %}</th>
+            <th class="oh-sticky-table__th text-center">{% trans "Saldo" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="oh-sticky-table__tr">
+            <td class="oh-sticky-table__td text-center text-muted">{{ forloop.counter }}</td>
+            <td class="oh-sticky-table__td">
+              {% if r.docente_id %}
+                <a href="{% url 'employee-view-individual' r.docente_id %}" class="text-decoration-none">
+                  <strong>{{ r.nombre }}</strong>
+                </a>
+              {% else %}<strong>{{ r.nombre }}</strong>{% endif %}
+              <small class="text-muted d-block">{{ r.instructor_id }}</small>
+            </td>
+            <td class="oh-sticky-table__td">
+              <small>{{ r.programa|default:"—" }}</small>
+              {% if r.campus %}<span class="oh-badge oh-badge--info">{{ r.campus }}</span>{% endif %}
+            </td>
+            <td class="oh-sticky-table__td text-center">{{ r.hrs_semana|floatformat:0 }}</td>
+            <td class="oh-sticky-table__td text-center">{{ r.hrs_semestre|floatformat:0 }}</td>
+            {% for v in r.cortes %}
+              <td class="oh-sticky-table__td text-center">{{ v|floatformat:0 }}</td>
+            {% endfor %}
+            <td class="oh-sticky-table__td text-center"><strong>{{ r.hrs_prenomina|floatformat:0 }}</strong></td>
+            <td class="oh-sticky-table__td text-center">
+              {% if r.saldo < 0 %}<span class="oh-badge oh-badge--danger">{{ r.saldo|floatformat:0 }}</span>
+              {% elif r.saldo > 0 %}<span class="oh-badge oh-badge--warning">{{ r.saldo|floatformat:0 }}</span>
+              {% else %}<span class="oh-badge oh-badge--success">0</span>{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="20" class="text-center p-5 text-muted">
+            {% if q %}
+              {% trans "Sin coincidencias para" %} "<strong>{{ q }}</strong>".
             {% else %}
-              <strong>{{ r.nombre }}</strong>
+              <ion-icon name="hourglass-outline" style="font-size:32px;"></ion-icon>
+              <p class="mt-2">{% trans "Sin datos para este periodo." %}</p>
             {% endif %}
-            <small class="text-muted d-block">{{ r.instructor_id }}</small>
-          </td>
-          <td class="oh-sticky-table__td">
-            <span class="oh-badge oh-badge--info">{{ r.campus|default:"-" }}</span>
-          </td>
-          <td class="oh-sticky-table__td">{{ r.programa|truncatechars:30 }}</td>
-          <td class="oh-sticky-table__td text-end">{{ r.hrs_semana }}</td>
-          <td class="oh-sticky-table__td text-end">{{ r.hrs_semestre }}</td>
-          {% for v in r.cortes %}
-            <td class="oh-sticky-table__td text-end">{{ v }}</td>
+          </td></tr>
           {% endfor %}
-          <td class="oh-sticky-table__td text-end"><strong>{{ r.hrs_prenomina }}</strong></td>
-          <td class="oh-sticky-table__td text-end">
-            {% if r.saldo < 0 %}
-              <span class="oh-badge oh-badge--danger">{{ r.saldo }}</span>
-            {% elif r.saldo > 0 %}
-              <span class="oh-badge oh-badge--warning">{{ r.saldo }}</span>
-            {% else %}
-              <span class="oh-badge oh-badge--success">{{ r.saldo }}</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="20" class="text-center p-4 text-muted">
-          {% trans "Sin datos para este periodo. Cargue clases en Carga Académica primero." %}
-        </td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %}
