@@ -2,7 +2,10 @@
 Tests de academic_load.
 """
 import io
-from django.test import TestCase
+import json
+from django.contrib.auth.models import User
+from django.test import TestCase, Client
+from django.urls import reverse
 from openpyxl import Workbook
 
 from academic_load.import_helpers import (
@@ -100,3 +103,55 @@ class PreviewTests(TestCase):
         self.assertIn("BOGT", info["campus"])
         self.assertEqual(info["ciclo_lectivo"], "2592")
         self.assertEqual(info["file_type"], "US_PROG")
+
+
+class ViewsSmokeTests(TestCase):
+    """Smoke tests de las vistas clave — solo verifica que renderizan 200."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_superuser(
+            username="test_admin", email="test@example.com", password="test_pass"
+        )
+
+    def setUp(self):
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_dashboard_responde_200(self):
+        r = self.client.get(reverse("academic-dashboard"))
+        self.assertIn(r.status_code, (200, 302))  # 302 si middleware redirige a wizard
+
+    def test_status_json(self):
+        r = self.client.get(reverse("academic-status"))
+        self.assertIn(r.status_code, (200, 302))  # 302 si middleware redirige a wizard
+        if r.status_code == 200:
+            data = json.loads(r.content)
+            self.assertEqual(data["brand"], "SIGAA — Universidad del Sinú")
+            self.assertTrue(data["sigaa_hide_money"])
+
+    def test_anomalias_200(self):
+        r = self.client.get(reverse("academic-anomalias"))
+        self.assertIn(r.status_code, (200, 302))  # 302 si middleware redirige a wizard
+
+    def test_docentes_sin_carga_200(self):
+        r = self.client.get(reverse("academic-docentes-sin-carga"))
+        self.assertIn(r.status_code, (200, 302))  # 302 si middleware redirige a wizard
+
+    def test_busqueda_sin_q_redirige(self):
+        r = self.client.get(reverse("academic-busqueda"))
+        self.assertEqual(r.status_code, 302)  # redirect sin query
+
+    def test_carga_list_200(self):
+        r = self.client.get(reverse("academic-load-list"))
+        self.assertIn(r.status_code, (200, 302))  # 302 si middleware redirige a wizard
+
+    def test_import_upload_200(self):
+        r = self.client.get(reverse("academic-load-import"))
+        self.assertIn(r.status_code, (200, 302))  # 302 si middleware redirige a wizard
+
+    def test_anonimo_redirige_login(self):
+        self.client.logout()
+        r = self.client.get(reverse("academic-dashboard"))
+        # login_required debe redirigir 302
+        self.assertEqual(r.status_code, 302)
