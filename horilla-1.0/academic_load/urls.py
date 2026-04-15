@@ -8,6 +8,7 @@ urlpatterns = [
     path("docentes-sin-carga/", views.docentes_sin_carga, name="academic-docentes-sin-carga"),
     path("status/", views.status_json, name="academic-status"),
     path("anomalias/", views.anomalias_carga, name="academic-anomalias"),
+    path("reconciliar-docentes/", views.reconciliar_docentes_view, name="academic-reconciliar"),
     path("export/", views.carga_export, name="academic-load-export"),
     path("import/", views.import_upload, name="academic-load-import"),
     path("import/preview/", views.import_preview, name="academic-load-import-preview"),

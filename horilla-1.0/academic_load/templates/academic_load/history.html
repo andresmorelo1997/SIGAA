@@ -8,7 +8,16 @@
       <h1 class="oh-titlebar__title">{% trans "Historial de Importaciones" %}</h1>
       <p class="oh-titlebar__subtitle">{% trans "Bitácora de archivos Excel procesados" %}</p>
     </div>
-    <div class="oh-titlebar__actions">
+    <div class="oh-titlebar__actions d-flex gap-2">
+      <form method="post" action="{% url 'academic-reconciliar' %}" class="d-inline"
+            onsubmit="return confirm('{% trans "Vincular FK docente en clases huérfanas según cédula. ¿Continuar?" %}')">
+        {% csrf_token %}
+        <button type="submit" class="oh-btn oh-btn--light"
+                title="{% trans 'Vincula FK docente en clases importadas sin asociar' %}">
+          <ion-icon name="link-outline" class="me-1"></ion-icon>
+          {% trans "Reconciliar docentes" %}
+        </button>
+      </form>
       <a href="{% url 'academic-load-import' %}" class="oh-btn oh-btn--secondary">
         <ion-icon name="cloud-upload-outline" class="me-2"></ion-icon>
         {% trans "Nueva importación" %}

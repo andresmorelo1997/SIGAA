@@ -328,6 +328,52 @@ def history_list(request):
     return render(request, "academic_load/history.html", {"history": history})
 
 
+# ---------------------------------------------------------------- RECONCILIAR DOCENTES UI
+@login_required
+def reconciliar_docentes_view(request):
+    """Ejecuta reconciliación de FK docente igual que el management command."""
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("academic-load-history"))
+
+    huerfanas = CargaAcademica.objects.filter(
+        docente__isnull=True
+    ).exclude(instructor_id_raw__isnull=True).exclude(instructor_id_raw="")
+    total = huerfanas.count()
+
+    emp_by_id = {}
+    for e in Employee.objects.all():
+        b = (e.badge_id or "").strip()
+        if not b: continue
+        emp_by_id[b] = e
+        if b.isdigit():
+            emp_by_id[b.lstrip("0")] = e
+            emp_by_id[b.zfill(10)] = e
+
+    resolvidas = 0
+    sin_match = 0
+    for c in huerfanas.iterator():
+        raw = (c.instructor_id_raw or "").strip()
+        emp = (emp_by_id.get(raw)
+               or emp_by_id.get(raw.lstrip("0"))
+               or emp_by_id.get(raw.zfill(10)))
+        if emp:
+            c.docente = emp
+            c.save(update_fields=["docente"])
+            resolvidas += 1
+        else:
+            sin_match += 1
+
+    if total == 0:
+        messages.info(request, "No había clases huérfanas que reconciliar.")
+    else:
+        messages.success(
+            request,
+            f"Reconciliación completa: {resolvidas}/{total} clases vinculadas a su docente."
+            + (f" · {sin_match} sin match." if sin_match else "")
+        )
+    return HttpResponseRedirect(reverse("academic-load-history"))
+
+
 # ---------------------------------------------------------------- ANOMALIAS
 @login_required
 def anomalias_carga(request):
