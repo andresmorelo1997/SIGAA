@@ -396,6 +396,27 @@ def dashboard_sigaa(request):
     for d in top_docentes:
         d["pct"] = round(100 * (d["hrs"] or 0) / max_hrs_top, 1)
 
+    # Programas críticos (cobertura < 50%)
+    from collections import defaultdict
+    plan_por_prog = defaultdict(set)
+    for cat, prog in PlanEstudio.objects.values_list("catalogo", "programa_codigo"):
+        plan_por_prog[prog].add(cat)
+    programas_criticos = []
+    for prog, cats in plan_por_prog.items():
+        if not cats:
+            continue
+        cubiertos = len(cats & carga_cats)
+        pct = 100 * cubiertos / len(cats)
+        if pct < 50:
+            programas_criticos.append({
+                "programa": prog,
+                "total": len(cats),
+                "cubiertos": cubiertos,
+                "faltantes": len(cats) - cubiertos,
+                "pct": round(pct, 1),
+            })
+    programas_criticos.sort(key=lambda x: x["pct"])
+
     return render(request, "academic_load/dashboard_sigaa.html", {
         "kpis": kpis,
         "ciclos": ciclos,
@@ -403,6 +424,7 @@ def dashboard_sigaa(request):
         "top_docentes": top_docentes,
         "por_campus": por_campus,
         "por_grado": por_grado,
+        "programas_criticos": programas_criticos[:5],
     })
 
 

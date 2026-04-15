@@ -63,7 +63,13 @@
       </div>
     </div>
     <div class="col-md-4">
-      <div class="oh-card oh-card--success">
+      {% if kpis.cobertura_pct >= 80 %}
+        <div class="oh-card oh-card--success">
+      {% elif kpis.cobertura_pct >= 50 %}
+        <div class="oh-card oh-card--warning">
+      {% else %}
+        <div class="oh-card oh-card--danger">
+      {% endif %}
         <div class="oh-card__body p-3">
           <div class="text-muted small">{% trans "Cobertura Plan vs Carga" %}</div>
           <div class="oh-card__title mt-1">{{ kpis.cobertura_pct }}%</div>
@@ -72,6 +78,33 @@
       </div>
     </div>
   </div>
+
+  <!-- Alertas críticas -->
+  {% if programas_criticos %}
+  <div class="oh-alert oh-alert--danger mb-3 p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <strong>
+          <ion-icon name="warning-outline"></ion-icon>
+          {% trans "Atención:" %}
+        </strong>
+        {{ programas_criticos|length }}
+        {% trans "programa(s) con cobertura crítica (< 50%)" %}
+      </div>
+      <a href="{% url 'plan-faltantes' %}" class="oh-btn oh-btn--light oh-btn--sm">
+        {% trans "Ver faltantes" %} →
+      </a>
+    </div>
+    <div class="mt-2">
+      {% for p in programas_criticos %}
+        <span class="oh-badge oh-badge--danger me-2">
+          {{ p.programa }} · {{ p.pct }}%
+          ({{ p.faltantes }}/{{ p.total }} {% trans "faltantes" %})
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Accesos rápidos -->
   <div class="oh-card mb-3">
