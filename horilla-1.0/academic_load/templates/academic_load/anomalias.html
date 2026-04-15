@@ -1,0 +1,163 @@
+{% extends 'index.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="oh-wrapper">
+  <div class="oh-titlebar">
+    <div class="oh-titlebar__container">
+      <h1 class="oh-titlebar__title">{% trans "Anomalías de carga docente" %}</h1>
+      <p class="oh-titlebar__subtitle">
+        {% trans "Detección de docentes sobrecargados o subutilizados" %}
+        {% if ciclo %} · <strong>{% trans "Ciclo" %} {{ ciclo }}</strong>{% endif %}
+      </p>
+    </div>
+    <div class="oh-titlebar__actions">
+      <a href="{% url 'academic-dashboard' %}" class="oh-btn oh-btn--light">
+        <ion-icon name="arrow-back-outline" class="me-1"></ion-icon>
+        {% trans "Dashboard" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtro -->
+  <form method="get" class="oh-card mb-3">
+    <div class="row g-3 p-3">
+      <div class="col-md-4">
+        <label class="oh-label">{% trans "Ciclo lectivo" %}</label>
+        <select name="ciclo" onchange="this.form.submit()" class="oh-select">
+          <option value="">— {% trans "Todos los ciclos" %} —</option>
+          {% for c in ciclos %}
+            <option value="{{ c }}" {% if c == ciclo %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <!-- KPIs -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-3">
+      <div class="oh-card">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Docentes con carga" %}</div>
+          <div class="oh-card__title mt-1">{{ total_con_carga }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="oh-card">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Promedio hrs/semana" %}</div>
+          <div class="oh-card__title mt-1">{{ promedio_hs }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="oh-card oh-card--danger">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Sobrecargados" %} (&gt;{{ umbral_sobre }}h)</div>
+          <div class="oh-card__title mt-1">{{ total_sobrecargados }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="oh-card oh-card--warning">
+        <div class="oh-card__body p-3">
+          <div class="text-muted small">{% trans "Subutilizados" %} (&lt;{{ umbral_sub }}h)</div>
+          <div class="oh-card__title mt-1">{{ total_subutilizados }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sobrecargados -->
+  <div class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title text-danger">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {% trans "Docentes sobrecargados" %} (&gt; {{ umbral_sobre }} hrs/semana)
+      </h4>
+    </div>
+    <div class="oh-sticky-table-container">
+      <table class="oh-sticky-table">
+        <thead class="oh-sticky-table__thead">
+          <tr>
+            <th class="oh-sticky-table__th">{% trans "Cédula" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Hrs/sem" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Hrs/sem.re" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in sobrecargados %}
+          <tr class="oh-sticky-table__tr">
+            <td class="oh-sticky-table__td">{{ d.docente__badge_id|default:"—" }}</td>
+            <td class="oh-sticky-table__td">
+              <a href="{% url 'employee-view-individual' d.docente__id %}" class="text-decoration-none">
+                {{ d.docente__employee_first_name }} {{ d.docente__employee_last_name }}
+              </a>
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ d.n }}</td>
+            <td class="oh-sticky-table__td text-end">
+              <span class="oh-badge oh-badge--danger">{{ d.hs|floatformat:1 }}</span>
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ d.hsr|floatformat:1 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center p-4 text-success">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            {% trans "No hay docentes sobrecargados." %}
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Subutilizados -->
+  <div class="oh-card mb-3">
+    <div class="oh-card__header">
+      <h4 class="oh-card__title text-warning">
+        <ion-icon name="warning-outline"></ion-icon>
+        {% trans "Docentes subutilizados" %} (&lt; {{ umbral_sub }} hrs/semana)
+      </h4>
+    </div>
+    <div class="oh-sticky-table-container">
+      <table class="oh-sticky-table">
+        <thead class="oh-sticky-table__thead">
+          <tr>
+            <th class="oh-sticky-table__th">{% trans "Cédula" %}</th>
+            <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Clases" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Hrs/sem" %}</th>
+            <th class="oh-sticky-table__th text-end">{% trans "Hrs/sem.re" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in subutilizados %}
+          <tr class="oh-sticky-table__tr">
+            <td class="oh-sticky-table__td">{{ d.docente__badge_id|default:"—" }}</td>
+            <td class="oh-sticky-table__td">
+              <a href="{% url 'employee-view-individual' d.docente__id %}" class="text-decoration-none">
+                {{ d.docente__employee_first_name }} {{ d.docente__employee_last_name }}
+              </a>
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ d.n }}</td>
+            <td class="oh-sticky-table__td text-end">
+              <span class="oh-badge oh-badge--warning">{{ d.hs|floatformat:1 }}</span>
+            </td>
+            <td class="oh-sticky-table__td text-end">{{ d.hsr|floatformat:1 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center p-4 text-success">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            {% trans "No hay docentes subutilizados." %}
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

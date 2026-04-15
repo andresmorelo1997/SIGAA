@@ -327,6 +327,63 @@ def history_list(request):
     return render(request, "academic_load/history.html", {"history": history})
 
 
+# ---------------------------------------------------------------- ANOMALIAS
+@login_required
+def anomalias_carga(request):
+    """Docentes con carga anómala: sobrecargados o subutilizados."""
+    from django.db.models import Sum, Count
+    from employee.models import Employee
+
+    ciclo = request.GET.get("ciclo", "")
+    ciclos = sorted(set(
+        CargaAcademica.objects.exclude(ciclo_lectivo__isnull=True).exclude(ciclo_lectivo="")
+        .values_list("ciclo_lectivo", flat=True)
+    ), reverse=True)
+
+    qs = CargaAcademica.objects.exclude(docente__isnull=True).select_related("docente")
+    if ciclo:
+        qs = qs.filter(ciclo_lectivo=ciclo)
+
+    # Agregar por docente
+    agg = qs.values(
+        "docente__id", "docente__badge_id",
+        "docente__employee_first_name", "docente__employee_last_name",
+    ).annotate(
+        hs=Sum("hrs_semanal"),
+        hsr=Sum("hrs_semestre"),
+        n=Count("id"),
+    ).order_by("-hs")
+
+    SOBRECARGADO = 25
+    SUBUTILIZADO = 4
+    sobrecargados = [d for d in agg if (d["hs"] or 0) > SOBRECARGADO]
+    subutilizados = [d for d in agg if 0 < (d["hs"] or 0) < SUBUTILIZADO]
+
+    # Métricas
+    total_con_carga = agg.count()
+    promedio = 0
+    if total_con_carga:
+        promedio = sum((d["hs"] or 0) for d in agg) / total_con_carga
+    mediana_hs = 0
+    hs_list = sorted((d["hs"] or 0) for d in agg)
+    if hs_list:
+        mediana_hs = hs_list[len(hs_list) // 2]
+
+    return render(request, "academic_load/anomalias.html", {
+        "sobrecargados": sobrecargados[:100],
+        "subutilizados": subutilizados[:100],
+        "total_sobrecargados": len(sobrecargados),
+        "total_subutilizados": len(subutilizados),
+        "total_con_carga": total_con_carga,
+        "promedio_hs": round(promedio, 1),
+        "mediana_hs": round(mediana_hs, 1),
+        "ciclos": ciclos,
+        "ciclo": ciclo,
+        "umbral_sobre": SOBRECARGADO,
+        "umbral_sub": SUBUTILIZADO,
+    })
+
+
 # ---------------------------------------------------------------- STATUS / HEALTH
 @login_required
 def status_json(request):
