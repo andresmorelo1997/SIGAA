@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="oh-wrapper">
-  <!-- Titlebar Horilla -->
+  <!-- Titlebar UniSinú -->
   <div class="oh-titlebar">
     <div class="oh-titlebar__container">
       <h1 class="oh-titlebar__title">{% trans "Carga Académica" %}</h1>
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <!-- Filtros (Horilla style) -->
+  <!-- Filtros -->
   <form method="get" class="oh-card mb-3">
     <div class="oh-card__header">
       <h4 class="oh-card__title">
@@ -72,7 +72,7 @@
     </div>
   </form>
 
-  <!-- Tabla Horilla -->
+  <!-- Tabla -->
   <div class="oh-sticky-table-container">
     <table class="oh-sticky-table">
       <thead class="oh-sticky-table__thead">
@@ -146,7 +146,7 @@
     </table>
   </div>
 
-  <!-- Paginación Horilla -->
+  <!-- Paginación -->
   {% if page.paginator.num_pages > 1 %}
   <div class="oh-pagination mt-3">
     <span class="oh-pagination__info">

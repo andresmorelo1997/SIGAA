@@ -51,24 +51,14 @@ if SETTINGS_EMAIL_BACKEND:
 
 
 SIDEBARS = [
-    # ───────── Académicos ─────────
-    "academic_load",     # Carga académica + importador Excel
+    # Sidebar unificado — solo módulos académicos UniSinú.
+    # Las novedades/retiros de docentes se gestionan dentro de la propia
+    # carga académica (estados: Activo/Cancelada/Detenida/Inactivo).
+    "academic_load",     # Carga académica + importador Excel + novedades
     "academic_plan",     # Plan de estudios + validación cruce
     "academic_payroll",  # Prenómina docente · cortes (HORAS, no dinero)
-    "academic_reports",  # Reportes SNIES
-    # ───────── Reusados de Horilla ─────────
-    "employee",      # Docentes
-    "leave",         # Novedades (licencias, comisiones, permisos)
-    "pms",           # Escalafón / desempeño
-    # Ocultos — no aplican al flujo académico actual
-    # "recruitment",  # convocatorias de docentes — usuario usa otro flujo
-    # "onboarding",   # inducción docente (Horilla) — proceso manual aparte
-    # "offboarding",  # terminación contrato docente — proceso manual aparte
-    # "attendance",   # asistencia oficina — no aplica
-    # "asset",        # activos físicos — no aplica
-    # "helpdesk",     # mesa de ayuda — no aplica
-    # "project",      # gestión proyectos — no aplica
-    # "payroll",      # nómina en $ — el sistema solo maneja HORAS
+    "academic_reports",  # Reportes institucionales
+    "employee",          # Docentes (reusa Employee de Horilla como base)
 ]
 
 # Activamos white labelling para usar el branding UniSinú/SIGAA
