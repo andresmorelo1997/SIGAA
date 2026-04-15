@@ -23,7 +23,7 @@ from openpyxl import load_workbook
 
 def detect_file_type(filename: str) -> str:
     name = (filename or "").upper()
-    if "US_PROG_CLASES" in name:
+    if "US_PROG_CLASES" in name or "CARGA_ACADEMICA" in name or "CARGA ACADÉMICA" in name or "CARGA ACADEMICA" in name:
         return "US_PROG"
     if "LC_PROG" in name:
         return "LC_PROG"
@@ -31,15 +31,33 @@ def detect_file_type(filename: str) -> str:
         return "US_DATOS"
     if "DOCENTES_IES" in name:
         return "DOCENTES_IES"
+    if "CORTE" in name and "PRENOMINA" in name:
+        return "CORTE_PRENOMINA"
     return "UNKNOWN"
 
 
-def find_header_row(sheet, max_search: int = 12) -> int:
-    """Localiza la fila de headers (la que contiene 'Nº Clase' o 'Catálogo')."""
+def pick_best_sheet(wb):
+    """Elige la hoja con más filas — los Excel reales del usuario tienen
+    metadata en Hoja1 y los datos en Hoja2."""
+    best = wb.active
+    best_size = best.max_row * best.max_column
+    for ws in wb.worksheets:
+        size = (ws.max_row or 0) * (ws.max_column or 0)
+        if size > best_size:
+            best = ws
+            best_size = size
+    return best
+
+
+def find_header_row(sheet, max_search: int = 15) -> int:
+    """Localiza la fila de headers (la que contiene 'Nº Clase', 'Catálogo',
+    'Instructor', 'Campus', etc.)."""
+    KEYS = ("nº clase", "no clase", "catálogo", "catalogo", "instructor",
+            "campus", "ccl lvo", "ciclo lectivo", "asignatura")
     for i, row in enumerate(sheet.iter_rows(max_row=max_search, values_only=True)):
         cells = [str(c).strip().lower() if c is not None else "" for c in row]
         joined = " | ".join(cells)
-        if any(k in joined for k in ("nº clase", "no clase", "catálogo", "catalogo", "instructor")):
+        if sum(1 for k in KEYS if k in joined) >= 2:
             return i
     return 0
 
@@ -60,8 +78,8 @@ def normalize_campus(value) -> str:
 
 def preview(file_bytes: bytes, filename: str) -> dict:
     """Lee el archivo y devuelve metadata sin insertar nada."""
-    wb = load_workbook(io.BytesIO(file_bytes), data_only=True, read_only=True)
-    sheet = wb.active
+    wb = load_workbook(io.BytesIO(file_bytes), data_only=True)
+    sheet = pick_best_sheet(wb)
 
     file_type = detect_file_type(filename)
     header_row = find_header_row(sheet)
@@ -115,7 +133,7 @@ def preview(file_bytes: bytes, filename: str) -> dict:
     }
 
 
-# Mapeo Excel → modelo (US_PROG_CLASES) — solo los campos clave
+# Mapeo Excel → modelo (US_PROG_CLASES) — incluye variantes Elysa
 COLMAP_US_PROG = {
     "Nº Clase": "num_clase",
     "No Clase": "num_clase",
@@ -128,9 +146,11 @@ COLMAP_US_PROG = {
     "Asignaturas": "descripcion",
     "Descripción": "descripcion",
     "Componente": "componente",
+    "Cpte": "componente",
     "Campus": "campus",
     "Grado": "grado",
     "Ciclo Lectivo": "ciclo_lectivo",
+    "Ccl Lvo": "ciclo_lectivo",
     "Grupo Académico": "grupo_academico",
     "Organización Académica": "org_academica",
     "Org. Academica": "desc_org_academica",
@@ -153,8 +173,11 @@ COLMAP_US_PROG = {
     "Nombre Instructor": "nombre_instructor",
     "Instructor ID": "instructor_id_raw",
     "ID Instructor": "instructor_id_raw",
+    "Instructor": "instructor_id_raw",  # ← variante de Elysa real
     "Hrs Semanal": "hrs_semanal",
     "Hrs Semestre": "hrs_semestre",
+    "Horas c/Profesor": "hrs_semanal",   # ← variante real
+    "Horas Carga Trabj": "hrs_semestre", # ← variante real
 }
 
 
@@ -163,8 +186,8 @@ def parse_rows(file_bytes: bytes, allowed_campus: Optional[Iterable[str]] = None
 
     Si `allowed_campus` se pasa, solo retorna filas cuyo campus esté en el set.
     """
-    wb = load_workbook(io.BytesIO(file_bytes), data_only=True, read_only=True)
-    sheet = wb.active
+    wb = load_workbook(io.BytesIO(file_bytes), data_only=True)
+    sheet = pick_best_sheet(wb)
     header_row = find_header_row(sheet)
     headers = []
     for row in sheet.iter_rows(min_row=header_row + 1, max_row=header_row + 1, values_only=True):
@@ -173,6 +196,8 @@ def parse_rows(file_bytes: bytes, allowed_campus: Optional[Iterable[str]] = None
 
     allowed = set(allowed_campus) if allowed_campus is not None else None
     rows_out: list[dict] = []
+    import datetime as _dt
+
     for row in sheet.iter_rows(min_row=header_row + 2, values_only=True):
         if not any(c not in (None, "") for c in row):
             continue
@@ -186,6 +211,44 @@ def parse_rows(file_bytes: bytes, allowed_campus: Optional[Iterable[str]] = None
                 continue
             if field == "campus":
                 v = normalize_campus(v)
+            # Fechas/horas → string corto
+            if isinstance(v, (_dt.datetime, _dt.date)):
+                v = v.strftime("%Y-%m-%d")
+            elif isinstance(v, _dt.time):
+                v = v.strftime("%H:%M")
+            # Truncar strings a límites razonables
+            if field in ("estado_clase",):
+                v = str(v)[:20]
+            elif field in ("componente",):
+                v = str(v)[:16]
+            elif field in ("catalogo",):
+                v = str(v)[:64]
+            elif field in ("descripcion", "nombre_instructor", "desc_org_academica"):
+                v = str(v)[:255]
+            elif field in ("campus", "grado"):
+                v = str(v)[:10]
+            elif field in ("ciclo_lectivo",):
+                v = str(v)[:10]
+            elif field in ("grupo_academico", "org_academica"):
+                v = str(v)[:64]
+            elif field in ("hora_inicio", "hora_fin"):
+                v = str(v)[:10]
+            elif field in ("jornada",):
+                v = str(v)[:20]
+            elif field in ("lunes", "martes", "miercoles", "jueves",
+                           "viernes", "sabado", "domingo"):
+                v = str(v)[:2]
+            elif field in ("fecha_inicial", "fecha_final"):
+                v = str(v)[:20]
+            elif field in ("instructor_id_raw",):
+                v = str(v).strip()
+            elif field in ("num_clase", "id_curso", "creditos", "seccion",
+                           "semanas", "capacidad_inscripcion", "total_inscripciones"):
+                try: v = int(float(v))
+                except (TypeError, ValueError): continue
+            elif field in ("hrs_semanal", "hrs_semestre"):
+                try: v = float(v)
+                except (TypeError, ValueError): continue
             kwargs[field] = v
 
         if allowed and kwargs.get("campus") not in allowed:
