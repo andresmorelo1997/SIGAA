@@ -69,8 +69,8 @@
           <th class="oh-sticky-table__th">{% trans "Docente" %}</th>
           <th class="oh-sticky-table__th">{% trans "Campus" %}</th>
           <th class="oh-sticky-table__th">{% trans "Programa" %}</th>
-          <th class="oh-sticky-table__th text-end">Hrs/sem</th>
-          <th class="oh-sticky-table__th text-end">Hrs/sem.re</th>
+          <th class="oh-sticky-table__th text-end" title="{% trans 'Horas a la semana que dicta' %}">Hrs/sem</th>
+          <th class="oh-sticky-table__th text-end" title="{% trans 'Horas totales del semestre' %}">Hrs/sem.re</th>
           {% for c in cortes_info %}
             <th class="oh-sticky-table__th text-end">{% trans "Corte" %} {{ c.num }}</th>
           {% endfor %}
