@@ -467,7 +467,7 @@
 							{# ────────────────────────────────────────────────────────── #}
 						</ul>
 						<button
-							hx-get={% url 'bonus-points-tab' employee.id %} hx-target="#bonus_points_target" id="bonus-tab-button" hidden>
+							{% if not SIGAA_HIDE_MONEY %}hx-get={% url 'bonus-points-tab' employee.id %}{% endif %} hx-target="#bonus_points_target" id="bonus-tab-button" hidden>
 						</button>
 
 						<div class="oh-general__tab-target oh-profile__info-tab mb-4" id="personal_target"> </div>

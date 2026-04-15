@@ -36,6 +36,7 @@ SUBMENUS = [
     {
         "menu": trans("Employee Bonus Point"),
         "redirect": reverse_lazy("employee-bonus-point"),
+        "accessibility": "pms.sidebar.bonus_point_accessibility",
     },
     {
         "menu": trans("Period"),
@@ -52,6 +53,11 @@ SUBMENUS = [
 
 def key_result_accessibility(request, submenu, user_perms, *args, **kwargs):
     return request.user.has_perm("pms.view_keyresult")
+
+
+def bonus_point_accessibility(request, submenu, user_perms, *args, **kwargs):
+    """SIGAA: oculta Bonus Point (dinero) cuando SIGAA_HIDE_MONEY está activo."""
+    return False  # SIGAA solo maneja HORAS, nunca puntos/dinero
 
 
 def period_accessibility(request, submenu, user_perms, *args, **kwargs):
